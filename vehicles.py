@@ -19,6 +19,9 @@ class Bike(Vehicle):
 
 
 class Motorcycle(Vehicle):
-    def __init__(self, speed, tile, max_velocity=6):
+    def __init__(self, speed, tile, group, prefered_speed, max_velocity=6):
         super().__init__(speed, tile, max_velocity)
+        self.group = group
+        self.prefered_speed = prefered_speed
+        self.fun = 0
 
