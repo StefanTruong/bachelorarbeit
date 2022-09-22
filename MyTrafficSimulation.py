@@ -1,6 +1,27 @@
 from vehicles import *
 from tile import *
 import numpy as np
+import sys
+
+
+def traffic_visualization_tiles(simulation):
+    """
+    visualizes the street on console.
+    :param simulation:
+    :return:
+    """
+    tiles = simulation.tiles
+    lanes = simulation.num_lanes
+    length = simulation.length
+
+    # Make sure we have space to draw the lanes
+    # sys.stdout.write("\n" * lanes)
+
+    for lane in range(0, lanes + 1):
+        for tile in tiles:
+            visual = tile[lane].get_icon()
+            sys.stdout.write(visual)
+        sys.stdout.write('\n')
 
 
 class TrafficSimulation:
@@ -20,6 +41,7 @@ class TrafficSimulation:
         :param speed_preferences: dict : dict : dict
         """
 
+        self.tiles = None  # will be initialized in method generic_tiles_setter [(left_Tile, right_Tile), ...]
         self.length = length
         self.density = density
         self.prob_slowdown = prob_slowdown
@@ -90,22 +112,25 @@ class TrafficSimulation:
             tile = tiles[tile_index][0]
 
             for biker_number in range(0, self.platoon_size):
-                motorcyclist = Motorcycle(speed=0, tile=tile, group=platoon, prefered_speed=self.platoon_composition[biker_number])
+                motorcyclist = Motorcycle(speed=0, tile=tile, group=platoon,
+                                          prefered_speed=self.platoon_composition[biker_number])
                 tiles[tile_index][0].vehicle = motorcyclist
                 tile_index += 1
 
-        return tiles, random_pos_of_cars_and_bikes
+        self.tiles = tiles
 
     def initialize(self):
-        tiles, random_pos_of_cars_and_bikes = self.generic_tile_setter()
-        print(random_pos_of_cars_and_bikes)
-        print(self.platoon_composition)
+        self.generic_tile_setter()
+
+
+def change_lane(trafficsimulation):
+    pass
 
 
 # Has to be set in class Trafficsimulation again
 model_settings = {
-    'length': 50,
-    'density': 0.3,
+    'length': 12000,
+    'density': 0.2,
     'prob_slowdown': 0.1,
     'num_lanes': 1,
     'prob_changelane': 0.7,
@@ -119,5 +144,6 @@ model_settings = {
     }
 }
 
-simulation = TrafficSimulation(**model_settings)
-simulation.initialize()
+sim = TrafficSimulation(**model_settings)
+sim.initialize()
+traffic_visualization_tiles(sim)

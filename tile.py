@@ -4,3 +4,9 @@ class Tile:
         self.lane = lane
         self.vehicle = vehicle
         self.curvature = curvature
+
+    def get_icon(self):
+        if self.vehicle is None:
+            return '.'
+        else:
+            return self.vehicle.icon
