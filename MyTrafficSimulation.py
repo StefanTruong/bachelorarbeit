@@ -4,6 +4,7 @@ import numpy as np
 import sys
 
 
+# ToDo implement for each time step
 def traffic_visualization_tiles(simulation):
     """
     visualizes the street on console.
@@ -41,6 +42,7 @@ class TrafficSimulation:
         :param speed_preferences: dict : dict : dict
         """
 
+        self.vehicle_list = None  # will be initialized in method generic_tiles_setter
         self.tiles = None  # will be initialized in method generic_tiles_setter [(left_Tile, right_Tile), ...]
         self.length = length
         self.density = density
@@ -78,6 +80,7 @@ class TrafficSimulation:
         generates a street with Tiles for each lane and randomly sets cars and bikes on the street
         :return: array of tiles = [(left_Tile, right_Tile)] with tuple representing a street sector
         """
+        vehicle_list = []
 
         # generates my empty street
         tiles = []
@@ -101,42 +104,65 @@ class TrafficSimulation:
             if index < self.number_cars:
                 car = Car(speed=3, tile=tile)
                 tiles[pos][1].vehicle = car
+                vehicle_list.append(car)
 
             else:
                 bike = Bike(speed=3, tile=tile)
                 tiles[pos][1].vehicle = bike
+                vehicle_list.append(bike)
 
         # motorcyclists are positioned on the left side at the beginning of the trip, with speed=0
         tile_index = 0
         for platoon in range(0, self.number_platoons):
-            tile = tiles[tile_index][0]
+            last_motorcyclist = None
 
             for biker_number in range(0, self.platoon_size):
+                tile = tiles[tile_index][0]
                 motorcyclist = Motorcycle(speed=0, tile=tile, group=platoon,
                                           prefered_speed=self.platoon_composition[biker_number])
+
+                # chain motorcyclist together
+                if last_motorcyclist is not None:
+                    motorcyclist.set_behind_partner(last_motorcyclist)
+                    last_motorcyclist.set_ahead_partner(motorcyclist)
+                    last_motorcyclist = motorcyclist
+
                 tiles[tile_index][0].vehicle = motorcyclist
+                vehicle_list.append(motorcyclist)
                 tile_index += 1
 
         self.tiles = tiles
+        self.vehicle_list = vehicle_list
 
     def initialize(self):
         self.generic_tile_setter()
 
 
-def change_lane(trafficsimulation):
+# ToDo
+def change_lane(simulation):
+    tiles = simulation.tiles
+
+
+def update_speed():
     pass
+# ToDo and check if motorcycle partners are right
+def moving(simulation):
+    vehicle_list = simulation.vehicle_list
+    for vehicle in vehicle_list:
+
+        pass
 
 
 # Has to be set in class Trafficsimulation again
 model_settings = {
-    'length': 12000,
+    'length': 40,
     'density': 0.2,
     'prob_slowdown': 0.1,
     'num_lanes': 1,
     'prob_changelane': 0.7,
     'car_share': 0.9,
     'number_platoons': 2,
-    'platoon_size': 4,
+    'platoon_size': 3,
     'speed_preferences': {
         'cautious': None,
         'average': None,
@@ -147,3 +173,4 @@ model_settings = {
 sim = TrafficSimulation(**model_settings)
 sim.initialize()
 traffic_visualization_tiles(sim)
+moving(sim)
