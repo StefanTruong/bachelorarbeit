@@ -3,18 +3,28 @@ import time, sys, random
 """
 Tutorial
 https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
+run it with Console not from IDE integration!
 """
 
 
 def loading1():
+    """
+    shows loading progress as percentage in one line
+    :return:
+    """
     print("Loading...")
     for i in range(0, 100):
-        time.sleep(0.1)
+        time.sleep(0.05)
         sys.stdout.write(u"\u001b[1000D" + str(i + 1) + "%")  # move cursor of terminal 1000 chars to the left
         sys.stdout.flush()
 
 
 def loading2(count):
+    """
+    shows loading progress as [###]
+    :param count:
+    :return:
+    """
     all_progress = [0] * count
     sys.stdout.write("\n" * count)  # Make sure we have space to draw the bars
     while any(x < 100 for x in all_progress):

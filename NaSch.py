@@ -148,7 +148,9 @@ class TrafficSimulation:
             self.current_state[lane] = next_state[lane]
 
         ### updating flow and time step values
-        #density is measured on a fixed site i
+        #density is measured on a fixed site ??? This is the starting point. It
+        #has to measure all velocities because the vehicle could have passed through that, so we have to check
+        #tiles ahead
         self.step += 1
         for lane in xrange(0, self.num_lanes):
             for i in xrange(0, self.maxVelocity):

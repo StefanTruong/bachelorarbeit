@@ -2,44 +2,26 @@ from vehicles import *
 from tile import *
 import numpy as np
 import sys
-
-
-# ToDo implement for each time step
-def traffic_visualization_tiles(simulation):
-    """
-    visualizes the street on console.
-    :param simulation:
-    :return:
-    """
-    tiles = simulation.tiles
-    lanes = simulation.num_lanes
-    length = simulation.length
-
-    # Make sure we have space to draw the lanes
-    # sys.stdout.write("\n" * lanes)
-
-    for lane in range(0, lanes + 1):
-        for tile in tiles:
-            visual = tile[lane].get_icon()
-            sys.stdout.write(visual)
-        sys.stdout.write('\n')
+import visualizer
+from collisionChecker import CollisionChecker
 
 
 class TrafficSimulation:
 
-    def __init__(self, length, density, prob_slowdown, num_lanes, prob_changelane, car_share,
-                 number_platoons, platoon_size, speed_preferences):
+    def __init__(self, length, density, num_lanes, prob_slowdown, prob_changelane, car_share,
+                 number_platoons, platoon_size, speed_preferences, total_amount_steps):
         """
         initializing model parameters
         :param length: length of the trip in tiles. Size of the array. Begins with index 0
         :param density: length*density == #total number of vehicles
         :param prob_slowdown:
         :param num_lanes: begins with index 0 for left lane. Curently works only exactly for 2 lanes!
-        :param prob_changelane:
+        :param prob_changelane: changing_lane L->R for overtaking
         :param car_share: [0,1]
         :param number_platoons: has to be lower than total number of total vehicles
         :param platoon_size: has to be greater than 1
         :param speed_preferences: dict : dict : dict
+        :param total_amount_steps: determines how many steps the simulation stops
         """
 
         self.vehicle_list = None  # will be initialized in method generic_tiles_setter
@@ -59,9 +41,10 @@ class TrafficSimulation:
         self.number_bikes = self.number_other_vehicles - self.number_cars
         self.speed_preferences = speed_preferences
 
-        biker_composition_modus = 1  # {speedy, average, cautious} ToDo Inputparameter
+        biker_composition_modus = 1  # {cautious, average, speedy} ToDo as Input parameter
         keys = list(speed_preferences.keys())
         platoon_composition_split = np.array_split([None] * self.platoon_size, len(keys))
+        # e.g. 5Motos [[{'cautious':None}, {'cautious':None}], [{'average':None}, {'average':None}], [{'speedy':None}]]
         platoon_composition = list()
 
         if biker_composition_modus == 1:
@@ -74,15 +57,16 @@ class TrafficSimulation:
         self.platoon_composition = platoon_composition
         self.step = 0
         self.flow = 0
+        self.total_amount_steps = total_amount_steps
 
     def generic_tile_setter(self):
         """
         generates a street with Tiles for each lane and randomly sets cars and bikes on the street
-        :return: array of tiles = [(left_Tile, right_Tile)] with tuple representing a street sector
+        :param: array of tiles = [(left_Tile, right_Tile), ...] with tuple representing a street sector
         """
         vehicle_list = []
 
-        # generates my empty street
+        # generates my empty street without curvature
         tiles = []
         for index in range(0, self.length):
             street_sector = []
@@ -94,24 +78,24 @@ class TrafficSimulation:
             street_sector = tuple(street_sector)
             tiles.append(street_sector)
 
-        # creates a ndarray containing index number where cars and bikes should be placed
+        # creates a ndarray containing index number where cars and bikes should be placed e.g. [43,81,83,82]
         random_pos_of_cars_and_bikes = np.random.choice(self.length, size=self.number_other_vehicles, replace=False)
 
-        # cars and bikes are always positioned on the left side lane. Starting with speed=3
+        # cars and then bikes are always first positioned on the right side lane. Starting with speed=0
         for index, pos in enumerate(random_pos_of_cars_and_bikes):
             tile = tiles[pos][1]
 
             if index < self.number_cars:
-                car = Car(speed=3, tile=tile)
-                tiles[pos][1].vehicle = car
+                car = Car(speed=0, tile=tile)
+                tiles[pos][1].set_vehicle(car)
                 vehicle_list.append(car)
 
             else:
-                bike = Bike(speed=3, tile=tile)
-                tiles[pos][1].vehicle = bike
+                bike = Bike(speed=0, tile=tile)
+                tiles[pos][1].set_vehicle(bike)
                 vehicle_list.append(bike)
 
-        # motorcyclists are positioned on the left side at the beginning of the trip, with speed=0
+        # motorcyclists are positioned on the left side at the beginning of the trip, with speed=0.
         tile_index = 0
         for platoon in range(0, self.number_platoons):
             last_motorcyclist = None
@@ -121,56 +105,115 @@ class TrafficSimulation:
                 motorcyclist = Motorcycle(speed=0, tile=tile, group=platoon,
                                           prefered_speed=self.platoon_composition[biker_number])
 
-                # chain motorcyclist together
+                # chain motorcyclist in a platoon together
                 if last_motorcyclist is not None:
                     motorcyclist.set_behind_partner(last_motorcyclist)
                     last_motorcyclist.set_ahead_partner(motorcyclist)
                     last_motorcyclist = motorcyclist
+                else:
+                    last_motorcyclist = motorcyclist
 
-                tiles[tile_index][0].vehicle = motorcyclist
+                tiles[tile_index][0].set_vehicle(motorcyclist)
                 vehicle_list.append(motorcyclist)
                 tile_index += 1
+            tile_index += 10
 
         self.tiles = tiles
         self.vehicle_list = vehicle_list
 
     def initialize(self):
+        """
+        set up the vehicles and the street. Each vehicle gets reference to the simulation
+        :return:
+        """
         self.generic_tile_setter()
+        for vehicle in self.vehicle_list:
+            vehicle.set_MyTrafficSimulation(self)
 
+    def update_lane_position(self, vehicle):
+        """
+        asks a vehicle if it would like to switch lane and updates the tiles
+        :return:
+        """
+        if vehicle.check_switch_position():
+            current_tile = vehicle.get_tile()
+            current_lane = current_tile.get_lane()
+            current_idx = current_tile.get_index()
 
-# ToDo
-def change_lane(simulation):
-    tiles = simulation.tiles
+            if current_lane == 0:
+                other_lane = 1
+            elif current_lane == 1:
+                other_lane = -1
 
+            # frees old tile from vehicle
+            self.tiles[current_idx][current_lane].set_vehicle(None)
+            # sets vehicle on the other lane
+            self.tiles[current_idx][current_lane + other_lane].set_vehicle(vehicle)
+            # updates current tile in the vehicle obj
+            vehicle.set_tile(self.tiles[current_idx][current_lane + other_lane])
 
-def update_speed():
-    pass
-# ToDo and check if motorcycle partners are right
-def moving(simulation):
-    vehicle_list = simulation.vehicle_list
-    for vehicle in vehicle_list:
+    def move_vehicle(self, vehicle):
+        """
+        moves the vehicle according to its speed and updates the tiles on the same lane
+        :param vehicle:
+        :return:
+        """
+        current_speed = vehicle.get_speed()
+        current_tile = vehicle.get_tile()
+        current_lane = current_tile.get_lane()
+        current_idx = current_tile.get_index()
 
-        pass
+        # free old tile from vehicle
+        self.tiles[current_idx][current_lane].set_vehicle(None)
+        # moves vehicle forward according to its speed
+        self.tiles[(current_idx + current_speed) % self.length][current_lane].set_vehicle(vehicle)
+        # updates current tile in the vehicle obj
+        vehicle.set_tile(self.tiles[(current_idx + current_speed) % self.length][current_lane])
+
+    def moving(self):
+        """
+        starts the simulation by moving the vehicles on the lane. Does not update the speed nor change the lane itself
+        :return:
+        """
+        for vehicle in self.vehicle_list:
+            # first update speed of all vehicles according to its surroundings
+            vehicle.update_speed()
+            # move all vehicles to its updated speed in the tiles
+            self.move_vehicle(vehicle)
+            # after moving prepare for switching lane
+            self.update_lane_position(vehicle)
 
 
 # Has to be set in class Trafficsimulation again
 model_settings = {
     'length': 40,
     'density': 0.2,
-    'prob_slowdown': 0.1,
-    'num_lanes': 1,
+    'num_lanes': 1,  # [0,1] do not change
+    'prob_slowdown': -1,
     'prob_changelane': 0.7,
     'car_share': 0.9,
-    'number_platoons': 2,
+    'number_platoons': 1,
     'platoon_size': 3,
     'speed_preferences': {
         'cautious': None,
         'average': None,
         'speedy': None,
-    }
+    },
+    'total_amount_steps': 20
 }
 
 sim = TrafficSimulation(**model_settings)
 sim.initialize()
-traffic_visualization_tiles(sim)
-moving(sim)
+checker = CollisionChecker(sim)
+
+for i in range(0, sim.total_amount_steps):
+    checker.check_for_inconsistencies()
+    visualizer.traffic_vis_tiles_step_by_step(sim)
+    sim.moving()
+
+sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
+sys.stdout.write('\n')
+sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
+sys.stdout.write('\n')
+sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+
