@@ -4,7 +4,7 @@ import copy
 import tile
 
 
-class CollisionChecker():
+class CollisionChecker:
     number_of_collisions = 0
     number_of_missing_pos = 0
     simulation = None

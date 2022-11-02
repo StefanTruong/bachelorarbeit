@@ -1,8 +1,10 @@
+import time
+
 from vehicles import *
 from tile import *
 import numpy as np
 import sys
-import visualizer
+from visualizer import VisualizeStreet
 from collisionChecker import CollisionChecker
 
 
@@ -170,7 +172,7 @@ class TrafficSimulation:
         # updates current tile in the vehicle obj
         vehicle.set_tile(self.tiles[(current_idx + current_speed) % self.length][current_lane])
 
-    def moving(self):
+    def moving_each_vehicle(self, vis):
         """
         starts the simulation by moving the vehicles on the lane. Does not update the speed nor change the lane itself
         :return:
@@ -178,42 +180,84 @@ class TrafficSimulation:
         for vehicle in self.vehicle_list:
             # first update speed of all vehicles according to its surroundings
             vehicle.update_speed()
+
             # move all vehicles to its updated speed in the tiles
             self.move_vehicle(vehicle)
+
+            # after moving prepare for switching lane
+            self.update_lane_position(vehicle)
+            vis.traffic_vis_tiles_step_by_step(vehicle)
+
+    def moving_fix_line(self, vis):
+        """
+        starts the simulation by moving the vehicles on the lane on fixed lines
+        :return:
+        """
+        for vehicle in self.vehicle_list:
+            # first update speed of all vehicles according to its surroundings
+            vehicle.update_speed()
+
+            # move all vehicles to its updated speed in the tiles
+            self.move_vehicle(vehicle)
+
+            # after moving prepare for switching lane
+            self.update_lane_position(vehicle)
+            vis.traffic_vis_tiles_fix_lines()
+
+    def moving_focused(self, vis, focus_vehicle):
+        """
+        starts the simulation by moving the vehicles on the lane. Does not update the speed nor change the lane itself
+        :return:
+        """
+        for vehicle in self.vehicle_list:
+            # first update speed of all vehicles according to its surroundings
+            vehicle.update_speed()
+
+            # move all vehicles to its updated speed in the tiles
+            self.move_vehicle(vehicle)
+
+            # after moving prepare for switching lane
+            self.update_lane_position(vehicle)
+            vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle)
+
+    def moving(self, vis, vis_modus, focused_vehicle=None):
+        """
+
+        :param vis: vis object
+        :param focused_vehicle: the vehicle it should be focused on
+        :param vis_modus: which vis function should be called
+        fix:        uses vis.traffic_vis_tiles_fix_lines()
+        step:       uses vis.traffic_vis_tiles_step_by_step()
+        focused:    uses vis.traffic_vis_tiles_fix_lines_focused()
+        :return:
+        """
+        for vehicle in self.vehicle_list:
+            # first update speed of all vehicles according to its surroundings
+            vehicle.update_speed()
+
+            # move all vehicles to its updated speed in the tiles
+            self.move_vehicle(vehicle)
+
             # after moving prepare for switching lane
             self.update_lane_position(vehicle)
 
+            # which visualization should be used
+            if vis_modus == 'step':
+                vis.traffic_vis_tiles_step_by_step(vehicle)
+            elif vis_modus == 'fix':
+                vis.traffic_vis_tiles_fix_lines()
+            elif vis_modus == 'focused':
+                vis.traffic_vis_tiles_fix_lines_focused(focused_vehicle)
+            else:
+                pass
 
-# Has to be set in class Trafficsimulation again
-model_settings = {
-    'length': 40,
-    'density': 0.2,
-    'num_lanes': 1,  # [0,1] do not change
-    'prob_slowdown': -1,
-    'prob_changelane': 0.7,
-    'car_share': 0.9,
-    'number_platoons': 1,
-    'platoon_size': 3,
-    'speed_preferences': {
-        'cautious': None,
-        'average': None,
-        'speedy': None,
-    },
-    'total_amount_steps': 20
-}
+    def get_tiles(self):
+        return self.tiles
 
-sim = TrafficSimulation(**model_settings)
-sim.initialize()
-checker = CollisionChecker(sim)
+    def get_vehicle_list(self):
+        return self.vehicle_list
 
-for i in range(0, sim.total_amount_steps):
-    checker.check_for_inconsistencies()
-    visualizer.traffic_vis_tiles_step_by_step(sim)
-    sim.moving()
+    def get_length(self):
+        return self.length
 
-sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
-sys.stdout.write('\n')
-sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
-sys.stdout.write('\n')
-sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
 

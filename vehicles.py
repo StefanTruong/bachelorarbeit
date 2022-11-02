@@ -71,19 +71,28 @@ class Vehicle:
     def look_at_vehicle_at_pos(self, position, lane):
         return self.sim.tiles[position][lane].get_vehicle()
 
-    def switch_possible(self, other_lane):
+    def switch_possible(self):
         switch = False
 
+        if self.tile.get_lane() == 0:
+            other_lane = 1
+        elif self.tile.get_lane() == 1:
+            other_lane = -1
+
         # switching only possible if side is free
-        if self.sim.tiles[self.tile.get_index()][self.tile.get_lane() + other_lane] is None:
+        if self.sim.tiles[self.tile.get_index()][self.tile.get_lane() + other_lane].get_vehicle() is None:
 
             # T2 more space than current velocity + 1
             if self.distance_front_other_lane > (self.get_speed() + 1):
 
                 # Look what kind of vehicle is behind me
-                look_street_idx = (self.tile.get_index - self.distance_behind_other_lane) % self.sim.length
+                look_street_idx = (self.tile.get_index() - self.distance_behind_other_lane) % self.sim.length
                 behind_vehicle = self.look_at_vehicle_at_pos(look_street_idx, self.tile.get_lane() + other_lane)
-                behind_max_speed = behind_vehicle.get_maxV()
+
+                if behind_vehicle is not None:
+                    behind_max_speed = behind_vehicle.get_maxV()
+                else:
+                    behind_max_speed = 0
 
                 # T3 more space than behind max_speed of rear car
                 if self.distance_behind_other_lane > behind_max_speed:
@@ -97,27 +106,22 @@ class Vehicle:
     def check_switch_position(self):
         """
         returns a Boolean if vehicle should switch lane
-        :return: Boolean switch_lane
+        :return: Boolean to switch_lane
         """
         switch_lane = False
 
         self.look_at_positional_environment()
 
-        if self.tile.get_lane() == 0:
-            other_lane = 1
-        elif self.tile.get_lane() == 1:
-            other_lane = -1
-
         # asymmetric condition for switching lanes L->R see Rickert (T2-T4)
         if self.tile.get_lane() == 0:
             # cars always try to return to the right lane, independent of the situation on the left lane
-            switch_lane = self.switch_possible(other_lane)
+            switch_lane = self.switch_possible()
 
         # asymmetric condition for switching lanes R->L see Rickert (T1-T4)
         elif self.tile.get_lane() == 1:
-            # current lane ahead has smaller space than current velocity + 1 (T1)
+            # current lane ahead has smaller space than current velocity + 1  security tile distance (T1)
             if self.distance_front < self.get_speed() + 1:
-                switch_lane = self.switch_possible(other_lane)
+                switch_lane = self.switch_possible()
 
         return switch_lane
 
@@ -128,7 +132,7 @@ class Vehicle:
         """
         self.look_at_positional_environment()
 
-        # 1.) Acceleration: accelerate if max speed not achieved if distance allows it.
+        # 1.) Acceleration: accelerate if max speed not achieved if distance allows it. security distance of 1 tile
         if self.distance_front > self.get_speed() + 1 and self.get_speed() < self.get_maxV():
             self.set_speed(self.get_speed() + 1)
 
@@ -141,7 +145,7 @@ class Vehicle:
 
         # 3.) Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
-            self.set_speed(self.get_speed() -1)
+            self.set_speed(self.get_speed() - 1)
 
     def set_tile(self, tile):
         self.tile = tile
