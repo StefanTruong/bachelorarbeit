@@ -12,6 +12,7 @@ class Vehicle:
         self.maxV = max_velocity
         self.tile = tile
         self.icon = 'Das soll nicht geprinted werden!'
+        self.id = 666
 
     def calc_dist_front_vehicle(self, lane):
         """
@@ -153,6 +154,9 @@ class Vehicle:
     def set_speed(self, speed):
         self.speed = speed
 
+    def set_id(self, identifier):
+        self.id = identifier
+
     def get_tile(self):
         return self.tile
 
@@ -164,6 +168,9 @@ class Vehicle:
 
     def get_icon(self):
         return self.icon
+
+    def get_id(self):
+        return self.id
 
     def set_MyTrafficSimulation(self, sim):
         self.sim = sim
@@ -178,6 +185,12 @@ class Vehicle:
 
 class Car(Vehicle):
     def __init__(self, speed, tile, max_velocity=12):
+        """
+        :param speed:
+        :param tile:
+        :param max_velocity: max Velocity of a vehicle in the model has the Car. If changed then update flow at
+        Analyzer.py has to be changed as well!
+        """
         super().__init__(speed, tile, max_velocity)
         self.symbol = 'C'
 

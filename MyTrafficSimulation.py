@@ -57,8 +57,6 @@ class TrafficSimulation:
                 platoon_composition += part
 
         self.platoon_composition = platoon_composition
-        self.step = 0
-        self.flow = 0
         self.total_amount_steps = total_amount_steps
 
     def generic_tile_setter(self):
@@ -122,6 +120,7 @@ class TrafficSimulation:
 
         self.tiles = tiles
         self.vehicle_list = vehicle_list
+        self.set_uniqueid(vehicle_list)
 
     def initialize(self):
         """
@@ -260,4 +259,9 @@ class TrafficSimulation:
     def get_length(self):
         return self.length
 
-
+    @staticmethod
+    def set_uniqueid(vehicle_list):
+        identifier = 0
+        for vehicle in vehicle_list:
+            vehicle.set_id(identifier)
+            identifier += 1

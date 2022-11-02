@@ -2,7 +2,7 @@ import sys
 import time
 from MyTrafficSimulation import *
 
-# select what visualization should be started
+# select what visualization should be started. Use the console to give argument
 # selection 1 debug scenario. Visualizes each vehicle movement step by step and the whole street. No probabilities
 # selection 2 movement simulation with fixed street for 0.8 steps/sec. No probabilities
 # selection 3 movement focused on one vehicle and portion of the street behind and ahead. No probabilities
@@ -10,8 +10,7 @@ from MyTrafficSimulation import *
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
 else:
-    selection = 0
-
+    selection = 4
 
 # ---------------------------------- selection 1 ------------------------------------
 if selection == 1:
@@ -143,3 +142,7 @@ elif selection == 3:
     sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
     sys.stdout.write('\n')
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+
+
+# ---------------------------------- selection 0 ------------------------------------
+
