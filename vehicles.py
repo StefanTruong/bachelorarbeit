@@ -184,12 +184,12 @@ class Vehicle:
 
 
 class Car(Vehicle):
-    def __init__(self, speed, tile, max_velocity=12):
+    def __init__(self, speed, tile, max_velocity=10):
         """
         :param speed:
         :param tile:
-        :param max_velocity: max Velocity of a vehicle in the model has the Car. If changed then update flow at
-        Analyzer.py has to be changed as well!
+        :param max_velocity: max Velocity of a vehicle in the model has the Car. If changed then update_flow_all_lanes
+        at Analyzer.py has to be changed as well!
         """
         super().__init__(speed, tile, max_velocity)
         self.symbol = 'C'
@@ -213,7 +213,7 @@ class Bike(Vehicle):
 
 class Motorcycle(Vehicle):
     # max_velocity: 100km/h = 30m/s -> 30m/s / 3,75m = 8tiles
-    def __init__(self, speed, tile, group, prefered_speed, max_velocity=8):
+    def __init__(self, speed, tile, group, prefered_speed, max_velocity=7):
         """
         initializes Motorcycle with parameters
         :param speed: integer, current initial speed
@@ -236,7 +236,6 @@ class Motorcycle(Vehicle):
 
     def set_ahead_partner(self, partner):
         self.ahead = partner
-
 
     def get_behind_partner(self):
         return self.behind

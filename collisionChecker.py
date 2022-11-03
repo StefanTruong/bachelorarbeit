@@ -12,7 +12,11 @@ class CollisionChecker:
 
     def __init__(self, simulation):
         self.simulation = simulation
-        self.initial_vehicle_list = copy.copy(simulation.vehicle_list)
+        self.initial_vehicle_list = copy.deepcopy(simulation.vehicle_list)
+        self.initial_vehicle_id_list = []
+
+        for vehicle in self.initial_vehicle_list:
+            self.initial_vehicle_id_list.append(vehicle.get_id())
 
     def check_for_inconsistencies(self):
         """
@@ -21,8 +25,8 @@ class CollisionChecker:
         """
         self.check_for_vehicle_collision()
         self.check_for_missing_index()
-        # ToDo this should be called separately after initial debugging is done due to performance
-        self.check_all_vehicle_present()
+        # ToDo this should be called separately after initial debugging is done due to performance reasons!
+        # self.check_all_vehicle_present()
 
     def check_for_vehicle_collision(self):
         """
@@ -47,7 +51,7 @@ class CollisionChecker:
 
     def check_for_missing_index(self):
         """
-        checks if a vehicle has no index
+        checks if a vehicle has no tile reference
         :return:
         """
         for vehicle in self.simulation.vehicle_list:
@@ -61,15 +65,15 @@ class CollisionChecker:
         checks if a vehicle vanishes during a step or a new vehicle suddenly appears after initial setting
         :return:
         """
-        current_vehicles_on_street = []
+        current_vehicle_ids_on_street = []
 
         # get all vehicles on the street
         for section in self.simulation.tiles:
             for tile in section:
                 if tile.get_vehicle() is not None:
-                    current_vehicles_on_street.append(tile.get_vehicle())
+                    current_vehicle_ids_on_street.append(tile.get_vehicle().get_id())
 
-        all_present = all(vehicle in self.initial_vehicle_list for vehicle in current_vehicles_on_street)
+        all_present = all(vehicle_id in self.initial_vehicle_id_list for vehicle_id in current_vehicle_ids_on_street)
 
         if not all_present:
             self.all_vehicle_present = False

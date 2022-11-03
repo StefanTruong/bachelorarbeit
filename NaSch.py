@@ -45,17 +45,17 @@ class TrafficSimulation:
         # create SciPy arrays to represent the road: current state
         self.current_state = -scipy.ones((self.num_lanes, self.length), dtype=int)
 
-        #Generates a random sample from a given 1-D array. Cars will be placed randomly.
-        #length*density == #number of cars
-        random_indices = scipy.random.choice(self.length,
+        # Generates a random sample from a given 1-D array. Cars will be placed randomly.
+        # length*density == #number of cars
+        random_indices = np.random.choice(self.length,
                                              size=int(round((self.length * self.density))),
                                              replace=False)
 
-        #Hint: xrange depreciated in python3. use range instead
-        #Hint: maxVelocity + 1 because 0 is not included
-        #cars will be placed across all lanes for initialization.
+        # Hint: xrange depreciated in python3. use range instead
+        # Hint: maxVelocity + 1 because 0 is not included
+        # cars will be placed across all lanes for initialization.
         for lane in range(0, self.num_lanes):
-            self.current_state[lane, random_indices] = scipy.random.randint(0, self.maxVelocity + 1,
+            self.current_state[lane, random_indices] = np.random.randint(0, self.maxVelocity + 1,
                                                                             size=len(random_indices))
 
         self.step = 0
@@ -69,7 +69,7 @@ class TrafficSimulation:
         for lane in range(0, self.num_lanes):
             for i in range(0, self.length):
 
-                #for each car on the lane
+                # for each car on the lane
                 if self.current_state[lane, i] != -1:
 
                     distance = 1
@@ -117,8 +117,8 @@ class TrafficSimulation:
         if self.num_lanes > 1:
             self.change_lane()
 
-        for lane in xrange(0, self.num_lanes):
-            for i in xrange(0, self.length):
+        for lane in range(0, self.num_lanes):
+            for i in range(0, self.length):
                 if self.current_state[lane, i] != -1:
                     distance = 1  # empty cells ahead
                     while self.current_state[lane, (i + distance) % self.length] == -1:
@@ -140,20 +140,20 @@ class TrafficSimulation:
         ### UPDATE POSITIONS: move each car based on updated velocity value
 
         next_state = -scipy.ones((self.num_lanes, self.length), dtype=int)
-        for lane in xrange(0, self.num_lanes):
-            for i in xrange(0, self.length):
+        for lane in range(0, self.num_lanes):
+            for i in range(0, self.length):
                 spaces = int(self.current_state[lane, i])
                 if self.current_state[lane, i] != -1:
                     next_state[lane, (i + spaces) % self.length] = self.current_state[lane, i]
             self.current_state[lane] = next_state[lane]
 
         ### updating flow and time step values
-        #density is measured on a fixed site ??? This is the starting point. It
-        #has to measure all velocities because the vehicle could have passed through that, so we have to check
-        #tiles ahead
+        # density is measured on a fixed site ??? This is the starting point. It
+        # has to measure all velocities because the vehicle could have passed through that, so we have to check
+        # tiles ahead
         self.step += 1
-        for lane in xrange(0, self.num_lanes):
-            for i in xrange(0, self.maxVelocity):
+        for lane in range(0, self.num_lanes):
+            for i in range(0, self.maxVelocity):
                 if self.current_state[lane, i] > i:
                     self.flow += 1
 
@@ -166,17 +166,15 @@ class TrafficSimulation:
             "\n"
 
 
-
-
-sim = TrafficSimulation(density = 0.5 , length = 50, num_lanes = 1)
+sim = TrafficSimulation(density=0.5, length=50, num_lanes=1)
 
 sim.initialize()
 sim.draw()
 for i in range(30):
     sim.calculate()
     sim.draw()
-print 'Car Density:', sim.density
-print 'Traffic flow rate:', sim.flow/sim.step
+print('Car Density:', sim.density)
+print('Traffic flow rate:', sim.flow / sim.step)
 
 
 def visualizations(densities, number_lanes):
@@ -206,5 +204,5 @@ def visualizations(densities, number_lanes):
     plt.show()
 
 
-visualizations(np.linspace(0, 1, 50), 1)
+# visualizations(np.linspace(0, 1, 50), 1)
 visualizations(np.linspace(0, 1, 50), 2)

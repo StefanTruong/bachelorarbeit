@@ -131,7 +131,7 @@ class TrafficSimulation:
         for vehicle in self.vehicle_list:
             vehicle.set_MyTrafficSimulation(self)
 
-    def update_lane_position(self, vehicle):
+    def update_lane_position(self, vehicle: Vehicle):
         """
         asks a vehicle if it would like to switch lane and updates the tiles
         :return:
@@ -153,7 +153,7 @@ class TrafficSimulation:
             # updates current tile in the vehicle obj
             vehicle.set_tile(self.tiles[current_idx][current_lane + other_lane])
 
-    def move_vehicle(self, vehicle):
+    def move_vehicle(self, vehicle: Vehicle):
         """
         moves the vehicle according to its speed and updates the tiles on the same lane
         :param vehicle:
@@ -171,7 +171,7 @@ class TrafficSimulation:
         # updates current tile in the vehicle obj
         vehicle.set_tile(self.tiles[(current_idx + current_speed) % self.length][current_lane])
 
-    def moving_each_vehicle(self, vis):
+    def moving_each_vehicle(self, vis: VisualizeStreet):
         """
         starts the simulation by moving the vehicles on the lane. Does not update the speed nor change the lane itself
         :return:
@@ -187,7 +187,7 @@ class TrafficSimulation:
             self.update_lane_position(vehicle)
             vis.traffic_vis_tiles_step_by_step(vehicle)
 
-    def moving_fix_line(self, vis):
+    def moving_fix_line(self, vis: VisualizeStreet):
         """
         starts the simulation by moving the vehicles on the lane on fixed lines
         :return:
@@ -203,7 +203,7 @@ class TrafficSimulation:
             self.update_lane_position(vehicle)
             vis.traffic_vis_tiles_fix_lines()
 
-    def moving_focused(self, vis, focus_vehicle):
+    def moving_focused(self, vis: VisualizeStreet, focus_vehicle: Vehicle):
         """
         starts the simulation by moving the vehicles on the lane. Does not update the speed nor change the lane itself
         :return:
@@ -219,7 +219,7 @@ class TrafficSimulation:
             self.update_lane_position(vehicle)
             vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle)
 
-    def moving(self, vis, vis_modus, focused_vehicle=None):
+    def moving(self, vis: VisualizeStreet = None, vis_modus=None, focused_vehicle=None):
         """
 
         :param vis: vis object
@@ -259,8 +259,14 @@ class TrafficSimulation:
     def get_length(self):
         return self.length
 
+    def get_density(self):
+        return self.density
+
+    def get_lanes(self):
+        return self.num_lanes
+
     @staticmethod
-    def set_uniqueid(vehicle_list):
+    def set_uniqueid(vehicle_list: list):
         identifier = 0
         for vehicle in vehicle_list:
             vehicle.set_id(identifier)

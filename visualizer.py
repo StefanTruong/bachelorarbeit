@@ -1,4 +1,5 @@
 from tile import *
+from vehicles import *
 import numpy as np
 import time, sys, random
 
@@ -20,7 +21,7 @@ class VisualizeStreet:
             sys.stdout.write(visual)
             sys.stdout.write('\n')
 
-    def traffic_vis_tiles_step_by_step(self, vehicle):
+    def traffic_vis_tiles_step_by_step(self, vehicle: Vehicle):
         """
         visualizes the street on console step by step for each vehicle
         X is the marker in which position the vehicle has moved
@@ -59,13 +60,13 @@ class VisualizeStreet:
         # Move up
         sys.stdout.write(u"\u001b[" + "2" + "A")
 
-    def traffic_vis_tiles_fix_lines_focused(self, focus_vehicle):
+    def traffic_vis_tiles_fix_lines_focused(self, focus_vehicle: Vehicle):
         """
         visualizes the street in fixed two lines before and after a focused vehicle
         :param focus_vehicle: the vehicle the visualization should focus on
         :return:
         """
-        view_distance = 10  # how far should be displayed
+        view_distance = 22  # how far should be displayed
 
         # calculates the right index to display
         behind = (focus_vehicle.get_tile().get_index() - view_distance) % self.simulation.get_length()
