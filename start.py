@@ -19,18 +19,20 @@ if len(sys.argv) == 2:
 else:
     selection = 4
 
+
 # ---------------------------------- selection 1 ------------------------------------
 if selection == 1:
+    print('Selection Mode: ', selection)
     # Has to be set in class Trafficsimulation again
     model_settings = {
         'length': 40,   # don't use more than 50 for visualization as console cannot display more at once
-        'density': 0.25,
+        'density': 2,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': -1,
         'prob_changelane': 1,
         'car_share': 0.9,
-        'number_platoons': 1,
-        'platoon_size': 1,
+        'number_platoons': 3,
+        'platoon_size': 3,
         'speed_preferences': {
             'cautious': None,
             'average': None,
@@ -61,9 +63,10 @@ if selection == 1:
 
 # ---------------------------------- selection 2 ------------------------------------
 elif selection == 2:
+    print('Selection Mode: ', selection)
     model_settings = {
         'length': 40,   # don't use more than 50 for visualization as console cannot display more at once
-        'density': 0.8,
+        'density': 2,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': 0.1,
         'prob_changelane': 0.5,
@@ -99,6 +102,7 @@ elif selection == 2:
 
 # ---------------------------------- selection 3 ------------------------------------
 elif selection == 3:
+    print('Selection Mode: ', selection)
     model_settings = {
         'length': 100,
         'density': 0.2,
@@ -153,15 +157,16 @@ elif selection == 3:
 
 # ---------------------------------- selection 4 ------------------------------------
 elif selection == 4:
+    print('Selection Mode: ', selection)
     model_settings = {
         'length': 50,
-        'density': 0.15,
+        'density': 0.2, # Hint will be changed in selection 4
         'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.2,  # ToDo Change to 10% when debugging finished
-        'prob_changelane': 0.5,  # ToDo change it back to lower number
+        'prob_slowdown': 0.2,
+        'prob_changelane': 0.5,
         'car_share': 0.9,
-        'number_platoons': 0,
-        'platoon_size': 0,
+        'number_platoons': 3,
+        'platoon_size': 3,
         'speed_preferences': {
             'cautious': None,
             'average': None,
@@ -170,41 +175,41 @@ elif selection == 4:
         'total_amount_steps': 10
     }
 
-# what densities shall be calculated. Lowest density should be number of bikers
-lowest_density = model_settings['platoon_size'] / model_settings['length']
-density_list = np.linspace(lowest_density, 0.5, 30)
+    # what densities shall be calculated. Lowest density should be number of bikers
+    lowest_density = (model_settings['platoon_size'] * model_settings['number_platoons']) / model_settings['length']
+    density_list = np.linspace(lowest_density, 2, 10)
 
-singleFlows = []
-avgFlows = []
-stdFlows = []
+    singleFlows = []
+    avgFlows = []
+    stdFlows = []
 
-for density in density_list:
-    model_settings['density'] = density
-    sim = TrafficSimulation(**model_settings)
-    sim.initialize()
-    checker = CollisionChecker(sim)
-    analyzer = AnalyzerSingleSim(sim)
-    vis = VisualizeStreet(sim)
-    # vis.traffic_vis_tiles()
-    for i in range(0, 10):
+    for density in density_list:
+        model_settings['density'] = density
+        sim = TrafficSimulation(**model_settings)
+        sim.initialize()
+        checker = CollisionChecker(sim)
+        analyzer = AnalyzerSingleSim(sim)
+        vis = VisualizeStreet(sim)
+        # vis.traffic_vis_tiles()
+        for i in range(0, 10):
 
-        for step in range(0, sim.total_amount_steps):
-            # checker.check_for_inconsistencies()
-            sim.moving()
-            # vis.traffic_vis_tiles()
-            analyzer.update()
+            for step in range(0, sim.total_amount_steps):
+                # checker.check_for_inconsistencies()
+                sim.moving()
+                # vis.traffic_vis_tiles()
+                analyzer.update()
 
-        singleFlows.append(analyzer.get_traffic_flow_all_lanes())
+            singleFlows.append(analyzer.get_traffic_flow_all_lanes())
 
-    avgFlows.append(np.mean(singleFlows))
-    stdFlows.append(np.std(singleFlows, ddof=0))
+        avgFlows.append(np.mean(singleFlows))
+        stdFlows.append(np.std(singleFlows, ddof=0))
 
-    sys.stdout.write('\n')
-    sys.stdout.write('\n')
-    sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
-    sys.stdout.write('\n')
-    sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
-    sys.stdout.write('\n')
-    sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+        # sys.stdout.write('\n')
+        # sys.stdout.write('\n')
+        # sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
+        # sys.stdout.write('\n')
+        # sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
+        # sys.stdout.write('\n')
+        # sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
 
-Plotter.flow_density_diagram(density_list, avgFlows, stdFlows)
+    Plotter.flow_density_diagram(density_list, avgFlows, stdFlows)

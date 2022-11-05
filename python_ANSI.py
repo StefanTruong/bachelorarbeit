@@ -14,7 +14,7 @@ def loading1():
     """
     print("Loading...")
     for i in range(0, 100):
-        time.sleep(0.05)
+        time.sleep(0.01)
         sys.stdout.write(u"\u001b[1000D" + str(i + 1) + "%")  # move cursor of terminal 1000 chars to the left
         sys.stdout.flush()
 

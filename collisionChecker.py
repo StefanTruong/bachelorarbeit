@@ -25,8 +25,7 @@ class CollisionChecker:
         """
         self.check_for_vehicle_collision()
         self.check_for_missing_index()
-        # ToDo this should be called separately after initial debugging is done due to performance reasons!
-        # self.check_all_vehicle_present()
+        self.check_all_vehicle_present()
 
     def check_for_vehicle_collision(self):
         """
@@ -65,15 +64,7 @@ class CollisionChecker:
         checks if a vehicle vanishes during a step or a new vehicle suddenly appears after initial setting
         :return:
         """
-        current_vehicle_ids_on_street = []
+        for vehicle in self.simulation.vehicle_list:
+            if id(vehicle.get_tile().get_vehicle()) != id(vehicle):
+                self.all_vehicle_present = False
 
-        # get all vehicles on the street
-        for section in self.simulation.tiles:
-            for tile in section:
-                if tile.get_vehicle() is not None:
-                    current_vehicle_ids_on_street.append(tile.get_vehicle().get_id())
-
-        all_present = all(vehicle_id in self.initial_vehicle_id_list for vehicle_id in current_vehicle_ids_on_street)
-
-        if not all_present:
-            self.all_vehicle_present = False

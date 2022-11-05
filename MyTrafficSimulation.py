@@ -1,3 +1,4 @@
+import math
 import time
 
 from vehicles import *
@@ -11,7 +12,7 @@ from collisionChecker import CollisionChecker
 class TrafficSimulation:
 
     def __init__(self, length, density, num_lanes, prob_slowdown, prob_changelane, car_share,
-                 number_platoons, platoon_size, speed_preferences, total_amount_steps):
+                 number_platoons, platoon_size, speed_preferences, total_amount_steps, biker_composition_modus=1):
         """
         initializing model parameters
         :param length: length of the trip in tiles. Size of the array. Begins with index 0
@@ -25,10 +26,11 @@ class TrafficSimulation:
         :param speed_preferences: dict : dict : dict
         :param total_amount_steps: determines how many steps the simulation stops
         """
-
+        self.platoon_composition = None
         self.vehicle_list = None  # will be initialized in method generic_tiles_setter
         self.tiles = None  # will be initialized in method generic_tiles_setter [(left_Tile, right_Tile), ...]
         self.length = length
+        self.total_amount_steps = total_amount_steps
         self.density = density
         self.prob_slowdown = prob_slowdown
         self.num_lanes = num_lanes
@@ -39,34 +41,42 @@ class TrafficSimulation:
         self.platoon_size = platoon_size
         self.number_total_motorcycles = number_platoons * platoon_size
         self.number_other_vehicles = self.number_total_vehicles - self.number_total_motorcycles
+        if self.number_other_vehicles < 0:
+            raise Exception("Too many Motorcycles for given vehicle density. Choose less Motorcyclist")
+
         self.number_cars = int(round(self.number_other_vehicles * car_share))
         self.number_bikes = self.number_other_vehicles - self.number_cars
-        self.speed_preferences = speed_preferences
 
-        biker_composition_modus = 1  # {cautious, average, speedy} ToDo as Input parameter
-        keys = list(speed_preferences.keys())
+        self.speed_preferences = speed_preferences
+        self.biker_composition_modus = biker_composition_modus
+        self.distribute_biker_speed_preference()
+
+    def distribute_biker_speed_preference(self):
+        """
+        set up how the speed preferences in a platoon is distributed.
+        :return:
+        """
+        keys = list(self.speed_preferences.keys())
         platoon_composition_split = np.array_split([None] * self.platoon_size, len(keys))
         # e.g. 5Motos [[{'cautious':None}, {'cautious':None}], [{'average':None}, {'average':None}], [{'speedy':None}]]
         platoon_composition = list()
 
-        if biker_composition_modus == 1:
+        # {cautious, average, speedy}
+        if self.biker_composition_modus == 1:
             for split_index, key in enumerate(keys):
-                speed_preference = {key: speed_preferences[key]}
+                speed_preference = {key: self.speed_preferences[key]}
                 length = len(platoon_composition_split[split_index])
                 part = [speed_preference] * length
                 platoon_composition += part
 
         self.platoon_composition = platoon_composition
-        self.total_amount_steps = total_amount_steps
 
-    def generic_tile_setter(self):
+    def generate_empty_street(self):
         """
-        generates a street with Tiles for each lane and randomly sets cars and bikes on the street
-        :param: array of tiles = [(left_Tile, right_Tile), ...] with tuple representing a street sector
+        generates an empty street
+        array of tiles = [(left_Tile, right_Tile), ...] with tuple representing a street sector
+        :return: returns empty street
         """
-        vehicle_list = []
-
-        # generates my empty street without curvature
         tiles = []
         for index in range(0, self.length):
             street_sector = []
@@ -78,24 +88,61 @@ class TrafficSimulation:
             street_sector = tuple(street_sector)
             tiles.append(street_sector)
 
-        # creates a ndarray containing index number where cars and bikes should be placed e.g. [43,81,83,82]
-        random_pos_of_cars_and_bikes = np.random.choice(self.length, size=self.number_other_vehicles, replace=False)
+        return tiles
+    @staticmethod
+    def generate_random_placing_number(length, number_vehicles):
+        """
+        generates random number
+        :return: returns a ndarray index number where cars and bikes should be placed e.g. [43,81,83,82]
+        """
+        return np.random.choice(length, size=number_vehicles, replace=False)
 
-        # cars and then bikes are always first positioned on the right side lane. Starting with speed=0
-        for index, pos in enumerate(random_pos_of_cars_and_bikes):
-            tile = tiles[pos][1]
+    @staticmethod
+    def placing_cars_bikes(tiles, vehicle_list, free_elements, positions, num_cars, num_bikes):
+        """
+        places cars and bikes randomly on the street required it is free. Starting with speed=0
+        populates a vehicle_list where all vehicles are listed
+        :param free_elements: list of [(idx, lane), ...] of free tiles
+        :param num_bikes: number of bikes which should be placed
+        :param num_cars: number of cars which should be placed
+        :param vehicle_list: the list of all vehicles Cars Bikes and Motorcyclist
+        :param tiles: the tiles on which the vehicles will be placed on
+        :param positions: list of numbers where cars and bikes should be positioned on the lane
+        """
 
-            if index < self.number_cars:
+        for index, pos in enumerate(positions):
+            idx = free_elements[pos][0]
+            lane = free_elements[pos][1]
+            tile = tiles[idx][lane]
+
+            if index < num_cars:
                 car = Car(speed=0, tile=tile)
-                tiles[pos][1].set_vehicle(car)
-                vehicle_list.append(car)
+                if tiles[idx][lane].get_vehicle() is None:
+                    tiles[idx][lane].set_vehicle(car)
+                    vehicle_list.append(car)
+                else:
+                    raise Exception('Problem in car placing. Place is not available')
 
             else:
                 bike = Bike(speed=0, tile=tile)
-                tiles[pos][1].set_vehicle(bike)
-                vehicle_list.append(bike)
+                if tiles[idx][lane].get_vehicle() is None:
+                    tiles[idx][lane].set_vehicle(bike)
+                    vehicle_list.append(bike)
+                else:
+                    raise Exception('Problem in Bike placing. Place is not available')
 
-        # motorcyclists are positioned on the left side at the beginning of the trip, with speed=0.
+    def placing_motorcyclist(self, tiles, vehicle_list):
+        """
+        motorcyclists are placed on the left lane beginning with index = 0 with speed=0
+        if there are more platoons, then they will be offset equally
+        :return:
+        """
+        # calculate offset between different platoons
+        free_space = self.length - self.number_total_motorcycles
+        if free_space < 0:
+            raise Exception("There are too many motorcycles. Choose a lower number of platoons or shrink size")
+        offset = int(math.floor(free_space / self.number_platoons))
+
         tile_index = 0
         for platoon in range(0, self.number_platoons):
             last_motorcyclist = None
@@ -116,7 +163,44 @@ class TrafficSimulation:
                 tiles[tile_index][0].set_vehicle(motorcyclist)
                 vehicle_list.append(motorcyclist)
                 tile_index += 1
-            tile_index += 10
+
+            # offset between each platoon
+            tile_index += offset
+
+    def look_free_tiles(self, tiles):
+        """
+        creates a list of (idx, lane) of free tiles on the street s.t. we can place the cars and bikes randomly
+        :param tiles: The street
+        :return: returns a list of [(idx, lane), ...] of free tiles
+        """
+        free_elements = []
+        for sector in tiles:
+            for lane in range(0, self.num_lanes + 1):
+                if sector[lane].get_vehicle() is None:
+                    free = (sector[lane].get_index(), lane)
+                    free_elements.append(free)
+
+        return free_elements
+
+    def generic_tile_setter(self):
+        """
+        generates a street with Tiles for each lane and randomly sets cars and bikes on the street
+        """
+        vehicle_list = []
+        tiles = self.generate_empty_street()
+
+        # motorcyclists are positioned on the left side at the beginning of the trip, with speed=0.
+        self.placing_motorcyclist(tiles, vehicle_list)
+
+        # get free space of the street tiles to randomly place the cars and Bikes
+        free_elements = self.look_free_tiles(tiles)
+
+        # choose from the free space for placing cars and bikes
+        random_pos_of_others = self.generate_random_placing_number(len(free_elements), self.number_other_vehicles)
+
+        # place cars and bikes on street
+        self.placing_cars_bikes(tiles, vehicle_list, free_elements, random_pos_of_others, self.number_cars,
+                                self.number_bikes)
 
         self.tiles = tiles
         self.vehicle_list = vehicle_list
