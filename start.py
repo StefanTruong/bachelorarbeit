@@ -298,7 +298,7 @@ elif selection == 6:
     vis = VisualizeStreet(sim)
 
     # initial setup visualization
-    vis.traffic_vis_tiles_granular()
+    vis.traffic_vis_tiles_granular_one_side()
     vis.traffic_vis_tiles()
 
     # visualizes each step by step with move and switching

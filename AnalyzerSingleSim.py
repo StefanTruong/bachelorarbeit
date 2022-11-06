@@ -52,16 +52,19 @@ class AnalyzerSingleSim:
                 'sum_change_lane': 0,  # sum of switched lanes
 
                 # ToDo add changes to update_vehicle_summary_dict
-                'behind_dist_partner': 0,       # motorcyclist distance of behind partner
-                'sum_behind_dist_partner': 0,   # sum of the distance of the behind partner
-                'avg_behind_dist_partner': 0,   # avg sum of the dist of the behind partner
-                'std_behind_dist_partner': 0,   # std of the dist of the behind partner
-                'ahead_dist_partner': 0,        # motorcyclist distance of ahead partner
-                'sum_ahead_dist_partner': 0,    # sum of the distance of the ahead partner
-                'avg_ahead_dist_partner': 0,    # avg sum of the dist of the ahead partner
-                'std_ahead_dist_partner': 0,    # std of the dist of the behind partner
-                'incr_fun': 0,                  # motorcyclist fun in this step
-                'sum_fun': 0                    # motorcyclist overall fun
+                'sum_ping_pong_lane_changes': 0,    # sum of ping pong lane changes
+                'behind_dist_partner': 0,           # motorcyclist distance of behind partner
+                'sum_behind_dist_partner': 0,       # sum of the distance of the behind partner
+                'avg_behind_dist_partner': 0,       # avg sum of the dist of the behind partner
+                'std_behind_dist_partner': 0,       # std of the dist of the behind partner
+                'ahead_dist_partner': 0,            # motorcyclist distance of ahead partner
+                'sum_ahead_dist_partner': 0,        # sum of the distance of the ahead partner
+                'avg_ahead_dist_partner': 0,        # avg sum of the dist of the ahead partner
+                'std_ahead_dist_partner': 0,        # std of the dist of the behind partner
+                'sum_on_left_lane': 0,              # how long the motorcyclist was on the left lane
+                'sum_on_right_lane': 0,             # how long the motorcyclist was on the right lane
+                'incr_fun': 0,                      # motorcyclist fun in this step
+                'sum_fun': 0                        # motorcyclist overall fun
             }
         self.vehicle_summary_dict = summary_dict
 

@@ -21,9 +21,10 @@ class VisualizeStreet:
             sys.stdout.write(visual)
             sys.stdout.write('\n')
 
-    def traffic_vis_tiles_granular(self):
+    # ToDo Save Plot in a Text file
+    def traffic_vis_tiles_granular_one_side(self):
         """
-        simply plots the street with the vehicles on it
+        writes one side of the time space diagram and saves it into a txt file
         :return:
         """
         for lane in range(0, self.simulation.num_lanes + 1):
