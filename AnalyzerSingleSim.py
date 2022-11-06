@@ -52,10 +52,16 @@ class AnalyzerSingleSim:
                 'sum_change_lane': 0,  # sum of switched lanes
 
                 # ToDo add changes to update_vehicle_summary_dict
-                'behind_dist_partner': 0,  # motorcyclist distance of behind partner
-                'ahead_dist_partner': 0,  # motorcyclist distance of ahead partner
-                'incr_fun': 0,  # motorcyclist fun in this step
-                'sum_fun': 0  # motorcyclist overall fun
+                'behind_dist_partner': 0,       # motorcyclist distance of behind partner
+                'sum_behind_dist_partner': 0,   # sum of the distance of the behind partner
+                'avg_behind_dist_partner': 0,   # avg sum of the dist of the behind partner
+                'std_behind_dist_partner': 0,   # std of the dist of the behind partner
+                'ahead_dist_partner': 0,        # motorcyclist distance of ahead partner
+                'sum_ahead_dist_partner': 0,    # sum of the distance of the ahead partner
+                'avg_ahead_dist_partner': 0,    # avg sum of the dist of the ahead partner
+                'std_ahead_dist_partner': 0,    # std of the dist of the behind partner
+                'incr_fun': 0,                  # motorcyclist fun in this step
+                'sum_fun': 0                    # motorcyclist overall fun
             }
         self.vehicle_summary_dict = summary_dict
 
@@ -107,9 +113,8 @@ class AnalyzerSingleSim:
         for lane in range(0, self.simulation.num_lanes + 1):
             for pos in range(0, max_velocity + 1):
                 if self.simulation.get_tiles()[pos][lane].get_vehicle() is not None:
-                    if self.simulation.get_tiles()[pos][lane].get_vehicle().get_speed() >= pos:
+                    if self.simulation.get_tiles()[pos][lane].get_vehicle().get_speed() > pos:
                         self.flow += 1
-
 
     def update_new_vehicle_list(self):
         """

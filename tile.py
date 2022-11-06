@@ -10,7 +10,6 @@ class Tile:
 
     def get_icon(self):
         if self.vehicle is None:
-            # ToDo remove icon should be just '  .  '. This is for debugging only
             if self.get_index() % 10 == 0:
                 return '  |  '
             else:
@@ -18,6 +17,12 @@ class Tile:
 
         else:
             return self.vehicle.get_icon()
+
+    def get_icon_granular(self):
+        if self.vehicle is None:
+            return ' '
+        else:
+            return self.vehicle.get_icon_granular()
 
     def get_index(self):
         return self.index

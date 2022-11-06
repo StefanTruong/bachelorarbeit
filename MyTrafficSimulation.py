@@ -16,7 +16,7 @@ class TrafficSimulation:
         """
         initializing model parameters
         :param length: length of the trip in tiles. Size of the array. Begins with index 0
-        :param density: length*density == #total number of vehicles
+        :param density: length*density == #total number of vehicles. Value between [0,2]
         :param prob_slowdown:
         :param num_lanes: begins with index 0 for left lane. Curently works only exactly for 2 lanes!
         :param prob_changelane: changing_lane L->R for overtaking
@@ -348,6 +348,9 @@ class TrafficSimulation:
 
     def get_lanes(self):
         return self.num_lanes
+
+    def get_number_total_vehicles(self):
+        return self.number_total_vehicles
 
     @staticmethod
     def set_uniqueid(vehicle_list: list):

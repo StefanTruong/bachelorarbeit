@@ -14,7 +14,7 @@ def loading1():
     """
     print("Loading...")
     for i in range(0, 100):
-        time.sleep(0.01)
+        time.sleep(0.005)
         sys.stdout.write(u"\u001b[1000D" + str(i + 1) + "%")  # move cursor of terminal 1000 chars to the left
         sys.stdout.flush()
 
@@ -28,7 +28,7 @@ def loading2(count):
     all_progress = [0] * count
     sys.stdout.write("\n" * count)  # Make sure we have space to draw the bars
     while any(x < 100 for x in all_progress):
-        time.sleep(0.01)
+        time.sleep(0.001)
         # Randomly increment one of our progress values
         unfinished = [(i, v) for (i, v) in enumerate(all_progress) if v < 100]
         index, _ = random.choice(unfinished)

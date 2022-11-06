@@ -21,6 +21,18 @@ class VisualizeStreet:
             sys.stdout.write(visual)
             sys.stdout.write('\n')
 
+    def traffic_vis_tiles_granular(self):
+        """
+        simply plots the street with the vehicles on it
+        :return:
+        """
+        for lane in range(0, self.simulation.num_lanes + 1):
+            visual = ''
+            for tile in self.simulation.tiles:
+                visual += tile[lane].get_icon_granular()
+            sys.stdout.write(visual)
+            sys.stdout.write('\n')
+
     def traffic_vis_tiles_step_by_step(self, vehicle: Vehicle):
         """
         visualizes the street on console step by step for each vehicle

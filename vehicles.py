@@ -42,7 +42,7 @@ class Vehicle:
         my_street = self.sim.tiles
         behind_distance = 0
 
-        while my_street[(my_position - behind_distance -1) % self.sim.length][lane].vehicle is None:
+        while my_street[(my_position - behind_distance - 1) % self.sim.length][lane].vehicle is None:
             behind_distance += 1
 
             if behind_distance > self.sim.length:
@@ -171,6 +171,8 @@ class Vehicle:
 
     def get_id(self):
         return self.id
+    def get_icon_granular(self):
+        return '.'
 
     def set_MyTrafficSimulation(self, sim):
         self.sim = sim
@@ -246,5 +248,3 @@ class Motorcycle(Vehicle):
     def get_icon(self):
         super().set_icon(self.symbol)
         return super().get_icon()
-
-
