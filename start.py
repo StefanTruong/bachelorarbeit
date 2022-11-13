@@ -28,7 +28,7 @@ if selection == 1:
     # Has to be set in class Trafficsimulation again
     model_settings = {
         'length': 40,  # don't use more than 50 for visualization as console cannot display more at once
-        'density': 2,
+        'density': 0.5,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': -1,
         'prob_changelane': 1,
@@ -62,13 +62,14 @@ if selection == 1:
     sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
     sys.stdout.write('\n')
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+    sys.stdout.write('\n')
 
 # ---------------------------------- selection 2 ------------------------------------
 elif selection == 2:
     print('Selection Mode: ', selection)
     model_settings = {
         'length': 40,  # don't use more than 50 for visualization as console cannot display more at once
-        'density': 2,
+        'density': 1,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': 0.1,
         'prob_changelane': 0.5,
@@ -101,13 +102,14 @@ elif selection == 2:
     sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
     sys.stdout.write('\n')
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+    sys.stdout.write('\n')
 
 # ---------------------------------- selection 3 ------------------------------------
 elif selection == 3:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 100,
-        'density': 0.2,
+        'length': 50,
+        'density': 0.5,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': -1,
         'prob_changelane': 1,
@@ -155,6 +157,7 @@ elif selection == 3:
     sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
     sys.stdout.write('\n')
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+    sys.stdout.write('\n')
 
 # ---------------------------------- selection 4 ------------------------------------
 elif selection == 4:
@@ -209,6 +212,7 @@ elif selection == 4:
     sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
     sys.stdout.write('\n')
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+    sys.stdout.write('\n')
 
 # ---------------------------------- selection 5 ------------------------------------
 elif selection == 5:
@@ -312,3 +316,4 @@ elif selection == 6:
     sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
     sys.stdout.write('\n')
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+    sys.stdout.write('\n')

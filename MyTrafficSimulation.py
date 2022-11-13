@@ -89,6 +89,7 @@ class TrafficSimulation:
             tiles.append(street_sector)
 
         return tiles
+
     @staticmethod
     def generate_random_placing_number(length, number_vehicles):
         """
@@ -150,7 +151,7 @@ class TrafficSimulation:
             for biker_number in range(0, self.platoon_size):
                 tile = tiles[tile_index][0]
                 motorcyclist = Motorcycle(speed=0, tile=tile, group=platoon,
-                                          prefered_speed=self.platoon_composition[biker_number])
+                                          preferred_speed=self.platoon_composition[biker_number])
 
                 # chain motorcyclist in a platoon together
                 if last_motorcyclist is not None:
