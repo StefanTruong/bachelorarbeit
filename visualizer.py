@@ -7,6 +7,13 @@ import time, sys, random
 class VisualizeStreet:
 
     def __init__(self, simulation):
+        """
+        :param simulation: Object from MyTrafficSimulation to get a reference
+        """
+        # time_space_data is used for storing data across each visualization call
+        # {0: [ [], [], ..., [] ],
+        #  1: [ [], [], ..., [] ]}
+        self.time_space_data = dict()
         self.simulation = simulation
 
     def traffic_vis_tiles(self):
@@ -18,19 +25,6 @@ class VisualizeStreet:
             visual = ''
             for tile in self.simulation.tiles:
                 visual += tile[lane].get_icon()
-            sys.stdout.write(visual)
-            sys.stdout.write('\n')
-
-    # ToDo Save Plot in a Text file
-    def traffic_vis_tiles_granular_one_side(self):
-        """
-        writes one side of the time space diagram and saves it into a txt file
-        :return:
-        """
-        for lane in range(0, self.simulation.num_lanes + 1):
-            visual = ''
-            for tile in self.simulation.tiles:
-                visual += tile[lane].get_icon_granular()
             sys.stdout.write(visual)
             sys.stdout.write('\n')
 
@@ -97,3 +91,38 @@ class VisualizeStreet:
         sys.stdout.write(u"\u001b[10000D")
         # Move up
         sys.stdout.write(u"\u001b[" + "2" + "A")
+
+    # ToDo Plot to a 2D Pixel Plot
+    def traffic_vis_tiles_granular(self):
+        """
+        writes one side of the time space diagram and plots it into a 2D Pixel Plot
+        :return: 2D Pixel Plot
+        """
+        # Dict to flexible naming variables according to lane
+        # Array represents x-axis of the 2D Plot, subarray y-axis of one side of the lane
+        # {0: [],
+        #  1: []}
+        x_values_all_lanes_all_steps = dict()
+
+        for lane in range(0, self.simulation.num_lanes + 1):
+            x_values_step = []
+
+            for tile in self.simulation.tiles:
+                x_values_step.append(tile[lane].get_icon_granular())
+
+            x_values_all_lanes_all_steps[lane] = x_values_step
+
+            # the time_space_data is a dict with a list as value. But Interpreter does not know that at first
+            if lane not in self.time_space_data:
+                self.time_space_data[lane] = list()
+                self.time_space_data[lane].append(x_values_all_lanes_all_steps[lane])
+            else:
+                self.time_space_data[lane].append(x_values_all_lanes_all_steps[lane])
+
+    def get_time_space_data(self, lane):
+        """
+        returns the time space data for plotting
+        :param lane: lane side which should be returned
+        :return: time space data in a list of lists
+        """
+        return self.time_space_data[lane]

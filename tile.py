@@ -19,10 +19,14 @@ class Tile:
             return self.vehicle.get_icon()
 
     def get_icon_granular(self):
+        """
+        returns the icon of the vehicle on the tile for a 2D Plot.
+        :return: integer 1 if there is a vehicle. integer 0 if there is None
+        """
         if self.vehicle is None:
-            return ' '
+            return 0
         else:
-            return self.vehicle.get_icon_granular()
+            return 1
 
     def get_index(self):
         return self.index

@@ -15,7 +15,7 @@ import Plotter
 #               only on console. Save before running. Use full-screen
 # selection 4   calculates a single average flow-density
 # selection 5   plots a flow-density diagram in an error bar
-# selection 6   like selection 1 but plotting is more granular for each side separately
+# selection 6   like selection 1 but plotting is more granular for each side separately. 2D Pixel Plot
 
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
@@ -93,7 +93,7 @@ elif selection == 2:
         checker.check_for_inconsistencies()
         vis.traffic_vis_tiles_fix_lines()
         time.sleep(1)
-        sim.moving(vis, vis_modus='fix')
+        sim.moving(vis)
 
     sys.stdout.write('\n')
     sys.stdout.write('\n')
@@ -109,7 +109,7 @@ elif selection == 3:
     print('Selection Mode: ', selection)
     model_settings = {
         'length': 50,
-        'density': 0.5,
+        'density': 1,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': -1,
         'prob_changelane': 1,
@@ -148,7 +148,8 @@ elif selection == 3:
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
         time.sleep(1.1)
-        sim.moving(vis, vis_modus='focused', focused_vehicle=focus_vehicle)
+        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle)
+        sim.moving(vis)
 
     sys.stdout.write('\n')
     sys.stdout.write('\n')
@@ -280,13 +281,13 @@ elif selection == 5:
 elif selection == 6:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 50,
-        'density': 0.2,
+        'length': 100,
+        'density': 0.8,
         'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.2,
+        'prob_slowdown': 0.,
         'prob_changelane': 0.5,
         'car_share': 0.9,
-        'number_platoons': 3,
+        'number_platoons': 1,
         'platoon_size': 3,
         'speed_preferences': {
             'cautious': None,
@@ -301,14 +302,15 @@ elif selection == 6:
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
 
-    # initial setup visualization
-    vis.traffic_vis_tiles_granular_one_side()
-    vis.traffic_vis_tiles()
-
     # visualizes each step by step with move and switching
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        sim.moving(vis, vis_modus='step')
+        # vis.traffic_vis_tiles()
+        vis.traffic_vis_tiles_granular()
+        sim.moving(vis)
+
+    for lane in range(0, sim.get_lanes() + 1):
+        Plotter.time_space_granular(vis.get_time_space_data(lane))
 
     sys.stdout.write('\n')
     sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
@@ -317,3 +319,5 @@ elif selection == 6:
     sys.stdout.write('\n')
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
     sys.stdout.write('\n')
+
+# ---------------------------------- selection 6 ------------------------------------

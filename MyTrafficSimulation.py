@@ -328,10 +328,6 @@ class TrafficSimulation:
             # which visualization should be used
             if vis_modus == 'step':
                 vis.traffic_vis_tiles_step_by_step(vehicle)
-            elif vis_modus == 'fix':
-                vis.traffic_vis_tiles_fix_lines()
-            elif vis_modus == 'focused':
-                vis.traffic_vis_tiles_fix_lines_focused(focused_vehicle)
             else:
                 pass
 
