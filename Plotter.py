@@ -37,36 +37,14 @@ def time_space_granular(data):
     # data is list of list and have to be converted to a numpy matrix for plotting
     np_array = np.array(data)
     np_matrix = np.asmatrix(np_array)
-    # print(np_matrix)
 
     fig = plt.figure()
-    fig.suptitle('test title', fontsize=20)
-    #fig.xlabel('xlabel', fontsize=18)
-    #fig.ylabel('ylabel', fontsize=16)
+    fig.suptitle('Space Time Plot', fontsize=12)
 
     ax = fig.add_subplot(111)
     ax.imshow(np_matrix, cmap=plt.cm.gray,
               interpolation='nearest')
 
-    plt.colorbar(np_matrix)
-
+    ax.set_xlabel("Space")
+    ax.set_ylabel("Time")
     plt.show()
-
-
-
-    '''
-    Plots a colorbar
-    fig, ax = plt.subplots(figsize=(6, 1))
-    fig.subplots_adjust(bottom=0.5)
-
-    cmap = mpl.cm.cool
-    norm = mpl.colors.Normalize(vmin=5, vmax=10)
-
-    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
-                 cax=ax, orientation='horizontal', label='Some Units')
-
-    plt.show()
-    '''
-
-
-

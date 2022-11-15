@@ -68,7 +68,7 @@ if selection == 1:
 elif selection == 2:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 40,  # don't use more than 50 for visualization as console cannot display more at once
+        'length': 20,  # don't use more than 50 for visualization as console cannot display more at once
         'density': 1,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': 0.1,
@@ -108,7 +108,7 @@ elif selection == 2:
 elif selection == 3:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 50,
+        'length': 20,
         'density': 1,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': -1,
@@ -282,9 +282,9 @@ elif selection == 6:
     print('Selection Mode: ', selection)
     model_settings = {
         'length': 100,
-        'density': 0.8,
+        'density': 0.5,
         'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.,
+        'prob_slowdown': 0.1,
         'prob_changelane': 0.5,
         'car_share': 0.9,
         'number_platoons': 1,
