@@ -16,7 +16,7 @@ class VisualizeStreet:
         self.time_space_data = dict()
         self.simulation = simulation
 
-    def traffic_vis_tiles(self):
+    def traffic_vis_tiles(self, display_curve=False):
         """
         simply plots the street with the vehicles on it
         :return:
@@ -28,10 +28,18 @@ class VisualizeStreet:
             sys.stdout.write(visual)
             sys.stdout.write('\n')
 
-    def traffic_vis_tiles_step_by_step(self, vehicle: Vehicle):
+        if display_curve:
+            curve_visual = ''
+            for tile in self.simulation.tiles:
+                curve_visual += str(tile[0].get_icon_curve())
+            sys.stdout.write(curve_visual)
+            sys.stdout.write('\n')
+
+    def traffic_vis_tiles_step_by_step(self, vehicle: Vehicle, display_curve=False):
         """
         visualizes the street on console step by step for each vehicle
         X is the marker in which position the vehicle has moved
+        :param display_curve: should the curve of the street be displayed
         :param vehicle: the vehicle which is moved. Position of it is needed for marker
         :return:
         """
@@ -47,13 +55,25 @@ class VisualizeStreet:
                 sys.stdout.write(visual)
             sys.stdout.write('\n')
 
+        if display_curve:
+            curve_visual = ''
+            for tile in self.simulation.tiles:
+                curve_visual += str(tile[0].get_icon_curve())
+            sys.stdout.write(curve_visual)
+            sys.stdout.write('\n')
+
         sys.stdout.write('\n')
 
-    def traffic_vis_tiles_fix_lines(self):
+    def traffic_vis_tiles_fix_lines(self, display_curve=False):
         """
         visualizes the street in fixed two lines
         :return:
         """
+        if display_curve:
+            shift_carret = "3"
+        else:
+            shift_carret = "2"
+
         # print visual line by line
         for lane in range(0, self.simulation.num_lanes + 1):
             visual_line_str = ""
@@ -62,18 +82,30 @@ class VisualizeStreet:
 
             print(visual_line_str)
 
+        if display_curve:
+            visual_curve_str = ""
+            for tile in self.simulation.tiles:
+                visual_curve_str = visual_curve_str + tile[0].get_icon_curve()
+            print(visual_curve_str)
+
         # move left
         sys.stdout.write(u"\u001b[10000D")
         # Move up
-        sys.stdout.write(u"\u001b[" + "2" + "A")
+        sys.stdout.write(u"\u001b[" + shift_carret + "A")
 
-    def traffic_vis_tiles_fix_lines_focused(self, focus_vehicle: Vehicle):
+    def traffic_vis_tiles_fix_lines_focused(self, focus_vehicle: Vehicle, display_curve=False):
         """
         visualizes the street in fixed two lines before and after a focused vehicle
+        :param display_curve: should the curve of the street be displayed
         :param focus_vehicle: the vehicle the visualization should focus on
         :return:
         """
-        view_distance = 22  # how far should be displayed
+        view_distance = 10  # how far should be displayed before and after the focused vehicle
+
+        if display_curve:
+            shift_carret = "3"
+        else:
+            shift_carret = "2"
 
         # calculates the right index to display
         behind = (focus_vehicle.get_tile().get_index() - view_distance) % self.simulation.get_length()
@@ -87,10 +119,17 @@ class VisualizeStreet:
                 visual_line_str += self.simulation.get_tiles()[(behind + incr) % length][lane].get_icon()
             print(visual_line_str)
 
+        if display_curve:
+            visual_curve_str = ""
+            for incr in range(0, view_distance * 2 + 1):
+                visual_curve_str += self.simulation.get_tiles()[(behind + incr) % length][0].get_icon_curve()
+            print(visual_curve_str)
+
+
         # move left
         sys.stdout.write(u"\u001b[10000D")
         # Move up
-        sys.stdout.write(u"\u001b[" + "2" + "A")
+        sys.stdout.write(u"\u001b[" + shift_carret + "A")
 
     # ToDo Plot to a 2D Pixel Plot
     def traffic_vis_tiles_granular(self):

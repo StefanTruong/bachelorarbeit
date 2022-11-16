@@ -6,6 +6,7 @@ import numpy as np
 from AnalyzerSingleSim import *
 from MyTrafficSimulation import *
 import Plotter
+from tileAttrSetting import *
 
 # select what visualization should be started. Use the console to give argument
 # selection 1   debug scenario. Visualizes each vehicle movement step by step and the whole street. No probabilities
@@ -16,11 +17,12 @@ import Plotter
 # selection 4   calculates a single average flow-density
 # selection 5   plots a flow-density diagram in an error bar
 # selection 6   like selection 1 but plotting is more granular for each side separately. 2D Pixel Plot
+# selection 7   Tile setting with curvature
 
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
 else:
-    selection = 6   # ToDo change to selection which should be run on IDE
+    selection = 7  # ToDo change to selection which should be run on IDE
 
 # ---------------------------------- selection 1 ------------------------------------
 if selection == 1:
@@ -91,7 +93,7 @@ elif selection == 2:
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        vis.traffic_vis_tiles_fix_lines()
+        vis.traffic_vis_tiles_fix_lines(display_curve=True)
         time.sleep(1)
         sim.moving(vis)
 
@@ -148,7 +150,7 @@ elif selection == 3:
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
         time.sleep(1.1)
-        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle)
+        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
 
     sys.stdout.write('\n')
@@ -225,7 +227,7 @@ elif selection == 5:
         'prob_slowdown': 0.2,
         'prob_changelane': 0.5,
         'car_share': 0.9,
-        'number_platoons': 3,   # Hint will be adjusted in selection 5
+        'number_platoons': 3,  # Hint will be adjusted in selection 5
         'platoon_size': 3,  # Hint will be adjusted in selection 5
         'speed_preferences': {
             'cautious': None,
@@ -302,10 +304,8 @@ elif selection == 6:
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
 
-    # visualizes each step by step with move and switching
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        # vis.traffic_vis_tiles()
         vis.traffic_vis_tiles_granular()
         sim.moving(vis)
 
@@ -320,4 +320,42 @@ elif selection == 6:
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
     sys.stdout.write('\n')
 
-# ---------------------------------- selection 6 ------------------------------------
+# ---------------------------------- selection 7 ------------------------------------
+elif selection == 7:
+    print('Selection Mode: ', selection)
+    model_settings = {
+        'length': 30,
+        'density': 0.5,
+        'num_lanes': 1,  # [0,1] do not change
+        'prob_slowdown': 0.1,
+        'prob_changelane': 0.2,
+        'car_share': 0.9,
+        'number_platoons': 1,
+        'platoon_size': 3,
+        'speed_preferences': {
+            'cautious': None,
+            'average': None,
+            'speedy': None,
+        },
+        'total_amount_steps': 2
+    }
+
+    sim = TrafficSimulation(**model_settings)
+    sim.initialize()
+    checker = CollisionChecker(sim)
+    vis = VisualizeStreet(sim)
+    tileAttrSetting = TileAttributeSetter(sim, modus='sinus', generate=True, amplitude=7, frequency=0.2)
+
+    vis.traffic_vis_tiles(display_curve=True)
+
+    for i in range(0, sim.total_amount_steps):
+        checker.check_for_inconsistencies()
+        sim.moving(vis)
+
+    sys.stdout.write('\n')
+    sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
+    sys.stdout.write('\n')
+    sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
+    sys.stdout.write('\n')
+    sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+    sys.stdout.write('\n')

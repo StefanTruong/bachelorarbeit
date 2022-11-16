@@ -327,7 +327,7 @@ class TrafficSimulation:
 
             # which visualization should be used
             if vis_modus == 'step':
-                vis.traffic_vis_tiles_step_by_step(vehicle)
+                vis.traffic_vis_tiles_step_by_step(vehicle, display_curve=True)
             else:
                 pass
 
