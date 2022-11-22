@@ -8,6 +8,7 @@ class Vehicle:
         self.distance_behind_other_lane = None
         self.distance_front_other_lane = None
         self.distance_front = None
+        self.distance_behind = None
         self.speed = speed
         self.maxV = max_velocity
         self.tile = tile
@@ -62,6 +63,9 @@ class Vehicle:
 
         # ahead free distance in current lane
         self.distance_front = self.calc_dist_front_vehicle(self.tile.get_lane())
+
+        # behind free distance in current lane
+        self.distance_behind = self.calc_dist_behind_vehicle(self.tile.get_lane())
 
         # ahead free distance in other lane
         self.distance_front_other_lane = self.calc_dist_front_vehicle(self.tile.get_lane() + other_lane)
@@ -133,18 +137,19 @@ class Vehicle:
         """
         self.look_at_positional_environment()
 
-        # 1.) Acceleration: accelerate if max speed not achieved if distance allows it. security distance of 1 tile
+        # 1. Acceleration: accelerate if max speed not achieved if distance allows it. security distance of 1 tile
         if self.distance_front > self.get_speed() + 1 and self.get_speed() < self.get_maxV():
             self.set_speed(self.get_speed() + 1)
 
-        # 2.) Slowing down with one tile security distance
+        # 2. Slowing down with one tile security distance
         if self.distance_front <= self.get_speed() != 0:
             self.set_speed(self.distance_front - 1)
 
+        # 3. Stop if distance is 0
         if self.distance_front == 0:
             self.set_speed(0)
 
-        # 3.) Randomization
+        # 4. Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
 
@@ -257,58 +262,21 @@ class Bike(Vehicle):
         """
         self.look_at_positional_environment()
 
-        # 1.) Acceleration: accelerate if max speed not achieved if distance allows it. No security distance
+        # 1. Acceleration: accelerate if max speed not achieved if distance allows it. No security distance
         if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV():
             self.set_speed(self.get_speed() + 1)
 
-        # 2.) Slowing down with one tile security distance. No security distance
+        # 2. Slowing down with no tile security distance. No security distance
         if self.distance_front <= self.get_speed() != 0:
             self.set_speed(self.distance_front)
 
+        # 3. Stop if there is no space in front
         if self.distance_front == 0:
             self.set_speed(0)
 
-        # 3.) Randomization
+        # 4. Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
-
-    def get_icon(self):
-        super().set_icon(self.symbol)
-        return super().get_icon()
-
-
-# --------------------------------------------------------------------------------------------------------------------
-class Motorcycle(Vehicle):
-    # max_velocity: 100km/h = 30m/s -> 30m/s / 3,75m = 8tiles
-    def __init__(self, speed, tile, group, preferred_speed, max_velocity=7):
-        """
-        initializes Motorcycle with parameters
-        :param speed: integer, current initial speed
-        :param tile: tile obj, the tile in the street where it is positioned
-        :param group: integer, biker group number
-        :param preferred_speed: dictionary of preferred speed e.g. {'cautious' : None}
-        :param max_velocity:
-        :param fun: ToDo
-        """
-        super().__init__(speed, tile, max_velocity)
-        self.ahead = None
-        self.behind = None
-        self.group = group
-        self.preferred_speed = preferred_speed
-        self.fun = 0
-        self.symbol = 'M'
-
-    def set_behind_partner(self, partner):
-        self.behind = partner
-
-    def set_ahead_partner(self, partner):
-        self.ahead = partner
-
-    def get_behind_partner(self):
-        return self.behind
-
-    def get_ahead_partner(self):
-        return self.ahead
 
     def get_icon(self):
         super().set_icon(self.symbol)

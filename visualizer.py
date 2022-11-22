@@ -1,7 +1,5 @@
-from tile import *
-from vehicles import *
-import numpy as np
-import time, sys, random
+from vehicles.Vehicles import *
+import sys
 
 
 class VisualizeStreet:

@@ -1,12 +1,9 @@
 import math
-import time
-
-from vehicles import *
+from vehicles.Motorcycle import Motorcycle
+from vehicles.Vehicles import *
 from tile import *
 import numpy as np
-import sys
 from visualizer import VisualizeStreet
-from collisionChecker import CollisionChecker
 
 
 class TrafficSimulation:

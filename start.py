@@ -2,11 +2,13 @@ import sys
 import time
 
 import numpy as np
-
+from vehicles.Vehicles import *
+from vehicles import Motorcycle
 from AnalyzerSingleSim import *
 from MyTrafficSimulation import *
 import Plotter
 from tileAttrSetting import *
+from collisionChecker import CollisionChecker
 
 # select what visualization should be started. Use the console to give argument
 # selection 1   debug scenario. Visualizes each vehicle movement step by step and the whole street. No probabilities
@@ -18,11 +20,14 @@ from tileAttrSetting import *
 # selection 5   plots a flow-density diagram in an error bar
 # selection 6   like selection 1 but plotting is more granular for each side separately. 2D Pixel Plot
 # selection 7   Tile setting with curvature
+# selection 8   Tile setting with curvature and Motorcyclist simple speed_up and slow_down logic.
+#               Visualization with one vehicle focused
+
 
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
 else:
-    selection = 7  # ToDo change to selection which should be run on IDE
+    selection = 8  # ToDo change to selection which should be run on IDE
 
 # ---------------------------------- selection 1 ------------------------------------
 if selection == 1:
@@ -352,6 +357,62 @@ elif selection == 7:
         checker.check_for_inconsistencies()
         sim.moving(vis)
 
+    sys.stdout.write('\n')
+    sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
+    sys.stdout.write('\n')
+    sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
+    sys.stdout.write('\n')
+    sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+    sys.stdout.write('\n')
+
+# ---------------------------------- selection 8 ------------------------------------
+elif selection == 8:
+    print('Selection Mode: ', selection)
+    model_settings = {
+        'length': 50,
+        'density': 0.7,
+        'num_lanes': 1,  # [0,1] do not change
+        'prob_slowdown': -1,
+        'prob_changelane': 1,
+        'car_share': 0.9,
+        'number_platoons': 1,
+        'platoon_size': 5,
+        'speed_preferences': {
+            'cautious': None,
+            'average': None,
+            'speedy': None,
+        },
+        'total_amount_steps': 100
+    }
+
+    sim = TrafficSimulation(**model_settings)
+    sim.initialize()
+    checker = CollisionChecker(sim)
+    vis = VisualizeStreet(sim)
+
+    # choose which vehicle should be focused on
+    vis.traffic_vis_tiles()
+
+    print('select vehicle to focus on (choose: (idx, lane) ')
+    vehicle_dict = {}
+    for idx, vehicle in enumerate(sim.vehicle_list):
+        vehicle_dict[idx] = vehicle
+
+    for key, value in vehicle_dict.items():
+        index = vehicle_dict[key].get_tile().get_index()
+        lane = vehicle_dict[key].get_tile().get_lane()
+        print(f'{key}: {index, lane}')
+
+    chosen_vehicle_number = input()
+    focus_vehicle = vehicle_dict[int(chosen_vehicle_number)]
+
+    for i in range(0, sim.total_amount_steps):
+        checker.check_for_inconsistencies()
+        time.sleep(1.1)
+        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        sim.moving(vis)
+
+    sys.stdout.write('\n')
     sys.stdout.write('\n')
     sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
     sys.stdout.write('\n')

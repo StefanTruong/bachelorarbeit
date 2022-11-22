@@ -3,7 +3,31 @@ import json
 
 
 def sinus(x, amplitude=5, frequency=0.2):
+    """
+    returns the absolute sinus of x
+    :param x:
+    :param amplitude: [0,100]
+    :param frequency:
+    :return:
+    """
+    if amplitude > 99:
+        raise ValueError('amplitude must be smaller than 100 or visualization will be broken')
+
     return abs(round(amplitude * math.sin(frequency * x)))
+
+
+def sinus_half(x, amplitude=5, frequency=0.2):
+    """
+    returns the sinus of x with a half period of 0
+    :param x:
+    :param amplitude: [0,100]
+    :param frequency:
+    :return:
+    """
+    if amplitude > 99:
+        raise ValueError('amplitude must be smaller than 100 or visualization will be broken')
+
+    return max(round(amplitude * math.sin(frequency * x)),0)
 
 
 class TileAttributeSetter:
@@ -13,9 +37,6 @@ class TileAttributeSetter:
         self.tiles = simulation.get_tiles()
         self.modus = modus
         self.attr_dict = None
-
-        if amplitude > 99:
-            raise ValueError('amplitude must be smaller than 100 or visualization will be broken')
 
         if generate:
             self.generate_attr_dict(amplitude=amplitude, frequency=frequency)
@@ -57,7 +78,7 @@ class TileAttributeSetter:
         not tile!!!
         :return:
         """
-        with open('attr_list.json', 'w') as f:
+        with open('./Street Attributes/attr_list.json', 'w') as f:
             json.dump(self.attr_dict, f)
 
     def load_attr_dict(self):
@@ -65,7 +86,7 @@ class TileAttributeSetter:
         loads the attr_dict from a json file
         :return:
         """
-        with open('attr_list.json', 'r') as f:
+        with open('./Street Attributes/attr_list.json', 'r') as f:
             attr_dict = json.load(f)
 
         for key, value in attr_dict.items():

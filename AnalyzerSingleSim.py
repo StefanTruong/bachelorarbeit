@@ -1,8 +1,4 @@
-import vehicles
-from vehicles import *
-from tile import *
 from MyTrafficSimulation import *
-from tile import *
 import copy
 import numpy as np
 
