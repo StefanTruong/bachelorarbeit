@@ -32,7 +32,6 @@ class Motorcycle(Vehicle):
         :return:
         """
         self.look_at_positional_environment()
-        self.update_partners()
         self.calc_distance_behind_partner()
         self.calc_distance_ahead_partner()
 
@@ -51,7 +50,9 @@ class Motorcycle(Vehicle):
         # in case of first and second if statement are true, then offset initial catch_up speed
         if self.distance_behind_partner > self.get_speed() + self.slow_down() > 0:
             # consider what speed the vehicle behind has before slowing down
-            behind_vehicle = self.look_at_vehicle_at_pos(self.distance_behind, self.get_tile.get_lane())
+            this_is_my_lane = self.get_tile().get_lane()
+            this_is_distance_behind = self.distance_behind
+            behind_vehicle = self.look_at_vehicle_at_pos(self.distance_behind, self.get_tile().get_lane())
 
             if behind_vehicle is not self.get_behind_partner():
                 if self.distance_behind > self.get_speed() + self.slow_down() > 0:
@@ -68,6 +69,8 @@ class Motorcycle(Vehicle):
         # 4. Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
+
+        self.update_partners()
 
     def catch_up(self):
         """
@@ -114,8 +117,41 @@ class Motorcycle(Vehicle):
                                            self.get_tile().get_index()) % self.sim.length
 
     def update_partners(self):
-        
+        """
+        updates the partners of the motorcyclist
+        :return:
+        """
+        idx_front_in_position = False
+        idx_behind_in_position = False
 
+        while not (idx_front_in_position and idx_behind_in_position):
+            # current motorcyclist overtakes ahead partner
+            if self.get_ahead_partner() is not None:
+                if self.get_ahead_partner().get_tile().get_index() < self.get_tile().get_index():
+                    old_ahead_partner = self.get_ahead_partner()
+                    old_behind_partner = self.get_behind_partner()
+                    self.set_ahead_partner(self.get_ahead_partner().get_ahead_partner())
+                    self.set_behind_partner(old_ahead_partner)
+                    old_ahead_partner.set_ahead_partner(self)
+                    old_ahead_partner.set_behind_partner(old_behind_partner)
+                else:
+                    idx_front_in_position = True
+            else:
+                idx_front_in_position = True
+
+            # behind partner overtakes current motorcyclist
+            if self.get_behind_partner() is not None:
+                if self.get_behind_partner().get_tile().get_index() > self.get_tile().get_index():
+                    old_ahead_partner = self.get_ahead_partner()
+                    old_behind_partner = self.get_behind_partner()
+                    self.set_behind_partner(self.get_behind_partner().get_behind_partner())
+                    self.set_ahead_partner(old_behind_partner)
+                    old_behind_partner.set_behind_partner(self)
+                    old_behind_partner.set_ahead_partner(old_ahead_partner)
+                else:
+                    idx_behind_in_position = True
+            else:
+                idx_behind_in_position = True
 
     def set_behind_partner(self, partner):
         self.behind = partner
