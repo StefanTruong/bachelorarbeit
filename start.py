@@ -21,6 +21,7 @@ from collisionChecker import CollisionChecker
 # selection 6   like selection 1 but plotting is more granular for each side separately. 2D Pixel Plot
 # selection 7   Tile setting with curvature
 # selection 8   Tile setting with curvature and Motorcyclist simple speed_up and slow_down logic.
+#               Motorcyclist do not overtake Platoon member if on same lane
 #               Visualization with one vehicle focused
 
 
@@ -369,12 +370,12 @@ elif selection == 7:
 elif selection == 8:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 100,
-        'density': 0.6,
+        'length': 300,
+        'density': 0.1,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': -1,
         'prob_changelane': 1,
-        'car_share': 0.5,
+        'car_share': 0.9,
         'number_platoons': 1,
         'platoon_size': 4,
         'speed_preferences': {
@@ -389,6 +390,7 @@ elif selection == 8:
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
+    analyzer = AnalyzerSingleSim(sim)
 
     # choose which vehicle should be focused on
     vis.traffic_vis_tiles()
@@ -408,9 +410,10 @@ elif selection == 8:
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        # time.sleep(1.1)
-        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        time.sleep(1.1)
+        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
+        analyzer.update()
 
     sys.stdout.write('\n')
     sys.stdout.write('\n')

@@ -153,6 +153,42 @@ class Motorcycle(Vehicle):
             else:
                 idx_behind_in_position = True
 
+    def check_switch_position(self):
+        """
+        returns a Boolean if Motorcyclist should switch lane. Will not switch lane if platoon member is directly ahead
+        :return: Boolean to switch_lane
+        """
+        switch_lane = False
+
+        self.look_at_positional_environment()
+
+        # asymmetric condition for switching lanes L->R see Rickert (T2-T4)
+        if self.tile.get_lane() == 0:
+
+            # cars always try to return to the right lane, independent of the situation on the left lane
+            switch_lane = self.switch_possible()
+
+            # do not switch if direct vehicle ahead is a platoon member
+            # Hint self.distance_front + 1 mandatory, since distance_front calculates the actual empty distance
+            vehicle = self.look_at_vehicle_at_pos(self.distance_front + 1, self.tile.get_lane())
+            if type(vehicle) is Motorcycle and vehicle.get_group() == self.get_group():
+                switch_lane = False
+
+        # asymmetric condition for switching lanes R->L see Rickert (T1-T4)
+        elif self.tile.get_lane() == 1:
+
+            # current lane ahead has smaller space than current velocity + 1  security tile distance (T1)
+            if self.distance_front < self.get_speed() + 1:
+                switch_lane = self.switch_possible()
+
+            # do not switch lane if direct vehicle ahead is a platoon member
+            # Hint self.distance_front + 1 mandatory, since distance_front calculates the actual empty distance
+            vehicle = self.look_at_vehicle_at_pos(self.distance_front + 1, self.tile.get_lane())
+            if type(vehicle) is Motorcycle and vehicle.get_group() == self.get_group():
+                switch_lane = False
+
+        return switch_lane
+
     def set_behind_partner(self, partner):
         self.behind = partner
 
@@ -164,6 +200,15 @@ class Motorcycle(Vehicle):
 
     def get_ahead_partner(self):
         return self.ahead
+
+    def get_group(self):
+        return self.group
+
+    def get_distance_behind_partner(self):
+        return self.distance_behind_partner
+
+    def get_distance_ahead_partner(self):
+        return self.distance_ahead_partner
 
     def get_icon(self):
         super().set_icon(self.symbol)

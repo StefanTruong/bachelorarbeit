@@ -98,7 +98,7 @@ class VisualizeStreet:
         :param focus_vehicle: the vehicle the visualization should focus on
         :return:
         """
-        view_distance = 10  # how far should be displayed before and after the focused vehicle
+        view_distance = 20  # how far should be displayed before and after the focused vehicle
 
         if display_curve:
             shift_carret = "3"
@@ -123,13 +123,11 @@ class VisualizeStreet:
                 visual_curve_str += self.simulation.get_tiles()[(behind + incr) % length][0].get_icon_curve()
             print(visual_curve_str)
 
-
         # move left
         sys.stdout.write(u"\u001b[10000D")
         # Move up
         sys.stdout.write(u"\u001b[" + shift_carret + "A")
 
-    # ToDo Plot to a 2D Pixel Plot
     def traffic_vis_tiles_granular(self):
         """
         writes one side of the time space diagram and plots it into a 2D Pixel Plot

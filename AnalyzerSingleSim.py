@@ -1,5 +1,6 @@
 from MyTrafficSimulation import *
 import copy
+from vehicles.Motorcycle import Motorcycle
 import numpy as np
 
 
@@ -7,6 +8,7 @@ class AnalyzerSingleSim:
     """
     analyzes changes in the movement of the vehicles and summarize them
     """
+
     def __init__(self, simulation: TrafficSimulation):
         self.simulation = simulation
         self.step = 0
@@ -42,25 +44,31 @@ class AnalyzerSingleSim:
                 'new_speed': vehicle.get_speed(),  # current speed
                 'old_speed': vehicle.get_speed(),  # the speed before
                 'avg_speed': 0,  # avg speed in current step
-                'new_lane': vehicle.get_tile().get_lane(),
-                'old_lane': vehicle.get_tile().get_lane(),
+                'new_lane': vehicle.get_tile().get_lane(),  # on which lane it is now
+                'old_lane': vehicle.get_tile().get_lane(),  # on which lane it was before
                 'change_lane': False,  # has it switched lane currently
                 'sum_change_lane': 0,  # sum of switched lanes
+                'sum_on_left_lane': 0,  # sum of time on left lane
+                'sum_on_right_lane': 0,  # sum of time on right lane
+                'avg_on_left_lane': 0,  # how long the vehicle was on the left lane per step
+                'avg_on_right_lane': 0,  # how long the vehicle was on the right lane per step
+
+                'behind_dist_partner': 0,  # motorcyclist distance of behind partner
+                'behind_dist_partner_list': [],  # list of motorcyclist distance of behind partner
+                'sum_behind_dist_partner': 0,  # sum of the distance of the behind partner
+                'avg_behind_dist_partner': 0,  # avg sum of the dist of the behind partner
+                'std_behind_dist_partner': 0,  # std of the dist of the behind partner
+                'ahead_dist_partner': 0,  # motorcyclist distance of ahead partner
+                'ahead_dist_partner_list': [],  # list of motorcyclist distance of ahead partner
+                'sum_ahead_dist_partner': 0,  # sum of the distance of the ahead partner
+                'avg_ahead_dist_partner': 0,  # avg sum of the dist of the ahead partner
+                'std_ahead_dist_partner': 0,  # std of the dist of the behind partner
 
                 # ToDo add changes to update_vehicle_summary_dict
-                'sum_ping_pong_lane_changes': 0,    # sum of ping pong lane changes
-                'behind_dist_partner': 0,           # motorcyclist distance of behind partner
-                'sum_behind_dist_partner': 0,       # sum of the distance of the behind partner
-                'avg_behind_dist_partner': 0,       # avg sum of the dist of the behind partner
-                'std_behind_dist_partner': 0,       # std of the dist of the behind partner
-                'ahead_dist_partner': 0,            # motorcyclist distance of ahead partner
-                'sum_ahead_dist_partner': 0,        # sum of the distance of the ahead partner
-                'avg_ahead_dist_partner': 0,        # avg sum of the dist of the ahead partner
-                'std_ahead_dist_partner': 0,        # std of the dist of the behind partner
-                'sum_on_left_lane': 0,              # how long the motorcyclist was on the left lane
-                'sum_on_right_lane': 0,             # how long the motorcyclist was on the right lane
-                'incr_fun': 0,                      # motorcyclist fun in this step
-                'sum_fun': 0                        # motorcyclist overall fun
+                'incr_fun': 0,  # motorcyclist fun in this step
+                'sum_fun': 0,  # motorcyclist overall fun
+
+                'sum_ping_pong_lane_changes': 0,  # sum of ping pong lane changes
             }
         self.vehicle_summary_dict = summary_dict
 
@@ -83,7 +91,7 @@ class AnalyzerSingleSim:
             self.vehicle_summary_dict[i]['old_speed'] = self.vehicle_summary_dict[i]['new_speed']
             self.vehicle_summary_dict[i]['new_speed'] = vehicle.get_speed()
 
-            # calc new average speed.
+            # calc new average speed
             self.vehicle_summary_dict[i]['avg_speed'] = self.vehicle_summary_dict[i]['sum_traveling_dist'] / self.step
 
             # if a lane change occurs update it. the former new lane is the old lane
@@ -94,6 +102,33 @@ class AnalyzerSingleSim:
                 self.vehicle_summary_dict[i]['new_lane'] = vehicle.get_tile().get_lane()
             else:
                 self.vehicle_summary_dict[i]['change_lane'] = False
+
+            if vehicle.get_tile().get_lane() == 0:
+                self.vehicle_summary_dict[i]['sum_on_left_lane'] += 1
+                self.vehicle_summary_dict[i]['avg_on_left_lane'] = \
+                    self.vehicle_summary_dict[i]['sum_on_left_lane'] / self.step
+            elif vehicle.get_tile().get_lane() == 1:
+                self.vehicle_summary_dict[i]['sum_on_right_lane'] += 1
+                self.vehicle_summary_dict[i]['avg_on_right_lane'] = \
+                    self.vehicle_summary_dict[i]['sum_on_right_lane'] / self.step
+
+            # Motorcyclist specific data
+            if type(vehicle) is Motorcycle:
+                self.vehicle_summary_dict[i]['behind_dist_partner'] = vehicle.get_distance_behind_partner()
+                self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(vehicle.get_distance_behind_partner())
+                self.vehicle_summary_dict[i]['sum_behind_dist_partner'] += vehicle.get_distance_behind_partner()
+                self.vehicle_summary_dict[i]['avg_behind_dist_partner'] = \
+                    self.vehicle_summary_dict[i]['sum_behind_dist_partner'] / self.step
+                self.vehicle_summary_dict[i]['std_behind_dist_partner'] = \
+                    np.std(self.vehicle_summary_dict[i]['behind_dist_partner_list'])
+
+                self.vehicle_summary_dict[i]['ahead_dist_partner'] = vehicle.get_distance_ahead_partner()
+                self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(vehicle.get_distance_ahead_partner())
+                self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] += vehicle.get_distance_ahead_partner()
+                self.vehicle_summary_dict[i]['avg_ahead_dist_partner'] = \
+                    self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] / self.step
+                self.vehicle_summary_dict[i]['std_ahead_dist_partner'] = \
+                    np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
 
     def incr_step(self):
         """
@@ -155,8 +190,11 @@ class SaveResults:
         self.density_list.append(analyzer.get_simulation().get_density())
         self.singleFlows.append(analyzer.get_traffic_flow_all_lanes())
 
-    # ToDo move to start.py
-    def finalize(self):
+    '''
+    # Analyzes single simulations with a given density. Use it when a loop with different densities is used at start.py
+    # needed for a flow density diagram in Plotter.py
+        # ToDo move to start.py
+        def finalize(self):
         """
         use when all single runs simulation with a density are done
         # ToDo reset flow, steps to zero again for new run
@@ -164,8 +202,4 @@ class SaveResults:
         """
         self.avg_flows.append(np.mean(self.singleFlows))
         self.std_err_singleFlows.append(np.std(self.singleFlows, ddof=0))
-
-    """
-    Analyzes single simulations with a given density. Use it when a loop with different densities is used at start.py
-    needed for a flow density diagram in Plotter.py
-    """
+    '''
