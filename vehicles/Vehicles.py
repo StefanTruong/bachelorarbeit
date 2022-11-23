@@ -74,7 +74,8 @@ class Vehicle:
         self.distance_behind_other_lane = self.calc_dist_behind_vehicle(self.tile.get_lane() + other_lane)
 
     def look_at_vehicle_at_pos(self, position, lane):
-        return self.sim.tiles[position][lane].get_vehicle()
+        pos = position % self.sim.length
+        return self.sim.tiles[pos][lane].get_vehicle()
 
     def switch_possible(self):
         switch = False
@@ -176,6 +177,9 @@ class Vehicle:
 
     def get_id(self):
         return self.id
+
+    def get_type(self):
+        return type(self).__name__
 
     def get_icon_granular(self):
         return '.'

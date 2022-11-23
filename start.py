@@ -370,12 +370,12 @@ elif selection == 7:
 elif selection == 8:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 300,
-        'density': 0.1,
+        'length': 500,
+        'density': 0.5,
         'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': -1,
+        'prob_slowdown': 0.1,
         'prob_changelane': 1,
-        'car_share': 0.9,
+        'car_share': 1,
         'number_platoons': 1,
         'platoon_size': 4,
         'speed_preferences': {
@@ -383,7 +383,7 @@ elif selection == 8:
             'average': None,
             'speedy': None,
         },
-        'total_amount_steps': 100
+        'total_amount_steps': 400
     }
 
     sim = TrafficSimulation(**model_settings)
@@ -410,10 +410,15 @@ elif selection == 8:
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        time.sleep(1.1)
-        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        # time.sleep(1.1)
+        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         analyzer.update()
+
+    Plotter.time_distance_diagram(model_settings['length'], model_settings['total_amount_steps'],
+                                  analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Motorcyclist")
+    Plotter.time_distance_diagram(model_settings['length'], model_settings['total_amount_steps'],
+                                  analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Car")
 
     sys.stdout.write('\n')
     sys.stdout.write('\n')

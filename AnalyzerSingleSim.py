@@ -38,8 +38,10 @@ class AnalyzerSingleSim:
         summary_dict = {}
         for vehicle in self.old_vehicle_list:
             summary_dict[vehicle.get_id()] = {
+                'vehicle_type': vehicle.get_type(),   # what type of vehicle the vehicle is
                 'new_pos': vehicle.get_tile().get_index(),  # the current tile index
                 'old_pos': vehicle.get_tile().get_index(),  # old tile index
+                'travel_list': [],  # list of all traveled distances by number of tiles in each step
                 'sum_traveling_dist': 0,  # sum of travel distance
                 'new_speed': vehicle.get_speed(),  # current speed
                 'old_speed': vehicle.get_speed(),  # the speed before
@@ -90,6 +92,7 @@ class AnalyzerSingleSim:
             # the former new speed is now the old speed. The new one is the current speed
             self.vehicle_summary_dict[i]['old_speed'] = self.vehicle_summary_dict[i]['new_speed']
             self.vehicle_summary_dict[i]['new_speed'] = vehicle.get_speed()
+            self.vehicle_summary_dict[i]['travel_list'].append(self.vehicle_summary_dict[i]['new_speed'])
 
             # calc new average speed
             self.vehicle_summary_dict[i]['avg_speed'] = self.vehicle_summary_dict[i]['sum_traveling_dist'] / self.step
@@ -174,7 +177,11 @@ class AnalyzerSingleSim:
     def get_simulation(self):
         return self.simulation
 
+    def get_vehicle_summary_dict(self):
+        return self.vehicle_summary_dict
 
+
+# ToDo Delete if not used
 class SaveResults:
     def __init__(self):
         self.density_list = []
