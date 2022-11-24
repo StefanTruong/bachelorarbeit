@@ -139,18 +139,24 @@ class Vehicle:
         self.look_at_positional_environment()
 
         # 1. Acceleration: accelerate if max speed not achieved if distance allows it. security distance of 1 tile
-        if self.distance_front > self.get_speed() + 1 and self.get_speed() < self.get_maxV():
+        # Cannot be faster than allowed speed limit of the current tile
+        if self.distance_front > self.get_speed() + 1 and self.get_speed() < self.get_maxV()\
+                and self.get_speed() < self.get_tile().get_speed_limit():
             self.set_speed(self.get_speed() + 1)
 
         # 2. Slowing down with one tile security distance
         if self.distance_front <= self.get_speed() != 0:
             self.set_speed(self.distance_front - 1)
 
-        # 3. Stop if distance is 0
+        # 3. Cannot be faster than allowed speed limit of the current tile
+        if self.get_speed() > self.get_tile().get_speed_limit():
+            self.set_speed(self.get_tile().get_speed_limit())
+
+        # 4. Stop if distance is 0
         if self.distance_front == 0:
             self.set_speed(0)
 
-        # 4. Randomization
+        # 5. Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
 
@@ -190,9 +196,11 @@ class Vehicle:
     def set_icon(self, symbol):
         speed_str = str(self.get_speed())
         if len(speed_str) == 1:
-            self.icon = ' ' + symbol + speed_str + '  '
+            self.icon = '' + symbol + speed_str + '   '
         elif len(speed_str) == 2:
-            self.icon = ' ' + symbol + speed_str + ' '
+            self.icon = '' + symbol + speed_str + '  '
+        elif len(speed_str) == 3:
+            self.icon = '' + symbol + speed_str + ' '
 
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -267,18 +275,24 @@ class Bike(Vehicle):
         self.look_at_positional_environment()
 
         # 1. Acceleration: accelerate if max speed not achieved if distance allows it. No security distance
-        if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV():
+        # Cannot be faster than allowed speed limit of the current tile
+        if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV()\
+                and self.get_speed() < self.get_tile().get_speed_limit():
             self.set_speed(self.get_speed() + 1)
 
         # 2. Slowing down with no tile security distance. No security distance
         if self.distance_front <= self.get_speed() != 0:
             self.set_speed(self.distance_front)
 
-        # 3. Stop if there is no space in front
+        # 3. Cannot be faster than allowed speed limit of the current tile
+        if self.get_speed() > self.get_tile().get_speed_limit():
+            self.set_speed(self.get_tile().get_speed_limit())
+
+        # 4. Stop if there is no space in front
         if self.distance_front == 0:
             self.set_speed(0)
 
-        # 4. Randomization
+        # 5. Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
 

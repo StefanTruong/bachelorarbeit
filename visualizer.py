@@ -33,6 +33,12 @@ class VisualizeStreet:
             sys.stdout.write(curve_visual)
             sys.stdout.write('\n')
 
+            speed_visual = ''
+            for tile in self.simulation.tiles:
+                speed_visual += str(tile[0].get_icon_speed_limit())
+            sys.stdout.write(speed_visual)
+            sys.stdout.write('\n')
+
     def traffic_vis_tiles_step_by_step(self, vehicle: Vehicle, display_curve=False):
         """
         visualizes the street on console step by step for each vehicle
@@ -60,6 +66,12 @@ class VisualizeStreet:
             sys.stdout.write(curve_visual)
             sys.stdout.write('\n')
 
+            speed_visual = ''
+            for tile in self.simulation.tiles:
+                speed_visual += str(tile[0].get_icon_speed_limit())
+            sys.stdout.write(speed_visual)
+            sys.stdout.write('\n')
+
         sys.stdout.write('\n')
 
     def traffic_vis_tiles_fix_lines(self, display_curve=False):
@@ -68,7 +80,7 @@ class VisualizeStreet:
         :return:
         """
         if display_curve:
-            shift_carret = "3"
+            shift_carret = "4"
         else:
             shift_carret = "2"
 
@@ -86,6 +98,12 @@ class VisualizeStreet:
                 visual_curve_str = visual_curve_str + tile[0].get_icon_curve()
             print(visual_curve_str)
 
+            speed_visual = ''
+            for tile in self.simulation.tiles:
+                speed_visual += str(tile[0].get_icon_speed_limit())
+            sys.stdout.write(speed_visual)
+            sys.stdout.write('\n')
+
         # move left
         sys.stdout.write(u"\u001b[10000D")
         # Move up
@@ -101,7 +119,7 @@ class VisualizeStreet:
         view_distance = 20  # how far should be displayed before and after the focused vehicle
 
         if display_curve:
-            shift_carret = "3"
+            shift_carret = "4"
         else:
             shift_carret = "2"
 
@@ -122,6 +140,11 @@ class VisualizeStreet:
             for incr in range(0, view_distance * 2 + 1):
                 visual_curve_str += self.simulation.get_tiles()[(behind + incr) % length][0].get_icon_curve()
             print(visual_curve_str)
+
+            visual_speed_str = ""
+            for incr in range(0, view_distance * 2 + 1):
+                visual_speed_str += self.simulation.get_tiles()[(behind + incr) % length][0].get_icon_speed_limit()
+            print(visual_speed_str)
 
         # move left
         sys.stdout.write(u"\u001b[10000D")

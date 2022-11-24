@@ -36,17 +36,20 @@ class Motorcycle(Vehicle):
         self.calc_distance_ahead_partner()
 
         # 1. Acceleration: accelerate if max speed not achieved if distance allows it. No security distance of 1 tile
-        if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV():
+        # cannot accelerate more than tile speed limit
+        if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV()\
+                and self.get_speed() < self.get_tile().get_speed_limit():
 
             # additional acceleration if too far from ahead partner
             if self.distance_front > self.get_speed() + self.catch_up() and \
-                    self.get_speed() + self.catch_up() < self.get_maxV():
+                    self.get_speed() + self.catch_up() < self.get_maxV() and \
+                    self.get_speed() + self.catch_up() < self.get_tile().get_speed_limit():
                 self.set_speed(self.get_speed() + self.catch_up() + 1)
 
             else:
                 self.set_speed(self.get_speed() + 1)
 
-        # slowdown if too far from behind partner
+        # 2. slowdown if too far from behind partner
         # in case of first and second if statement are true, then offset initial catch_up speed
         if self.distance_behind_partner > self.get_speed() + self.slow_down() > 0:
             # consider what speed the vehicle behind has before slowing down
@@ -58,15 +61,19 @@ class Motorcycle(Vehicle):
                 if self.distance_behind > self.get_speed() + self.slow_down() > 0:
                     self.set_speed(self.get_speed() + self.slow_down())
 
-        # 2. Slowing down with no tile security distance. No security distance
+        # 3. Slowing down with no tile security distance. No security distance
         if self.distance_front <= self.get_speed() != 0:
             self.set_speed(self.distance_front)
 
-        # 3. Stop if there is no space in front
+        # 4. Cannot be faster than allowed speed limit of the current tile
+        if self.get_speed() > self.get_tile().get_speed_limit():
+            self.set_speed(self.get_tile().get_speed_limit())
+
+        # 5. Stop if there is no space in front
         if self.distance_front == 0:
             self.set_speed(0)
 
-        # 4. Randomization
+        # 6. Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
 

@@ -23,6 +23,7 @@ from collisionChecker import CollisionChecker
 # selection 8   Tile setting with curvature and Motorcyclist simple speed_up and slow_down logic.
 #               Motorcyclist do not overtake Platoon member if on same lane
 #               Visualization with one vehicle focused
+#               saves an attribute dict s.t. it can be filled with speed limit and curvature
 
 
 if len(sys.argv) == 2:
@@ -391,6 +392,7 @@ elif selection == 8:
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
     analyzer = AnalyzerSingleSim(sim)
+    tileAttrSetting = TileAttributeSetter(sim, modus='sinus_half', generate=True, amplitude=2000, frequency=0.1)
 
     # choose which vehicle should be focused on
     vis.traffic_vis_tiles()
@@ -410,8 +412,8 @@ elif selection == 8:
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        # time.sleep(1.1)
-        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        time.sleep(1.1)
+        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         analyzer.update()
 

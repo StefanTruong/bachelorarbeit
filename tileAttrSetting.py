@@ -2,32 +2,32 @@ import math
 import json
 
 
-def sinus(x, amplitude=5, frequency=0.2):
+def sinus(x, amplitude=2000, frequency=0.1):
     """
     returns the absolute sinus of x
     :param x:
-    :param amplitude: [0,100]
+    :param amplitude: [0,9999]
     :param frequency:
     :return:
     """
-    if amplitude > 99:
-        raise ValueError('amplitude must be smaller than 100 or visualization will be broken')
+    if amplitude > 9999:
+        raise ValueError('amplitude must be smaller than 10000 or visualization will be broken')
 
     return abs(round(amplitude * math.sin(frequency * x)))
 
 
-def sinus_half(x, amplitude=5, frequency=0.2):
+def sinus_half(x, amplitude=2000, frequency=0.1):
     """
     returns the sinus of x with a half period of 0
     :param x:
-    :param amplitude: [0,100]
+    :param amplitude: [0,9999]
     :param frequency:
     :return:
     """
-    if amplitude > 99:
-        raise ValueError('amplitude must be smaller than 100 or visualization will be broken')
+    if amplitude > 9999:
+        raise ValueError('amplitude must be smaller than 10000 or visualization will be broken')
 
-    return max(round(amplitude * math.sin(frequency * x)),0)
+    return max(round(amplitude * math.sin(frequency * x)), 0)
 
 
 class TileAttributeSetter:
@@ -51,23 +51,52 @@ class TileAttributeSetter:
         """
         generates a dictionary with the curvature or beauty values for each tile and set the values for the tiles
         Each section have the same curvature and beauty value
+        First value is the curvature
+        Second value the maximum allowed speed
+        Third value is the beauty
         :param amplitude:
         :param frequency:
         :return:
         """
         attr_dict = dict()
+        # Unlimited speed limit is default value
+        speed_limit = 100
+        # beauty default value is zero
+        initial_beauty = 0
 
         for section in self.tiles:
             attr_list = []
             index = section[0].get_index()
 
+            # First value is the curvature
+            # generate sinus curve
             if self.modus == 'sinus':
                 attr = sinus(index, amplitude, frequency)
                 attr_list.append(attr)
+
+            # generate half sinus curve
+            elif self.modus == 'sinus_half':
+                attr = sinus_half(index, amplitude, frequency)
+                attr_list.append(attr)
+
             else:
                 attr = 0
+                attr_list.append(attr)
+
+            # Second value is the speed limit
+            attr_list.append(100)
+
+            # Third value is the beauty
+            attr_list.append(initial_beauty)
+
             for lane in range(0, self.simulation.get_lanes() + 1):
-                section[lane].set_curvature(attr)
+                # first value is the curvature
+                section[lane].set_curvature(attr_list[0])
+                # Second value the maximum allowed speed
+                section[lane].set_speed_limit(attr_list[1])
+                # Third value is the beauty
+                section[lane].set_beauty(attr_list[2])
+
             attr_dict[index] = attr_list
 
         self.attr_dict = attr_dict
@@ -83,7 +112,10 @@ class TileAttributeSetter:
 
     def load_attr_dict(self):
         """
-        loads the attr_dict from a json file
+        loads the attr_dict from a json file.
+        First value is the curvature
+        Second value the maximum allowed speed
+        Third value is the beauty
         :return:
         """
         with open('./Street Attributes/attr_list.json', 'r') as f:
@@ -93,5 +125,7 @@ class TileAttributeSetter:
             for lane in range(0, self.simulation.get_lanes() + 1):
                 # first value is the curvature
                 self.tiles[int(key)][lane].set_curvature(value[0])
-                # second value is the beauty
-                self.tiles[int(key)][lane].set_beauty(value[1])
+                # second value is the speed limit
+                self.tiles[int(key)][lane].set_speed_limit(value[1])
+                # third value is the beauty
+                self.tiles[int(key)][lane].set_beauty(value[2])
