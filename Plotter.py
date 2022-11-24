@@ -1,6 +1,6 @@
 from AnalyzerSingleSim import *
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
 
@@ -51,13 +51,43 @@ def time_space_granular(data):
     plt.show()
 
 
-def time_distance_diagram(model_length, total_amount_steps, summary_dict, plot_type):
+def time_distance_diagram(summary_dict, plot_type):
+    """
+    Plots a time distance diagram for cars or motorcyclists according to plot_type
+    :param summary_dict: result dict from AnalyzerSingleSim
+    :param plot_type: Time_Distance_Diagram_Motorcyclist or Time_Distance_Diagram_Car
+    :return:
+    """
     adjusted_results = extractor_summary_dict(summary_dict, plot_type=plot_type)
     ax = adjusted_results.plot(colormap='viridis')
     ax.set_xlabel('Time')
     ax.set_ylabel('Distance')
     ax.set_title(plot_type)
     plt.show()
+
+
+def velocity_distro_diagram(summary_dict, plot_type='Velocity_Distribution_Motorcyclist'):
+    """
+
+    :param summary_dict: result dict from AnalyzerSingleSim
+    :param plot_type: Velocity_Distribution_Motorcyclist
+    :return:
+    """
+    adjusted_results = extractor_summary_dict(summary_dict, plot_type=plot_type)
+    # cmap = cm.ScalarMappable(cmap='rainbow')
+    ax = adjusted_results.plot(kind='box', title=plot_type)
+    ax.set_xlabel('Motorcyclist')
+    ax.set_ylabel('Velocity')
+
+    plt.show()
+    '''
+    boxplot = adjusted_results.boxplot()
+    boxplot.set_xlabel('Biker')
+    boxplot.set_ylabel('Velocity')
+    boxplot.set_title(plot_type)
+    plt.show()
+    '''
+
 
 def extractor_summary_dict(summary_dict, plot_type):
     """
@@ -108,6 +138,23 @@ def extractor_summary_dict(summary_dict, plot_type):
         for col in data.columns:
             data[col] = data[col].cumsum()
 
+    # Creates a DF from summary_dict for a velocity distribution diagram for Motorcyclist only
+    elif plot_type == 'Velocity_Distribution_Motorcyclist':
+        motorcyclist_only = {}
 
+        for key in summary_dict:
+            if summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only[key] = summary_dict[key]['travel_list']
+
+        # convert dict into dataframe. Columns are the travel distance from each motorcyclist
+        data = pd.DataFrame.from_dict(motorcyclist_only)
+
+        # rename columns to Biker_vehicle index
+        for col in data.columns:
+            name = 'Biker ' + str(col)
+            data.rename(columns={col: name}, inplace=True)
+
+    else:
+        raise ValueError('Plot type not supported')
 
     return data
