@@ -119,8 +119,8 @@ elif selection == 2:
 elif selection == 3:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 20,
-        'density': 1,
+        'length': 50,
+        'density': 0.5,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': -1,
         'prob_changelane': 1,
@@ -373,8 +373,8 @@ elif selection == 7:
 elif selection == 8:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 200,
-        'density': 0.7,
+        'length': 400,
+        'density': 0.5,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': 0.1,
         'prob_changelane': 1,
@@ -409,8 +409,8 @@ elif selection == 8:
         lane = vehicle_dict[key].get_tile().get_lane()
         print(f'{key}: {index, lane}')
 
-    # chosen_vehicle_number = input()
-    # focus_vehicle = vehicle_dict[int(chosen_vehicle_number)]
+    chosen_vehicle_number = input()
+    focus_vehicle = vehicle_dict[int(chosen_vehicle_number)]
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()

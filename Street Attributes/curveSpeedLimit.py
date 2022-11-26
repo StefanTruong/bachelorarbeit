@@ -19,21 +19,24 @@ will not be implemented in this project
 These are truly epic roads with mile upon mile of twists and turns.
 """
 
-def custom_speed_limit():
+
+def curve_speed_limit(curve):
     """
     This function creates a custom speed limit dict for each curvature value
     maximum curvature is 10000[ce]/100[km/h] = 100[ce / km/h]
     :return:
     """
     speedlimit_to_curvature = {
-        50: [0, 28],
-        70: [28, 66]
-        50: [1500]
-        1000 : [1200]
+        70: (0, 300),
+        60: (300, 700),
+        50: (700, 1000),
+        40: (1000, 10000),
     }
-    for i in range(0, 9999):
-        curvature_speed_limit[i] =
-
+    for max_speed in speedlimit_to_curvature:
+        if curve in range(*speedlimit_to_curvature[max_speed]):
+            return max_speed
+        else:
+            raise ValueError("Curve value not in range [0, 10000]")
 
 def save_attr_dict(mydict):
     """

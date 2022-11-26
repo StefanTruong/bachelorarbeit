@@ -59,8 +59,8 @@ class TileAttributeSetter:
         :return:
         """
         attr_dict = dict()
-        # Unlimited speed limit is default value
-        speed_limit = 100
+        # Unlimited speed limit is default value. To Change it go to tile class
+        max_speed = self.tiles[0][0].get_speed_limit()
         # beauty default value is zero
         initial_beauty = 0
 
@@ -84,7 +84,7 @@ class TileAttributeSetter:
                 attr_list.append(attr)
 
             # Second value is the speed limit
-            attr_list.append(100)
+            attr_list.append(max_speed)
 
             # Third value is the beauty
             attr_list.append(initial_beauty)
