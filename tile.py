@@ -7,6 +7,7 @@ class Tile:
         :param vehicle: the vehicle on the tile
         :param curvature: curve of the tile
         :param beauty: the beauty of the tile (optional)
+        :param speed_limit: the speed limit of the tile depending on curvature. If no data available use max values
         """
         self.index = index
         self.lane = lane
@@ -111,3 +112,4 @@ class Tile:
 
     def get_beauty(self):
         return self.beauty
+
