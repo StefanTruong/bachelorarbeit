@@ -394,7 +394,7 @@ elif selection == 8:
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
     analyzer = AnalyzerSingleSim(sim)
-    tileAttrSetting = TileAttributeSetter(sim, modus='sinus_half', generate=False, amplitude=2000, frequency=0.05)
+    tileAttrSetting = TileAttributeSetter(sim, modus='sinus_half', generate=True, amplitude=5000, frequency=0.05)
 
     # choose which vehicle should be focused on
     vis.traffic_vis_tiles()

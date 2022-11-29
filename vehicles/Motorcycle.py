@@ -78,6 +78,7 @@ class Motorcycle(Vehicle):
             self.set_speed(self.get_speed() - 1)
 
         self.update_partners()
+        # ToDo update fun
 
     def catch_up(self):
         """

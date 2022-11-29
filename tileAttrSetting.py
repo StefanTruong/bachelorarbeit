@@ -107,12 +107,13 @@ class TileAttributeSetter:
                 attr = 0
                 attr_list.append(attr)
 
-            # Second value is the speed limit from the default value in tile
-            attr_list.append(section[0].get_speed_limit())
+            # Second value is the speed limit depending on curvature
+            attr_list.append(curve_speed_limit(attr_list[0]))
 
             # Third value is the beauty from the default value in tile
             attr_list.append(section[0].get_beauty())
 
+            # set the values for the tiles according to attr_list
             for lane in range(0, self.simulation.get_lanes() + 1):
                 # first value is the curvature
                 section[lane].set_curvature(attr_list[0])
@@ -157,7 +158,10 @@ class TileAttributeSetter:
                 # if no speed limit is set in the json file, the speed limit will be calculated from the curvature
                 # if no curvature is set in the json file, the speed limit will be the maximum value
                 if type(value[1]) is int:
-                    self.tiles[int(key)][lane].set_speed_limit(value[1])
+                    if value[1] == 0:
+                        raise ValueError('Speed limit must be greater than 0')
+                    else:
+                        self.tiles[int(key)][lane].set_speed_limit(value[1])
                 else:
                     speed_limit = curve_speed_limit(self.tiles[int(key)][lane].get_curvature())
                     self.tiles[int(key)][lane].set_speed_limit(speed_limit)
