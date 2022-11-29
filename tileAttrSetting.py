@@ -54,7 +54,6 @@ def curve_speed_limit(curve):
 
     for max_speed in speedlimit_to_curvature:
         if curve in range(*speedlimit_to_curvature[max_speed]):
-            print(range(*speedlimit_to_curvature[max_speed]))
             return max_speed
 
 

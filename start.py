@@ -373,7 +373,7 @@ elif selection == 7:
 elif selection == 8:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 200,
+        'length': 1000,
         'density': 0.1,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': 0.1,
@@ -394,7 +394,7 @@ elif selection == 8:
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
     analyzer = AnalyzerSingleSim(sim)
-    tileAttrSetting = TileAttributeSetter(sim, modus='sinus_half', generate=True, amplitude=5000, frequency=0.05)
+    tileAttrSetting = TileAttributeSetter(sim, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
 
     # choose which vehicle should be focused on
     vis.traffic_vis_tiles()
@@ -411,11 +411,12 @@ elif selection == 8:
 
     chosen_vehicle_number = input()
     focus_vehicle = vehicle_dict[int(chosen_vehicle_number)]
+    # focus_vehicle.set_symbol('X') For Visualization only
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
         # time.sleep(1.1)
-        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         analyzer.update()
 

@@ -220,6 +220,9 @@ class Car(Vehicle):
         super().set_icon(self.symbol)
         return super().get_icon()
 
+    def set_symbol(self, symbol):
+        self.symbol = symbol
+
 
 # --------------------------------------------------------------------------------------------------------------------
 class Bike(Vehicle):
@@ -299,3 +302,6 @@ class Bike(Vehicle):
     def get_icon(self):
         super().set_icon(self.symbol)
         return super().get_icon()
+
+    def set_symbol(self, symbol):
+        self.symbol = symbol

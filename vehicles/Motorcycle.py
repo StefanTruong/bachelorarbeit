@@ -203,6 +203,9 @@ class Motorcycle(Vehicle):
     def set_ahead_partner(self, partner):
         self.ahead = partner
 
+    def set_symbol(self, symbol):
+        self.symbol = symbol
+
     def get_behind_partner(self):
         return self.behind
 
