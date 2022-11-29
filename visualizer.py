@@ -1,5 +1,6 @@
 from vehicles.Vehicles import *
 import sys
+import time
 
 
 class VisualizeStreet:

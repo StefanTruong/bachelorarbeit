@@ -55,6 +55,7 @@ class Tile:
             '~~~~': range(2000, 5000),
             '~~~~~': range(5000, 20000)
         }
+
         icon = 'error'
         for key in symbol_to_curvature:
             if self.get_curvature() in symbol_to_curvature[key]:
@@ -69,6 +70,8 @@ class Tile:
             return '' + icon + '  '
         elif len(icon) == 4:
             return '' + icon + ' '
+        elif len(icon) == 5:
+            return '' + icon + ''
 
     def get_icon_speed_limit(self):
         """

@@ -373,7 +373,7 @@ elif selection == 7:
 elif selection == 8:
     print('Selection Mode: ', selection)
     model_settings = {
-        'length': 500,
+        'length': 200,
         'density': 0.1,
         'num_lanes': 1,  # [0,1] do not change
         'prob_slowdown': 0.1,
@@ -386,7 +386,7 @@ elif selection == 8:
             'average': None,
             'speedy': None,
         },
-        'total_amount_steps': 400
+        'total_amount_steps': 100
     }
 
     sim = TrafficSimulation(**model_settings)
@@ -414,7 +414,7 @@ elif selection == 8:
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        time.sleep(1.1)
+        # time.sleep(1.1)
         vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         analyzer.update()
