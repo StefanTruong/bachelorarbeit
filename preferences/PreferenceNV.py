@@ -69,6 +69,7 @@ def calc_gradient_sign(pdf, dist_preference_range):
 
 class Preferences:
     def __init__(self):
+        # distance preference single sided
         self.dist_preference_small = None
         self.dist_mean_small = 6
         self.dist_sd_small = 1
@@ -82,6 +83,7 @@ class Preferences:
         self.dist_sd_high = 1
         self.dist_ampl_high = 1
 
+        # distance preference double sided
         self.dist_preference_small_small = None
         self.dist_preference_small_avg = None
         self.dist_preference_small_high = None
@@ -89,21 +91,37 @@ class Preferences:
         self.dist_preference_avg_high = None
         self.dist_preference_high_high = None
 
+        # curve speed preference
+        self.curve_preference_all = None
+        self.curve_preference_cautious = None
+        self.curve_sd_cautious = 1
+        self.curve_ampl_cautious = 1
+        self.curve_preference_average = None
+        self.curve_sd_average = 1
+        self.curve_ampl_average = 1
+        self.curve_preference_speed = None
+        self.curve_sd_speed = 1
+        self.curve_ampl_speed = 1
+
         # How far the NV should be calculated and plotted
-        dist_preference_sight = np.linspace(0, 50, 500)
+        dist_preference_sight = np.linspace(0, 100, 500)
 
         # plot preference distribution
         # self.plot_distance_preferences(dist_preference_sight)
 
         # calculate pdf for single distance preference used for leader or sweeper
-        self.calc_pdf_oneside(dist_preference_sight)
-
         # calculate pdf for mixed distance preference used for inbetween vehicles
-        self.calc_pdf_twoside(dist_preference_sight)
+        self.calc_distance_pdf(dist_preference_sight)
 
         # check linear combination of pdfs
-        plot_linear_combination(dist_preference_sight, self.dist_preference_avg, self.dist_preference_high,
-                                self.dist_preference_avg_high)
+        # plot_linear_combination(dist_preference_sight, self.dist_preference_avg, self.dist_preference_high,
+        #                          self.dist_preference_avg_high)
+
+        # calculate pdf for speed-curvature preference
+        self.calc_curvature_pdf(dist_preference_sight)
+
+        # calculate gradient sign for each distance preference
+        # ToDo
 
     def plot_distance_preferences(self, dist_preference_sight):
         """
@@ -125,13 +143,14 @@ class Preferences:
         plt.legend()
         plt.show()
 
-    def calc_pdf_oneside(self, dist_preference_sight):
+    def calc_distance_pdf(self, dist_preference_sight):
         """
         calculates the distance pdf for small, avg and high for velocity adjustments for leader and sweeper
+        calculates the distance pdf for small, avg and high for velocity adjustments inbetween vehicles
         :param dist_preference_sight:
         :return:
         """
-        # calculate y-values for each preference
+        # calculate y-values for each onesided preference
         pdf_small = normal_dist(dist_preference_sight, self.dist_mean_small, self.dist_sd_small, self.dist_ampl_small)
         pdf_avg = normal_dist(dist_preference_sight, self.dist_mean_avg, self.dist_sd_avg, self.dist_ampl_avg)
         pdf_high = normal_dist(dist_preference_sight, self.dist_mean_high, self.dist_sd_high, self.dist_ampl_high)
@@ -140,12 +159,6 @@ class Preferences:
         self.dist_preference_avg = pdf_avg
         self.dist_preference_high = pdf_high
 
-    def calc_pdf_twoside(self, dist_preference_sight):
-        """
-        calculates the distance pdf for small, avg and high for velocity adjustments inbetween vehicles
-        :param dist_preference_sight:
-        :return:
-        """
         # Linear combination of normal distributed Variables N(a*mean1 + b*mean2, sqrt(a²sd1² + b²sd2²))
         # calculate mean and sd for each mixed preference
         mean_small_small = self.dist_ampl_small * self.dist_mean_small
@@ -186,6 +199,79 @@ class Preferences:
         self.dist_preference_avg_avg = pdf_avg_avg
         self.dist_preference_avg_high = pdf_avg_high
         self.dist_preference_high_high = pdf_high_high
+
+    def calc_curvature_pdf(self, dist_preference_sight):
+        """
+        calculates the preferred speed pdf for each curvature range. Should correspond to speedlimit_to_curvature dict
+        :return:    curve_preference = {'speed' :   {velo1: [range(), pdf]
+                                                    velo2: [range(), pdf]},
+                                        'average': ...
+        """
+        # From tileAttrSetting.py curve-speed-limit
+        speedlimit_to_curvature = {
+            10: (0, 500),  # 10tiles ~ 40 m/s ~ 144 km/h
+            9: (500, 800),  # 9 tiles ~ 36 m/s ~ 129 km/h
+            8: (800, 1000),  # 8 tiles ~ 32 m/s ~ 115 km/h
+            7: (1000, 1200),  # 7 tiles ~ 28 m/s ~ 101 km/h
+            6: (1200, 1400),  # 6 tiles ~ 24 m/s ~ 86 km/h
+            5: (1400, 1600),  # 5 tiles ~ 20 m/s ~ 72 km/h
+            4: (1600, 1800),  # 4 tiles ~ 16 m/s ~ 57 km/h
+            3: (1800, 2000),  # 3 tiles ~ 12 m/s ~ 43 km/h
+            2: (2000, 3000),  # 2 tiles ~ 8 m/s ~ 29 km/h
+            1: (3000, 10000),  # 1 tile ~ 4 m/s ~ 14 km/h
+        }
+        # The speed type wants to ride maximum speed
+        self.curve_preference_speed = speedlimit_to_curvature
+
+        # The average type wants to ride one speed less
+        self.curve_preference_average = {
+            9: (0, 500),
+            8: (500, 800),
+            7: (800, 1000),
+            6: (1000, 1200),
+            5: (1200, 1400),
+            4: (1400, 1600),
+            3: (1600, 1800),
+            2: (1800, 3000),
+            1: (3000, 10000),
+        }
+
+        # The cautious type wants to ride two speed less
+        self.curve_preference_cautious = {
+            8: (0, 500),
+            7: (500, 800),
+            6: (800, 1000),
+            5: (1000, 1200),
+            4: (1200, 1400),
+            3: (1400, 1600),
+            2: (1600, 3000),
+            1: (3000, 10000),
+        }
+
+        # generates a dictionary in dictionary for each speed cto curvature preference
+        self.curve_preference_all = {'speed': {}, 'average': {}, 'cautious': {}}
+        for velo, curve_range in self.curve_preference_speed.items():
+            mean = int(velo)
+            sd_speed = self.curve_sd_speed
+            ampl_speed = self.curve_ampl_speed
+            self.curve_preference_all['speed'][velo] = [curve_range,
+                                                        normal_dist(dist_preference_sight, mean, sd_speed, ampl_speed)]
+
+        for velo, curve_range in self.curve_preference_average.items():
+            mean = int(velo)
+            sd_average = self.curve_sd_average
+            ampl_average = self.curve_ampl_average
+            self.curve_preference_all['average'][velo] = [curve_range,
+                                                          normal_dist(dist_preference_sight, mean, sd_average,
+                                                                      ampl_average)]
+
+        for velo, curve_range in self.curve_preference_cautious.items():
+            mean = int(velo)
+            sd_cautious = self.curve_sd_cautious
+            ampl_cautious = self.curve_ampl_cautious
+            self.curve_preference_all['cautious'][velo] = [curve_range,
+                                                           normal_dist(dist_preference_sight, mean, sd_cautious,
+                                                                       ampl_cautious)]
 
 
 if __name__ == '__main__':

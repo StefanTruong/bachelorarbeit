@@ -49,7 +49,7 @@ if selection == 1:
         'speed_preferences': {
             'cautious': None,
             'average': None,
-            'speedy': None,
+            'speed': None,
         },
         'total_amount_steps': 10
     }
@@ -90,7 +90,7 @@ elif selection == 2:
         'speed_preferences': {
             'cautious': None,
             'average': None,
-            'speedy': None,
+            'speed': None,
         },
         'total_amount_steps': 100
     }
@@ -130,7 +130,7 @@ elif selection == 3:
         'speed_preferences': {
             'cautious': None,
             'average': None,
-            'speedy': None,
+            'speed': None,
         },
         'total_amount_steps': 100
     }
@@ -186,7 +186,7 @@ elif selection == 4:
         'speed_preferences': {
             'cautious': None,
             'average': None,
-            'speedy': None,
+            'speed': None,
         },
         'total_amount_steps': 100
     }
@@ -241,7 +241,7 @@ elif selection == 5:
         'speed_preferences': {
             'cautious': None,
             'average': None,
-            'speedy': None,
+            'speed': None,
         },
         'total_amount_steps': 100
     }
@@ -303,7 +303,7 @@ elif selection == 6:
         'speed_preferences': {
             'cautious': None,
             'average': None,
-            'speedy': None,
+            'speed': None,
         },
         'total_amount_steps': 100
     }
@@ -344,7 +344,7 @@ elif selection == 7:
         'speed_preferences': {
             'cautious': None,
             'average': None,
-            'speedy': None,
+            'speed': None,
         },
         'total_amount_steps': 2
     }
@@ -384,7 +384,7 @@ elif selection == 8:
         'speed_preferences': {
             'cautious': None,
             'average': None,
-            'speedy': None,
+            'speed': None,
         },
         'total_amount_steps': 100
     }
