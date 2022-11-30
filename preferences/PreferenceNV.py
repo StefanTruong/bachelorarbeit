@@ -3,128 +3,190 @@ import matplotlib.pyplot as plt
 import math
 
 
-def distance_preference(pref):
+def plot_nv(pref_range, pdf, label='Missing Label'):
+    plt.plot(pref_range, pdf, color='red')
+    plt.xlabel(label)
+    plt.ylabel('Probability Density')
+    plt.title('Normal Distribution')
+    plt.show()
+
+
+def plot_linear_combination(dist_preference_sight, first_dist, second_dist, mixed_dist):
     """
-    get distance preference range from [0, max] with max steps
-    :param pref: String. high, medium, low. Has to begin with 0
+    plot linear combination of two preference distributions which are linear combinations of NV
+    :param dist_preference_sight:
+    :param first_dist:
+    :param second_dist:
+    :param mixed_dist:
     :return:
     """
-    # preference for distance
-    preference_range = []
-
-    if pref == 'small':
-        preference_range = np.linspace(0, 10, 10)
-    elif pref == 'avg':
-        preference_range = np.linspace(0, 12, 12)
-    elif pref == 'high':
-        preference_range = np.linspace(0, 14, 14)
-    else:
-        raise ValueError('pref must be avg, small or high')
-
-    return preference_range
+    plt.plot(dist_preference_sight, first_dist, color='red', label='first')
+    plt.plot(dist_preference_sight, second_dist, color='blue', label='second')
+    plt.plot(dist_preference_sight, mixed_dist, color='green', label='mixed')
+    plt.legend()
+    plt.show()
 
 
-def normal_dist(values, mean, sd):
+def normal_dist(values, mean, sd, amp=1):
     """
     calculate normal distribution
-    :param values:
-    :param mean:
-    :param sd:
-    :return:
+    :param amp: amplitude of NV to strengthen preference
+    :param values: list of sight distance values to be plotted
+    :param mean: mean of the preference
+    :param sd: standard deviation of the preference
+    :return: list of normal distribution values matching the values list length
     """
     prob_density = []
     for x in values:
         var = float(sd) ** 2
         denominator = (2 * math.pi * var) ** .5
         num = math.exp(-(float(x) - float(mean)) ** 2 / (2 * var))
-        prob_density.append(num / denominator)
+        prob_density.append(amp * (num / denominator))
 
     return prob_density
 
 
-def calc_gradient_sign(pdf, dist_preference_range, dist=None):
+def calc_gradient_sign(pdf, dist_preference_range):
     """
     calculate gradient sign for distance given a preference distribution
     :param pdf: probability density function
-    :param dist: Integer. distance value to get gradient
     :param dist_preference_range: range of distance preference
     :return:
     """
-
     start = int(dist_preference_range[0])
     end = int(dist_preference_range[-1])
 
-    if dist is not None:
-        if dist in range(start, end):
-            gradient = np.gradient(pdf)
-        else:
-            raise ValueError('dist must be in range of dist_preference_range')
-
-        if gradient[dist] >= 0:
+    gradient = np.gradient(pdf)
+    gradient_sign = []
+    for i in range(start, end):
+        if gradient[i] >= 0:
             sign = 1
         else:
             sign = -1
-        return gradient[dist]
-
-    else:
-        gradient = np.gradient(pdf)
-        gradient_sign = []
-        for i in range(start, end):
-            if gradient[i] >= 0:
-                sign = 1
-            else:
-                sign = -1
-            gradient_sign.append(sign)
-        return gradient_sign
+        gradient_sign.append(sign)
+    return gradient_sign
 
 
 class Preferences:
     def __init__(self):
         self.dist_preference_small = None
+        self.dist_mean_small = 6
+        self.dist_sd_small = 1
+        self.dist_ampl_small = 1
         self.dist_preference_avg = None
+        self.dist_mean_avg = 8
+        self.dist_sd_avg = 1
+        self.dist_ampl_avg = 1
         self.dist_preference_high = None
+        self.dist_mean_high = 10
+        self.dist_sd_high = 1
+        self.dist_ampl_high = 1
 
-        self.calculate_preferences()
+        self.dist_preference_small_small = None
+        self.dist_preference_small_avg = None
+        self.dist_preference_small_high = None
+        self.dist_preference_avg_avg = None
+        self.dist_preference_avg_high = None
+        self.dist_preference_high_high = None
 
-    def calculate_preferences(self):
+        # How far the NV should be calculated and plotted
+        dist_preference_sight = np.linspace(0, 50, 500)
+
+        # plot preference distribution
+        # self.plot_distance_preferences(dist_preference_sight)
+
+        # calculate pdf for single distance preference used for leader or sweeper
+        self.calc_pdf_oneside(dist_preference_sight)
+
+        # calculate pdf for mixed distance preference used for inbetween vehicles
+        self.calc_pdf_twoside(dist_preference_sight)
+
+        # check linear combination of pdfs
+        plot_linear_combination(dist_preference_sight, self.dist_preference_avg, self.dist_preference_high,
+                                self.dist_preference_avg_high)
+
+    def plot_distance_preferences(self, dist_preference_sight):
         """
         calculates the distance preference for small, avg and high for velocity adjustments
-        [1, 1, 1, 1, 1, -1, -1, -1, -1, -1]
+        depending on vehicle distance
+        :return: a list of [1, 1, 1, 1, 1, -1, -1, -1, -1, -1]. Index indicates how velocity should be adjusted
+        """
+        # calculate y-values and plot NV for each preference
+        pdf_small = normal_dist(dist_preference_sight, self.dist_mean_small, self.dist_sd_small, self.dist_ampl_small)
+        pdf_avg = normal_dist(dist_preference_sight, self.dist_mean_avg, self.dist_sd_avg, self.dist_ampl_avg)
+        pdf_high = normal_dist(dist_preference_sight, self.dist_mean_high, self.dist_sd_high, self.dist_ampl_high)
+
+        plt.plot(dist_preference_sight, pdf_small, color='red', label='small')
+        plt.plot(dist_preference_sight, pdf_avg, color='blue', label='avg')
+        plt.plot(dist_preference_sight, pdf_high, color='green', label='high')
+        plt.xlabel('Vehicle Distance')
+        plt.ylabel('Density')
+        plt.title('Distance Preference Distribution')
+        plt.legend()
+        plt.show()
+
+    def calc_pdf_oneside(self, dist_preference_sight):
+        """
+        calculates the distance pdf for small, avg and high for velocity adjustments for leader and sweeper
+        :param dist_preference_sight:
         :return:
         """
-        # What preference modi are available see def distance_preference
-        dist_preference_modi = ['small', 'avg', 'high']
+        # calculate y-values for each preference
+        pdf_small = normal_dist(dist_preference_sight, self.dist_mean_small, self.dist_sd_small, self.dist_ampl_small)
+        pdf_avg = normal_dist(dist_preference_sight, self.dist_mean_avg, self.dist_sd_avg, self.dist_ampl_avg)
+        pdf_high = normal_dist(dist_preference_sight, self.dist_mean_high, self.dist_sd_high, self.dist_ampl_high)
 
-        # calculate distance preference for each modi and save it in a list within a dictionary
-        my_pref_dist_dict = {}
-        for modus in dist_preference_modi:
-            my_pref_dist_dict[f'dist_preference_{modus}'] = distance_preference(modus)
+        self.dist_preference_small = pdf_small
+        self.dist_preference_avg = pdf_avg
+        self.dist_preference_high = pdf_high
 
-        for key, pref_range in my_pref_dist_dict.items():
-            mean = np.mean(pref_range)
-            sd = np.std(pref_range)
-            pdf = normal_dist(pref_range, mean, sd)
-            gradient_sign = calc_gradient_sign(pdf, pref_range)
-            my_pref_dist_dict[key] = gradient_sign
+    def calc_pdf_twoside(self, dist_preference_sight):
+        """
+        calculates the distance pdf for small, avg and high for velocity adjustments inbetween vehicles
+        :param dist_preference_sight:
+        :return:
+        """
+        # Linear combination of normal distributed Variables N(a*mean1 + b*mean2, sqrt(a²sd1² + b²sd2²))
+        # calculate mean and sd for each mixed preference
+        mean_small_small = self.dist_ampl_small * self.dist_mean_small
+        sd_small_small = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
+                                   (self.dist_ampl_small ** 2 * self.dist_sd_small ** 2))
 
-            # print(pdf)
-            # print(gradient_sign)
-            # print(sum(pdf))
+        mean_small_avg = self.dist_ampl_small * self.dist_mean_small + self.dist_ampl_avg * self.dist_mean_avg
+        sd_small_avg = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
+                                 (self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2))
 
-            # plt.plot(pref_range, pdf, color='red')
-            # plt.xlabel('Data points')
-            # plt.ylabel('Probability Density')
-            # plt.title('Normal Distribution')
-            # plt.show()
+        mean_small_high = self.dist_ampl_small * self.dist_mean_small + self.dist_ampl_high * self.dist_mean_high
+        sd_small_high = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
+                                  (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
 
-        # save preferences in class
-        self.dist_preference_small = my_pref_dist_dict['dist_preference_small']
-        self.dist_preference_avg = my_pref_dist_dict['dist_preference_avg']
-        self.dist_preference_high = my_pref_dist_dict['dist_preference_high']
+        mean_avg_avg = self.dist_ampl_avg * self.dist_mean_avg
+        sd_avg_avg = math.sqrt((self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2) +
+                               (self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2))
 
-        # print(vars(self))
+        mean_avg_high = self.dist_ampl_avg * self.dist_mean_avg + self.dist_ampl_high * self.dist_mean_high
+        sd_avg_high = math.sqrt((self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2) +
+                                (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
+
+        mean_high_high = self.dist_ampl_high * self.dist_mean_high
+        sd_high_high = math.sqrt((self.dist_ampl_high ** 2 * self.dist_sd_high ** 2) +
+                                 (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
+
+        # calculate y-values for each preference
+        pdf_small_small = normal_dist(dist_preference_sight, mean_small_small, sd_small_small)
+        pdf_small_avg = normal_dist(dist_preference_sight, mean_small_avg, sd_small_avg)
+        pdf_small_high = normal_dist(dist_preference_sight, mean_small_high, sd_small_high)
+        pdf_avg_avg = normal_dist(dist_preference_sight, mean_avg_avg, sd_avg_avg)
+        pdf_avg_high = normal_dist(dist_preference_sight, mean_avg_high, sd_avg_high)
+        pdf_high_high = normal_dist(dist_preference_sight, mean_high_high, sd_high_high)
+
+        self.dist_preference_small_small = pdf_small_small
+        self.dist_preference_small_avg = pdf_small_avg
+        self.dist_preference_small_high = pdf_small_high
+        self.dist_preference_avg_avg = pdf_avg_avg
+        self.dist_preference_avg_high = pdf_avg_high
+        self.dist_preference_high_high = pdf_high_high
 
 
 if __name__ == '__main__':
-    # main()
     distance_preferences = Preferences()
