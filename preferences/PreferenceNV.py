@@ -113,8 +113,8 @@ class Preferences:
         self.curve_preference_all = None
         self.speed_gap_preferences = None
 
-        # How far the NV should be calculated and plotted
-        dist_preference_sight = np.linspace(0, 100, 500)
+        # How far the NV should be calculated. Length of data has to match with length for pdf and gradient to match
+        dist_preference_sight = np.linspace(0, 50, 50)
 
         # plot preference distribution
         # self.plot_distance_preferences(dist_preference_sight)
@@ -131,13 +131,13 @@ class Preferences:
 
         # check linear combination of pdfs
 
-        #plot_linear_combination(dist_preference_sight, self.dist_preference_all['small_small']['pdf'],
-        #                        self.curve_preference_all['cautious'][5]['pdf'], self.speed_gap_preferences['cautious']['small_small'][5]['pdf'])
-        print(self.dist_preference_all['small_small']['mean'])
+        plot_linear_combination(dist_preference_sight, self.dist_preference_all['small_avg']['pdf'],
+                                self.curve_preference_all['cautious'][5]['pdf'],
+                                self.speed_gap_preferences['cautious']['small_avg'][5]['pdf'])
+        print(self.dist_preference_all['small_avg']['mean'])
         print(self.curve_preference_all['cautious'][5]['mean'])
-        print(len(self.speed_gap_preferences['cautious']['small_small'][5]['pdf']))
-        print(len(self.speed_gap_preferences['cautious']['small_small'][5]['gradient']))
-
+        print(self.speed_gap_preferences['cautious']['small_avg'][5]['pdf'])
+        print(self.speed_gap_preferences['cautious']['small_avg'][5]['gradient'])
 
     def plot_distance_preferences(self, dist_preference_sight):
         """
@@ -177,11 +177,11 @@ class Preferences:
         sd_small_small = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
                                    (self.dist_ampl_small ** 2 * self.dist_sd_small ** 2))
 
-        mean_small_avg = self.dist_ampl_small * self.dist_mean_small - self.dist_ampl_avg * self.dist_mean_avg
+        mean_small_avg = self.dist_ampl_avg * self.dist_mean_avg - self.dist_ampl_small * self.dist_mean_small
         sd_small_avg = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
                                  (self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2))
 
-        mean_small_high = self.dist_ampl_small * self.dist_mean_small - self.dist_ampl_high * self.dist_mean_high
+        mean_small_high = self.dist_ampl_high * self.dist_mean_high - self.dist_ampl_small * self.dist_mean_small
         sd_small_high = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
                                   (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
 
@@ -189,13 +189,25 @@ class Preferences:
         sd_avg_avg = math.sqrt((self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2) +
                                (self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2))
 
-        mean_avg_high = self.dist_ampl_avg * self.dist_mean_avg - self.dist_ampl_high * self.dist_mean_high
+        mean_avg_high = self.dist_ampl_high * self.dist_mean_high - self.dist_ampl_avg * self.dist_mean_avg
         sd_avg_high = math.sqrt((self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2) +
                                 (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
 
         mean_high_high = self.dist_ampl_high * self.dist_mean_high - self.dist_ampl_high * self.dist_mean_high
         sd_high_high = math.sqrt((self.dist_ampl_high ** 2 * self.dist_sd_high ** 2) +
                                  (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
+
+        mean_high_small = self.dist_ampl_small * self.dist_mean_small - self.dist_ampl_high * self.dist_mean_high
+        sd_high_small = math.sqrt((self.dist_ampl_high ** 2 * self.dist_sd_high ** 2) +
+                                  (self.dist_ampl_small ** 2 * self.dist_sd_small ** 2))
+
+        mean_high_avg = self.dist_ampl_avg * self.dist_mean_avg - self.dist_ampl_high * self.dist_mean_high
+        sd_high_avg = math.sqrt((self.dist_ampl_high ** 2 * self.dist_sd_high ** 2) +
+                                (self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2))
+
+        mean_avg_small = self.dist_ampl_small * self.dist_mean_small - self.dist_ampl_avg * self.dist_mean_avg
+        sd_avg_small = math.sqrt((self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2) +
+                                 (self.dist_ampl_small ** 2 * self.dist_sd_small ** 2))
 
         # calculate y-values for each preference
         pdf_small_small = normal_dist(dist_preference_sight, mean_small_small, sd_small_small)
@@ -204,6 +216,9 @@ class Preferences:
         pdf_avg_avg = normal_dist(dist_preference_sight, mean_avg_avg, sd_avg_avg)
         pdf_avg_high = normal_dist(dist_preference_sight, mean_avg_high, sd_avg_high)
         pdf_high_high = normal_dist(dist_preference_sight, mean_high_high, sd_high_high)
+        pdf_high_small = normal_dist(dist_preference_sight, mean_high_small, sd_high_small)
+        pdf_high_avg = normal_dist(dist_preference_sight, mean_high_avg, sd_high_avg)
+        pdf_avg_small = normal_dist(dist_preference_sight, mean_avg_small, sd_avg_small)
 
         self.dist_preference_all = {
             'small': {'pdf': pdf_small, 'mean': self.dist_mean_small, 'sd': self.dist_sd_small,
@@ -216,7 +231,10 @@ class Preferences:
             'small_high': {'pdf': pdf_small_high, 'mean': mean_small_high, 'sd': sd_small_high},
             'avg_avg': {'pdf': pdf_avg_avg, 'mean': mean_avg_avg, 'sd': sd_avg_avg},
             'avg_high': {'pdf': pdf_avg_high, 'mean': mean_avg_high, 'sd': sd_avg_high},
-            'high_high': {'pdf': pdf_high_high, 'mean': mean_high_high, 'sd': sd_high_high}
+            'high_high': {'pdf': pdf_high_high, 'mean': mean_high_high, 'sd': sd_high_high},
+            'high_small': {'pdf': pdf_high_small, 'mean': mean_high_small, 'sd': sd_high_small},
+            'high_avg': {'pdf': pdf_high_avg, 'mean': mean_high_avg, 'sd': sd_high_avg},
+            'avg_small': {'pdf': pdf_avg_small, 'mean': mean_avg_small, 'sd': sd_avg_small}
         }
 
     def calc_curvature_pdf(self, dist_preference_sight):
@@ -266,7 +284,7 @@ class Preferences:
             1: (3000, 10000),
         }
 
-        # generates a dictionary in dictionary for each speed cto curvature preference
+        # generates a dictionary in dictionary for each speed to curvature preference
         self.curve_preference_all = {'speed': {}, 'average': {}, 'cautious': {}}
         for velo, curve_range in self.curve_preference_speed.items():
             mean = int(velo)
@@ -310,7 +328,8 @@ class Preferences:
         # What preferences are available
         speed_preferences = ['speed', 'average', 'cautious']
         gap_preferences = \
-            ['small', 'avg', 'high', 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high', 'high_high']
+            ['small', 'avg', 'high', 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high', 'high_high',
+             'high_small', 'high_avg', 'avg_small']
         speed_gap_preferences = {}
 
         for speed_preference in speed_preferences:
