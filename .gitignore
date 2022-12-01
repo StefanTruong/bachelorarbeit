@@ -188,4 +188,4 @@ fabric.properties
 NaSch.py
 
 # No Json
-.json
+*.json
