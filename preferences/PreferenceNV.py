@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -11,7 +13,7 @@ def plot_nv(pref_range, pdf, label='Missing Label'):
     plt.show()
 
 
-def plot_linear_combination(dist_preference_sight, first_dist, second_dist, mixed_dist):
+def plot_linear_combination(dist_preference_sight, first_dist, second_dist=None, mixed_dist=None):
     """
     plot linear combination of two preference distributions which are linear combinations of NV
     :param dist_preference_sight:
@@ -21,15 +23,17 @@ def plot_linear_combination(dist_preference_sight, first_dist, second_dist, mixe
     :return:
     """
     plt.plot(dist_preference_sight, first_dist, color='red', label='first')
-    plt.plot(dist_preference_sight, second_dist, color='blue', label='second')
-    plt.plot(dist_preference_sight, mixed_dist, color='green', label='mixed')
+    if second_dist is not None:
+        plt.plot(dist_preference_sight, second_dist, color='blue', label='second')
+    if mixed_dist is not None:
+        plt.plot(dist_preference_sight, mixed_dist, color='green', label='mixed')
     plt.legend()
     plt.show()
 
 
 def normal_dist(values, mean, sd, amp=1):
     """
-    calculate normal distribution
+    calculate normal distribution matching the values list length
     :param amp: amplitude of NV to strengthen preference
     :param values: list of sight distance values to be plotted
     :param mean: mean of the preference
@@ -46,7 +50,7 @@ def normal_dist(values, mean, sd, amp=1):
     return prob_density
 
 
-def calc_gradient_sign(pdf, dist_preference_range):
+def gradient_sign(pdf, dist_preference_range):
     """
     calculate gradient sign for distance given a preference distribution
     :param pdf: probability density function
@@ -67,41 +71,44 @@ def calc_gradient_sign(pdf, dist_preference_range):
     return gradient_sign
 
 
+def save_dict(dictionary):
+    with open('data.json', 'w') as fp:
+        json.dump(dictionary, fp, indent=4)
+
+
 class Preferences:
     def __init__(self):
         # distance preference single sided
-        self.dist_preference_small = None
         self.dist_mean_small = 6
         self.dist_sd_small = 1
         self.dist_ampl_small = 1
-        self.dist_preference_avg = None
         self.dist_mean_avg = 8
         self.dist_sd_avg = 1
         self.dist_ampl_avg = 1
-        self.dist_preference_high = None
         self.dist_mean_high = 10
         self.dist_sd_high = 1
         self.dist_ampl_high = 1
 
-        # distance preference double sided
-        self.dist_preference_small_small = None
-        self.dist_preference_small_avg = None
-        self.dist_preference_small_high = None
-        self.dist_preference_avg_avg = None
-        self.dist_preference_avg_high = None
-        self.dist_preference_high_high = None
-
         # curve speed preference
-        self.curve_preference_all = None
-        self.curve_preference_cautious = None
+        self.curve_preference_cautious = None  # ToDo Input parameter
+        self.curve_preference_average = None  # ToDo Input parameter
+        self.curve_preference_speed = None  # ToDo Input parameter
         self.curve_sd_cautious = 1
         self.curve_ampl_cautious = 1
-        self.curve_preference_average = None
         self.curve_sd_average = 1
         self.curve_ampl_average = 1
-        self.curve_preference_speed = None
         self.curve_sd_speed = 1
         self.curve_ampl_speed = 1
+
+        # summarized preferences for dist and curve_speed
+        # dist_preference_all = {'small': [dist_preference_small, mean, sd, ampl],..., 'small_small': ...}
+        # curve_preference_all = {'speed' :    {velo1: [range(), pdf, mean, sd, ampl]
+        #                                       velo2: [range(), pdf, mean, sd, ampl]},
+        #                         'average': ...
+        # speed_gap_preferences = {'speed': {'small': {velo1: [merged_pdf, range]}}}
+        self.dist_preference_all = None
+        self.curve_preference_all = None
+        self.speed_gap_preferences = None
 
         # How far the NV should be calculated and plotted
         dist_preference_sight = np.linspace(0, 100, 500)
@@ -113,15 +120,20 @@ class Preferences:
         # calculate pdf for mixed distance preference used for inbetween vehicles
         self.calc_distance_pdf(dist_preference_sight)
 
-        # check linear combination of pdfs
-        # plot_linear_combination(dist_preference_sight, self.dist_preference_avg, self.dist_preference_high,
-        #                          self.dist_preference_avg_high)
-
         # calculate pdf for speed-curvature preference
         self.calc_curvature_pdf(dist_preference_sight)
 
+        # merge curvature-speed preference and distance preference
+        self.calc_merged_preference(dist_preference_sight)
+
+        # check linear combination of pdfs
+        plot_linear_combination(dist_preference_sight, self.dist_preference_all['small'][0],
+                                 self.curve_preference_all['speed'][5][1], self.speed_gap_preferences['speed']['small'][5][0])
+        print(self.dist_preference_all['small'][1])
+        print(self.curve_preference_all['speed'][5][2])
+
         # calculate gradient sign for each distance preference
-        # ToDo
+        self.calc_gradient_sign()
 
     def plot_distance_preferences(self, dist_preference_sight):
         """
@@ -155,33 +167,29 @@ class Preferences:
         pdf_avg = normal_dist(dist_preference_sight, self.dist_mean_avg, self.dist_sd_avg, self.dist_ampl_avg)
         pdf_high = normal_dist(dist_preference_sight, self.dist_mean_high, self.dist_sd_high, self.dist_ampl_high)
 
-        self.dist_preference_small = pdf_small
-        self.dist_preference_avg = pdf_avg
-        self.dist_preference_high = pdf_high
-
         # Linear combination of normal distributed Variables N(a*mean1 + b*mean2, sqrt(a²sd1² + b²sd2²))
         # calculate mean and sd for each mixed preference
-        mean_small_small = self.dist_ampl_small * self.dist_mean_small
+        mean_small_small = self.dist_ampl_small * self.dist_mean_small - self.dist_ampl_small * self.dist_mean_small
         sd_small_small = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
                                    (self.dist_ampl_small ** 2 * self.dist_sd_small ** 2))
 
-        mean_small_avg = self.dist_ampl_small * self.dist_mean_small + self.dist_ampl_avg * self.dist_mean_avg
+        mean_small_avg = self.dist_ampl_small * self.dist_mean_small - self.dist_ampl_avg * self.dist_mean_avg
         sd_small_avg = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
                                  (self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2))
 
-        mean_small_high = self.dist_ampl_small * self.dist_mean_small + self.dist_ampl_high * self.dist_mean_high
+        mean_small_high = self.dist_ampl_small * self.dist_mean_small - self.dist_ampl_high * self.dist_mean_high
         sd_small_high = math.sqrt((self.dist_ampl_small ** 2 * self.dist_sd_small ** 2) +
                                   (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
 
-        mean_avg_avg = self.dist_ampl_avg * self.dist_mean_avg
+        mean_avg_avg = self.dist_ampl_avg * self.dist_mean_avg - self.dist_ampl_avg * self.dist_mean_avg
         sd_avg_avg = math.sqrt((self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2) +
                                (self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2))
 
-        mean_avg_high = self.dist_ampl_avg * self.dist_mean_avg + self.dist_ampl_high * self.dist_mean_high
+        mean_avg_high = self.dist_ampl_avg * self.dist_mean_avg - self.dist_ampl_high * self.dist_mean_high
         sd_avg_high = math.sqrt((self.dist_ampl_avg ** 2 * self.dist_sd_avg ** 2) +
                                 (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
 
-        mean_high_high = self.dist_ampl_high * self.dist_mean_high
+        mean_high_high = self.dist_ampl_high * self.dist_mean_high - self.dist_ampl_high * self.dist_mean_high
         sd_high_high = math.sqrt((self.dist_ampl_high ** 2 * self.dist_sd_high ** 2) +
                                  (self.dist_ampl_high ** 2 * self.dist_sd_high ** 2))
 
@@ -193,18 +201,23 @@ class Preferences:
         pdf_avg_high = normal_dist(dist_preference_sight, mean_avg_high, sd_avg_high)
         pdf_high_high = normal_dist(dist_preference_sight, mean_high_high, sd_high_high)
 
-        self.dist_preference_small_small = pdf_small_small
-        self.dist_preference_small_avg = pdf_small_avg
-        self.dist_preference_small_high = pdf_small_high
-        self.dist_preference_avg_avg = pdf_avg_avg
-        self.dist_preference_avg_high = pdf_avg_high
-        self.dist_preference_high_high = pdf_high_high
+        self.dist_preference_all = {
+            'small': [pdf_small, self.dist_mean_small, self.dist_sd_small, self.dist_ampl_small],
+            'avg': [pdf_avg, self.dist_mean_avg, self.dist_sd_avg, self.dist_ampl_avg],
+            'high': [pdf_high, self.dist_mean_high, self.dist_sd_high, self.dist_ampl_high],
+            'small_small': [pdf_small_small, mean_small_small, sd_small_small],
+            'small_avg': [pdf_small_avg, mean_small_avg, sd_small_avg],
+            'small_high': [pdf_small_high, mean_small_high, sd_small_high],
+            'avg_avg': [pdf_avg_avg, mean_avg_avg, sd_avg_avg],
+            'avg_high': [pdf_avg_high, mean_avg_high, sd_avg_high],
+            'high_high': [pdf_high_high, mean_high_high, sd_high_high]
+        }
 
     def calc_curvature_pdf(self, dist_preference_sight):
         """
         calculates the preferred speed pdf for each curvature range. Should correspond to speedlimit_to_curvature dict
-        :return:    curve_preference = {'speed' :   {velo1: [range(), pdf]
-                                                    velo2: [range(), pdf]},
+        :return:    curve_preference = {'speed' :   {velo1: [range(), pdf, mean, sd, ampl],
+                                                    velo2: [range(), pdf, mean, sd, ampl]},
                                         'average': ...
         """
         # From tileAttrSetting.py curve-speed-limit
@@ -255,7 +268,8 @@ class Preferences:
             sd_speed = self.curve_sd_speed
             ampl_speed = self.curve_ampl_speed
             self.curve_preference_all['speed'][velo] = [curve_range,
-                                                        normal_dist(dist_preference_sight, mean, sd_speed, ampl_speed)]
+                                                        normal_dist(dist_preference_sight, mean, sd_speed, ampl_speed),
+                                                        mean, sd_speed, ampl_speed]
 
         for velo, curve_range in self.curve_preference_average.items():
             mean = int(velo)
@@ -263,7 +277,7 @@ class Preferences:
             ampl_average = self.curve_ampl_average
             self.curve_preference_all['average'][velo] = [curve_range,
                                                           normal_dist(dist_preference_sight, mean, sd_average,
-                                                                      ampl_average)]
+                                                                      ampl_average), mean, sd_average, ampl_average]
 
         for velo, curve_range in self.curve_preference_cautious.items():
             mean = int(velo)
@@ -271,7 +285,61 @@ class Preferences:
             ampl_cautious = self.curve_ampl_cautious
             self.curve_preference_all['cautious'][velo] = [curve_range,
                                                            normal_dist(dist_preference_sight, mean, sd_cautious,
-                                                                       ampl_cautious)]
+                                                                       ampl_cautious), mean, sd_cautious, ampl_cautious]
+
+    def calc_merged_preference(self, dist_preference_sight):
+        """
+        merges the preferences of curvature-speed preference and distance preference
+        :param dist_preference_sight:
+        :return:
+        preference = {'speed':  {'small':   {velocity1:  [merged_pdf, range()],
+                                            velocity2:  [merged_pdf, range()]}
+                                 'avg':     ...                              },
+
+                    'average':  ...}
+        """
+
+        # What preferences are available
+        speed_preferences = ['speed', 'average', 'cautious']
+        gap_preferences = \
+            ['small', 'avg', 'high', 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high', 'high_high']
+        speed_gap_preferences = {}
+
+        for speed_preference in speed_preferences:
+            speed_gap_preferences[speed_preference] = {}
+
+            for gap_preference in gap_preferences:
+                speed_gap_preferences[speed_preference][gap_preference] = {}
+
+                for velo, range_pdf_list in self.curve_preference_all[speed_preference].items():
+                    # Hint: not all dist preferences has an amplitude e.g. small_small.
+                    # Relative importance of speed and distance preference are set equal
+                    # dist_preference_all =
+                    # {'small': [dist_preference_small, mean, sd, ampl], ..., 'small_small': ...}
+
+                    # curve_preference_all =
+                    # {'speed' :   {velo1: [range(), pdf, mean, sd, ampl]
+                    #               velo2: [range(), pdf, mean, sd, ampl]},
+                    #  'average': ...
+
+                    merged_mean = self.curve_preference_all[speed_preference][velo][2] + \
+                                  self.dist_preference_all[gap_preference][1]
+                    merged_sd = math.sqrt(self.curve_preference_all[speed_preference][velo][3] ** 2 +
+                                          self.dist_preference_all[gap_preference][2] ** 2)
+
+                    merged_pdf = normal_dist(dist_preference_sight, merged_mean, merged_sd)
+                    speed_gap_preferences[speed_preference][gap_preference][velo] = \
+                        [merged_pdf, range_pdf_list[0]]
+
+        self.speed_gap_preferences = speed_gap_preferences
+        # save_dict(self.speed_gap_preferences)
+
+    def calc_gradient_sign(self):
+        """
+        pre-calculates preference dict for each combination of distance preference ['small', 'avg', 'high']
+        and curve speed preference ['speed', 'average', 'cautious']
+        :return: dict which shows how a vehicle should accelerate according to its preference
+        """
 
 
 if __name__ == '__main__':
