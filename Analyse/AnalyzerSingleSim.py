@@ -1,4 +1,4 @@
-from MyTrafficSimulation import *
+from movementLogic.MyTrafficSimulation import *
 import copy
 from vehicles.Motorcycle import Motorcycle
 import numpy as np

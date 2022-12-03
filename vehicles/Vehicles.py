@@ -1,4 +1,3 @@
-from tile import Tile
 import numpy as np
 
 

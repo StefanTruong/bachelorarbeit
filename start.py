@@ -1,14 +1,11 @@
 import sys
 import time
 
-import numpy as np
-from vehicles.Vehicles import *
-from vehicles import Motorcycle
-from AnalyzerSingleSim import *
-from MyTrafficSimulation import *
-import Plotter
-from tileAttrSetting import *
-from collisionChecker import CollisionChecker
+from Analyse.AnalyzerSingleSim import *
+from movementLogic.MyTrafficSimulation import *
+from plotAndVisualize import Plotter
+from StreetAttributes.tileAttrSetting import *
+from Analyse.collisionChecker import CollisionChecker
 
 # select what visualization should be started. Use the console to give argument
 # selection 1   debug scenario. Visualizes each vehicle movement step by step and the whole street. No probabilities

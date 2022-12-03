@@ -2,10 +2,10 @@ import math
 import json
 
 
-def sinus(x, amplitude=2000, frequency=0.1):
+def sinus(x, amplitude, frequency):
     """
     returns the absolute sinus of x
-    :param x:
+    :param x: tile index
     :param amplitude: [0,9999]
     :param frequency:
     :return:
@@ -16,10 +16,10 @@ def sinus(x, amplitude=2000, frequency=0.1):
     return abs(round(amplitude * math.sin(frequency * x)))
 
 
-def sinus_half(x, amplitude=2000, frequency=0.1):
+def sinus_half(x, amplitude, frequency):
     """
     returns the sinus of x with a half period of 0
-    :param x:
+    :param x: tile index
     :param amplitude: [0,9999]
     :param frequency:
     :return:
@@ -28,6 +28,16 @@ def sinus_half(x, amplitude=2000, frequency=0.1):
         raise ValueError('amplitude must be smaller than 10000 or visualization will be broken')
 
     return max(round(amplitude * math.sin(frequency * x)), 0)
+
+
+def constant_speed(x, number):
+    """
+    returns a constant speed limit for all tiles
+    :param x: tile index
+    :param number:
+    :return:
+    """
+    return number
 
 
 def curve_speed_limit(curve):
@@ -59,14 +69,14 @@ def curve_speed_limit(curve):
 
 class TileAttributeSetter:
 
-    def __init__(self, simulation, modus='sinus', generate=True, amplitude=5, frequency=0.2):
+    def __init__(self, simulation, modus='sinus', generate=True, amplitude=5, frequency=0.2, constant_speed_limit=5):
         self.simulation = simulation
         self.tiles = simulation.get_tiles()
         self.modus = modus
         self.attr_dict = None
 
         if generate:
-            self.generate_attr_dict(amplitude=amplitude, frequency=frequency)
+            self.generate_attr_dict(amplitude=amplitude, frequency=frequency, constant_speed_limit=constant_speed_limit)
             self.save_attr_dict()
         else:
             try:
@@ -74,15 +84,16 @@ class TileAttributeSetter:
             except FileNotFoundError as e:
                 print(e)
 
-    def generate_attr_dict(self, amplitude, frequency):
+    def generate_attr_dict(self, amplitude, frequency, constant_speed_limit):
         """
         generates a dictionary with the curvature or beauty values for each tile and set the values for the tiles
         Each section have the same curvature and beauty value
         First value is the curvature
         Second value the maximum allowed speed
         Third value is the beauty
-        :param amplitude:
-        :param frequency:
+        :param constant_speed_limit: for constant speed limit
+        :param amplitude: for sinus like curvatures
+        :param frequency: for sinus like curvatures
         :return:
         """
         attr_dict = dict()
@@ -100,6 +111,10 @@ class TileAttributeSetter:
             # generate half sinus curve
             elif self.modus == 'sinus_half':
                 attr = sinus_half(index, amplitude, frequency)
+                attr_list.append(attr)
+
+            elif self.modus == 'constant':
+                attr = constant_speed(index, constant_speed_limit)
                 attr_list.append(attr)
 
             else:
@@ -131,7 +146,7 @@ class TileAttributeSetter:
         not tile!!!
         :return:
         """
-        with open('StreetAttributes/attr_list.json', 'w') as f:
+        with open('attr_list.json', 'w') as f:
             json.dump(self.attr_dict, f)
 
     def load_attr_dict(self):
@@ -142,7 +157,7 @@ class TileAttributeSetter:
         Third value is the beauty
         :return:
         """
-        with open('StreetAttributes/attr_list.json', 'r') as f:
+        with open('attr_list.json', 'r') as f:
             self.attr_dict = json.load(f)
 
         for key, value in self.attr_dict.items():

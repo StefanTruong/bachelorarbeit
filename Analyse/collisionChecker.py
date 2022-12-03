@@ -1,7 +1,5 @@
-from tile import *
 import sys
 import copy
-import tile
 
 
 class CollisionChecker:

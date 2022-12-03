@@ -1,8 +1,8 @@
 import json
-
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+from configuration.config import *
 
 
 def plot_nv(pref_range, pdf, label='Missing Label'):
@@ -130,7 +130,7 @@ class Preferences:
         self.calc_merged_preference(dist_preference_sight)
 
         # check linear combination of pdfs
-
+        '''
         plot_linear_combination(dist_preference_sight, self.dist_preference_all['small_avg']['pdf'],
                                 self.curve_preference_all['cautious'][5]['pdf'],
                                 self.speed_gap_preferences['cautious']['small_avg'][5]['pdf'])
@@ -138,6 +138,7 @@ class Preferences:
         print(self.curve_preference_all['cautious'][5]['mean'])
         print(self.speed_gap_preferences['cautious']['small_avg'][5]['pdf'])
         print(self.speed_gap_preferences['cautious']['small_avg'][5]['gradient'])
+        '''
 
     def plot_distance_preferences(self, dist_preference_sight):
         """

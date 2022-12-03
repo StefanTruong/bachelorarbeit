@@ -1,9 +1,9 @@
 import math
 from vehicles.Motorcycle import Motorcycle
 from vehicles.Vehicles import *
-from tile import *
+from StreetAttributes.tile import *
 import numpy as np
-from visualizer import VisualizeStreet
+from plotAndVisualize.visualizer import VisualizeStreet
 
 
 class TrafficSimulation:
