@@ -14,7 +14,8 @@ class ConfigPreference:
         'platoon_size': 3,
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
-        'motorcycle_max_velocity': 7, }
+        'motorcycle_max_velocity': 7,
+        'adjust_speed_preference': False}
     selection_2 = {
         'length': 20,  # don't use more than 50 for visualization as console cannot display more at once
         'total_amount_steps': 100,
@@ -27,7 +28,8 @@ class ConfigPreference:
         'platoon_size': 3,
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
-        'motorcycle_max_velocity': 7, }
+        'motorcycle_max_velocity': 7,
+        'adjust_speed_preference': False}
     selection_3 = {
         'length': 50,  # don't use more than 50 for visualization as console cannot display more at once
         'total_amount_steps': 100,
@@ -40,7 +42,8 @@ class ConfigPreference:
         'platoon_size': 1,
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
-        'motorcycle_max_velocity': 7, }
+        'motorcycle_max_velocity': 7,
+        'adjust_speed_preference': False}
     selection_4 = {
         'length': 40,  # don't use more than 50 for visualization as console cannot display more at once
         'total_amount_steps': 100,
@@ -53,7 +56,8 @@ class ConfigPreference:
         'platoon_size': 3,
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
-        'motorcycle_max_velocity': 7, }
+        'motorcycle_max_velocity': 7,
+        'adjust_speed_preference': False}
     selection_5 = {
         'length': 100,  # don't use more than 50 for visualization as console cannot display more at once
         'total_amount_steps': 100,
@@ -66,7 +70,8 @@ class ConfigPreference:
         'platoon_size': 3,
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
-        'motorcycle_max_velocity': 7, }
+        'motorcycle_max_velocity': 7,
+        'adjust_speed_preference': False}
     selection_6 = {
         'length': 100,  # don't use more than 50 for visualization as console cannot display more at once
         'total_amount_steps': 100,
@@ -79,7 +84,8 @@ class ConfigPreference:
         'platoon_size': 3,
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
-        'motorcycle_max_velocity': 7, }
+        'motorcycle_max_velocity': 7,
+        'adjust_speed_preference': False}
     selection_7 = {
         'length': 30,  # don't use more than 50 for visualization as console cannot display more at once
         'total_amount_steps': 100,
@@ -92,7 +98,8 @@ class ConfigPreference:
         'platoon_size': 3,
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
-        'motorcycle_max_velocity': 7, }
+        'motorcycle_max_velocity': 7,
+        'adjust_speed_preference': False}
     selection_8 = {
         'length': 1000,  # don't use more than 50 for visualization as console cannot display more at once
         'total_amount_steps': 100,
@@ -105,7 +112,8 @@ class ConfigPreference:
         'platoon_size': 4,
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
-        'motorcycle_max_velocity': 7, }
+        'motorcycle_max_velocity': 7,
+        'adjust_speed_preference': False}
     selection_9 = None
 
     def __init__(self, configuration=None):
@@ -125,8 +133,12 @@ class ConfigPreference:
             :param speed_preferences: available speed preferences: 'speed', 'average', 'cautious'
             :param speed_distance_prereferences: matching speed preferences with distance preferences
             :param biker_composition_modus: how the preference distribution of bikers is generated
-            modi equal: equal distribution of speed_preferences in the platoon
-                        Beginning with cautious first, then average and then speed
+                    equal:  equal distribution of speed_preferences in the platoon
+                            Beginning with cautious first, then average and then speed
+                    average_only: only average speed preference in the platoon
+                    cautious_only: only cautious speed preference in the platoon
+                    speed_only: only speed speed preference in the platoon
+            :param update_speed_modus: when Motorcyclist should update its speed according to its speed-gap preference
             """
             self.model_settings = {
                 'length': 1000,
@@ -156,7 +168,8 @@ class ConfigPreference:
                               'front_gap_preference': 'small',
                               'inbetween_gap_preference': 'small_small'},
                 },
-                'biker_composition_modus': 'equal',
+                'biker_composition_modus': 'average_only',
+                'adjust_speed_preference': True
             }
         elif configuration == 'selection_1':
             self.model_settings = self.selection_1

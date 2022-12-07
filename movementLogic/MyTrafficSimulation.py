@@ -11,7 +11,7 @@ class TrafficSimulation:
     def __init__(self, length, total_amount_steps, density, num_lanes, prob_slowdown, prob_changelane, car_share,
                  number_platoons, platoon_size, car_max_velocity, bike_max_velocity, motorcycle_max_velocity,
                  speed_preferences=None, distance_preferences=None, speed_distance_preferences=None,
-                 biker_composition_modus=None):
+                 biker_composition_modus=None, adjust_speed_preference=False):
         """
         initializing model parameters
         :param length: length of the trip in tiles. Size of the array. Begins with index 0
@@ -53,6 +53,7 @@ class TrafficSimulation:
         self.distance_preferences = distance_preferences
         self.speed_distance_preferences = speed_distance_preferences
         self.biker_composition_modus = biker_composition_modus
+        self.adjust_speed_preference = adjust_speed_preference
 
         self.platoon_composition = None  # ['cautious', 'cautious', 'average', 'speed']
         self.distribute_biker_speed_preference()
@@ -63,6 +64,7 @@ class TrafficSimulation:
         e.g. for equal distribution ['cautious', 'cautious', 'average', 'speed']
         :return:
         """
+        platoon_composition = None
         if self.biker_composition_modus == 'equal':
             platoon_composition_split = np.array_split([None] * self.platoon_size, len(self.speed_preferences))
             platoon_composition = list()
@@ -72,8 +74,20 @@ class TrafficSimulation:
                 length = len(platoon_composition_split[split_index])
                 part = [speed_preference] * length
                 platoon_composition += part
-        if self.biker_composition_modus is None:
-            platoon_composition = None
+
+        elif self.biker_composition_modus == 'cautious_only':
+            if self.speed_preferences[0] == 'cautious':
+                platoon_composition = ['cautious'] * self.platoon_size
+            else:
+                raise ValueError('Unknown speed preference')
+
+        elif self.biker_composition_modus == 'average_only':
+            if self.speed_preferences[1] == 'average':
+                platoon_composition = ['average'] * self.platoon_size
+
+        elif self.biker_composition_modus == 'speed_only':
+            if self.speed_preferences[2] == 'speed':
+                platoon_composition = ['speed'] * self.platoon_size
         else:
             raise ValueError("No other biker_composition_modus implemented yet")
 
@@ -324,6 +338,7 @@ class TrafficSimulation:
     def moving(self, vis: VisualizeStreet = None, vis_modus=None, focused_vehicle=None):
         """
 
+        :param update_speed_modus: when Motorcyclist should update its speed according to its speed-gap preference
         :param vis: vis object
         :param focused_vehicle: the vehicle it should be focused on
         :param vis_modus: which vis function should be called
@@ -334,7 +349,10 @@ class TrafficSimulation:
         """
         for vehicle in self.vehicle_list:
             # first update speed of all vehicles according to its surroundings
-            vehicle.update_speed()
+            if self.adjust_speed_preference and type(vehicle) is Motorcycle:
+                vehicle.update_speed_preference()
+            else:
+                vehicle.update_speed()
 
             # move all vehicles to its updated speed in the tiles
             self.move_vehicle(vehicle)

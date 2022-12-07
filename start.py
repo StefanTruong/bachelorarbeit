@@ -284,7 +284,6 @@ elif selection == 8:
 
     chosen_vehicle_number = input()
     focus_vehicle = vehicle_dict[int(chosen_vehicle_number)]
-    # focus_vehicle.set_symbol('X') For Visualization only
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
@@ -318,3 +317,35 @@ elif selection == 9:
     vis = VisualizeStreet(sim)
     analyzer = AnalyzerSingleSim(sim)
     tileAttrSetting = TileAttributeSetter(sim, modus='constant', generate=True, constant_speed_limit=30)
+
+    # choose which vehicle should be focused on
+    vis.traffic_vis_tiles()
+
+    print('select vehicle to focus on (choose: (idx, lane) ')
+    vehicle_dict = {}
+    for idx, vehicle in enumerate(sim.vehicle_list):
+        vehicle_dict[idx] = vehicle
+
+    for key, value in vehicle_dict.items():
+        index = vehicle_dict[key].get_tile().get_index()
+        lane = vehicle_dict[key].get_tile().get_lane()
+        print(f'{key}: {index, lane}')
+
+    chosen_vehicle_number = input()
+    focus_vehicle = vehicle_dict[int(chosen_vehicle_number)]
+
+    for i in range(0, sim.total_amount_steps):
+        checker.check_for_inconsistencies()
+        # time.sleep(1.1)
+        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        sim.moving(vis)
+        analyzer.update()
+
+    sys.stdout.write('\n')
+    sys.stdout.write('\n')
+    sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
+    sys.stdout.write('\n')
+    sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
+    sys.stdout.write('\n')
+    sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+    sys.stdout.write('\n')

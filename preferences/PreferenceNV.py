@@ -72,7 +72,7 @@ def calc_gradient(pdf, dist_preference_range):
 
 
 def save_dict(dictionary):
-    with open('data.json', 'w') as fp:
+    with open('./preferences/speed_gap_preferences.json', 'w') as fp:
         json.dump(dictionary, fp, indent=4)
 
 

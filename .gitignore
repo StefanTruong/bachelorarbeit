@@ -184,8 +184,5 @@ fabric.properties
 # idea folder, uncomment if you don't need it
 .idea
 
-# Old
-NaSch.py
-
 # No Json
 *.json
