@@ -8,22 +8,23 @@ from plotAndVisualize.visualizer import VisualizeStreet
 
 class TrafficSimulation:
 
-    def __init__(self, length, density, num_lanes, prob_slowdown, prob_changelane, car_share,
-                 number_platoons, platoon_size, speed_preferences, total_amount_steps, biker_composition_modus=1):
+    def __init__(self, length, total_amount_steps, density, num_lanes, prob_slowdown, prob_changelane, car_share,
+                 number_platoons, platoon_size, car_max_velocity, bike_max_velocity, motorcycle_max_velocity,
+                 speed_preferences=None, distance_preferences=None, speed_distance_preferences=None,
+                 biker_composition_modus=None):
         """
         initializing model parameters
         :param length: length of the trip in tiles. Size of the array. Begins with index 0
         :param density: length*density == #total number of vehicles. Value between [0,2]
         :param prob_slowdown:
-        :param num_lanes: begins with index 0 for left lane. Curently works only exactly for 2 lanes!
+        :param num_lanes: begins with index 0 for left lane. Currently, works only exactly for 2 lanes!
         :param prob_changelane: changing_lane L->R for overtaking
         :param car_share: [0,1]
         :param number_platoons: has to be lower than total number of total vehicles
         :param platoon_size: has to be greater than 1
-        :param speed_preferences: dict : dict : dict
+        :param speed_preferences: list of preferences for speed
         :param total_amount_steps: determines how many steps the simulation stops
         """
-        self.platoon_composition = None
         self.vehicle_list = None  # will be initialized in method generic_tiles_setter
         self.tiles = None  # will be initialized in method generic_tiles_setter [(left_Tile, right_Tile), ...]
         self.length = length
@@ -44,27 +45,37 @@ class TrafficSimulation:
         self.number_cars = int(round(self.number_other_vehicles * car_share))
         self.number_bikes = self.number_other_vehicles - self.number_cars
 
+        self.car_max_velocity = car_max_velocity
+        self.bike_max_velocity = bike_max_velocity
+        self.motorcycle_max_velocity = motorcycle_max_velocity
+
         self.speed_preferences = speed_preferences
+        self.distance_preferences = distance_preferences
+        self.speed_distance_preferences = speed_distance_preferences
         self.biker_composition_modus = biker_composition_modus
+
+        self.platoon_composition = None  # ['cautious', 'cautious', 'average', 'speed']
         self.distribute_biker_speed_preference()
 
     def distribute_biker_speed_preference(self):
         """
-        set up how the speed preferences in a platoon is distributed.
+        set up how the speed preferences in a platoon is distributed in a list
+        e.g. for equal distribution ['cautious', 'cautious', 'average', 'speed']
         :return:
         """
-        keys = list(self.speed_preferences.keys())
-        platoon_composition_split = np.array_split([None] * self.platoon_size, len(keys))
-        # e.g. 5Motos [[{'cautious':None}, {'cautious':None}], [{'average':None}, {'average':None}], [{'speedy':None}]]
-        platoon_composition = list()
+        if self.biker_composition_modus == 'equal':
+            platoon_composition_split = np.array_split([None] * self.platoon_size, len(self.speed_preferences))
+            platoon_composition = list()
 
-        # {cautious, average, speedy}
-        if self.biker_composition_modus == 1:
-            for split_index, key in enumerate(keys):
-                speed_preference = {key: self.speed_preferences[key]}
+            for split_index, preference in enumerate(self.speed_preferences):
+                speed_preference = preference
                 length = len(platoon_composition_split[split_index])
                 part = [speed_preference] * length
                 platoon_composition += part
+        if self.biker_composition_modus is None:
+            platoon_composition = None
+        else:
+            raise ValueError("No other biker_composition_modus implemented yet")
 
         self.platoon_composition = platoon_composition
 
@@ -95,8 +106,7 @@ class TrafficSimulation:
         """
         return np.random.choice(length, size=number_vehicles, replace=False)
 
-    @staticmethod
-    def placing_cars_bikes(tiles, vehicle_list, free_elements, positions, num_cars, num_bikes):
+    def placing_cars_bikes(self, tiles, vehicle_list, free_elements, positions, num_cars, num_bikes):
         """
         places cars and bikes randomly on the street required it is free. Starting with speed=0
         populates a vehicle_list where all vehicles are listed
@@ -114,7 +124,7 @@ class TrafficSimulation:
             tile = tiles[idx][lane]
 
             if index < num_cars:
-                car = Car(speed=0, tile=tile)
+                car = Car(speed=0, tile=tile, max_velocity=self.car_max_velocity)
                 if tiles[idx][lane].get_vehicle() is None:
                     tiles[idx][lane].set_vehicle(car)
                     vehicle_list.append(car)
@@ -122,7 +132,7 @@ class TrafficSimulation:
                     raise Exception('Problem in car placing. Place is not available')
 
             else:
-                bike = Bike(speed=0, tile=tile)
+                bike = Bike(speed=0, tile=tile, max_velocity=self.bike_max_velocity)
                 if tiles[idx][lane].get_vehicle() is None:
                     tiles[idx][lane].set_vehicle(bike)
                     vehicle_list.append(bike)
@@ -147,8 +157,18 @@ class TrafficSimulation:
 
             for biker_number in range(0, self.platoon_size):
                 tile = tiles[tile_index][0]
+
+                if self.platoon_composition is not None and self.speed_distance_preferences is not None:
+                    preferred_speed = self.platoon_composition[biker_number]
+                    speed_distance_preferences = self.speed_distance_preferences[preferred_speed]
+                else:
+                    preferred_speed = None
+                    speed_distance_preferences = None
+
                 motorcyclist = Motorcycle(speed=0, tile=tile, group=platoon,
-                                          preferred_speed=self.platoon_composition[biker_number])
+                                          preferred_speed=preferred_speed,
+                                          speed_distance_preferences=speed_distance_preferences,
+                                          max_velocity=self.motorcycle_max_velocity)
 
                 # chain motorcyclist in a platoon together
                 if last_motorcyclist is not None:

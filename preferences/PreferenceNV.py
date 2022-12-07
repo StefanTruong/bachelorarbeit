@@ -77,28 +77,34 @@ def save_dict(dictionary):
 
 
 class Preferences:
-    def __init__(self):
+    def __init__(self, cfg):
         # distance preference single sided
-        self.dist_mean_small = 6
-        self.dist_sd_small = 1
-        self.dist_ampl_small = 1
-        self.dist_mean_avg = 8
-        self.dist_sd_avg = 1
-        self.dist_ampl_avg = 1
-        self.dist_mean_high = 10
-        self.dist_sd_high = 1
-        self.dist_ampl_high = 1
+        self.dist_mean_small = cfg.dist_mean_small
+        self.dist_sd_small = cfg.dist_sd_small
+        self.dist_ampl_small = cfg.dist_ampl_small
+        self.dist_mean_avg = cfg.dist_mean_avg
+        self.dist_sd_avg = cfg.dist_sd_avg
+        self.dist_ampl_avg = cfg.dist_ampl_avg
+        self.dist_mean_high = cfg.dist_mean_high
+        self.dist_sd_high = cfg.dist_sd_high
+        self.dist_ampl_high = cfg.dist_ampl_high
 
         # curve speed preference
-        self.curve_preference_cautious = None  # ToDo Input parameter
-        self.curve_preference_average = None  # ToDo Input parameter
-        self.curve_preference_speed = None  # ToDo Input parameter
-        self.curve_sd_cautious = 1
-        self.curve_ampl_cautious = 1
-        self.curve_sd_average = 1
-        self.curve_ampl_average = 1
-        self.curve_sd_speed = 1
-        self.curve_ampl_speed = 1
+        self.curve_preference_cautious = cfg.curve_preference_cautious
+        self.curve_preference_average = cfg.curve_preference_average
+        self.curve_preference_speed = cfg.curve_preference_speed
+        self.curve_sd_cautious = cfg.curve_sd_cautious
+        self.curve_ampl_cautious = cfg.curve_ampl_cautious
+        self.curve_sd_average = cfg.curve_sd_average
+        self.curve_ampl_average = cfg.curve_ampl_average
+        self.curve_sd_speed = cfg.curve_sd_speed
+        self.curve_ampl_speed = cfg.curve_ampl_speed
+
+        # How far the NV should be calculated. Length of data has to match with length for pdf and gradient to match
+        dist_preference_sight = cfg.dist_preference_sight
+
+        # for global configuration
+        self.cfg = cfg
 
         # summarized preferences for dist and curve_speed
         # dist_preference_all = {'small':   {pdf: dist_preference_small,
@@ -112,9 +118,6 @@ class Preferences:
         self.dist_preference_all = None
         self.curve_preference_all = None
         self.speed_gap_preferences = None
-
-        # How far the NV should be calculated. Length of data has to match with length for pdf and gradient to match
-        dist_preference_sight = np.linspace(0, 50, 50)
 
         # plot preference distribution
         # self.plot_distance_preferences(dist_preference_sight)
@@ -245,45 +248,16 @@ class Preferences:
                                         'average': ...
         """
         # From tileAttrSetting.py curve-speed-limit
-        speedlimit_to_curvature = {
-            10: (0, 500),  # 10tiles ~ 40 m/s ~ 144 km/h
-            9: (500, 800),  # 9 tiles ~ 36 m/s ~ 129 km/h
-            8: (800, 1000),  # 8 tiles ~ 32 m/s ~ 115 km/h
-            7: (1000, 1200),  # 7 tiles ~ 28 m/s ~ 101 km/h
-            6: (1200, 1400),  # 6 tiles ~ 24 m/s ~ 86 km/h
-            5: (1400, 1600),  # 5 tiles ~ 20 m/s ~ 72 km/h
-            4: (1600, 1800),  # 4 tiles ~ 16 m/s ~ 57 km/h
-            3: (1800, 2000),  # 3 tiles ~ 12 m/s ~ 43 km/h
-            2: (2000, 3000),  # 2 tiles ~ 8 m/s ~ 29 km/h
-            1: (3000, 10000),  # 1 tile ~ 4 m/s ~ 14 km/h
-        }
+        speedlimit_to_curvature = self.cfg.speedlimit_to_curvature
+
         # The speed type wants to ride maximum speed
-        self.curve_preference_speed = speedlimit_to_curvature
+        self.curve_preference_speed = self.cfg.curve_preference_speed
 
         # The average type wants to ride one speed less
-        self.curve_preference_average = {
-            9: (0, 500),
-            8: (500, 800),
-            7: (800, 1000),
-            6: (1000, 1200),
-            5: (1200, 1400),
-            4: (1400, 1600),
-            3: (1600, 1800),
-            2: (1800, 3000),
-            1: (3000, 10000),
-        }
+        self.curve_preference_average = self.cfg.curve_preference_average
 
         # The cautious type wants to ride two speed less
-        self.curve_preference_cautious = {
-            8: (0, 500),
-            7: (500, 800),
-            6: (800, 1000),
-            5: (1000, 1200),
-            4: (1200, 1400),
-            3: (1400, 1600),
-            2: (1600, 3000),
-            1: (3000, 10000),
-        }
+        self.curve_preference_cautious = self.cfg.curve_preference_cautious
 
         # generates a dictionary in dictionary for each speed to curvature preference
         self.curve_preference_all = {'speed': {}, 'average': {}, 'cautious': {}}
@@ -363,6 +337,11 @@ class Preferences:
         self.speed_gap_preferences = speed_gap_preferences
         save_dict(self.speed_gap_preferences)
 
+    def get_speed_gap_preferences(self):
+        return self.speed_gap_preferences
+
 
 if __name__ == '__main__':
-    distance_preferences = Preferences()
+    config = ConfigPreference()
+    distance_preferences = Preferences(config)
+    print(distance_preferences.get_speed_gap_preferences())

@@ -4,13 +4,13 @@ from vehicles.Vehicles import *
 # --------------------------------------------------------------------------------------------------------------------
 class Motorcycle(Vehicle):
     # max_velocity: 100km/h = 30m/s -> 30m/s / 3,75m = 8tiles
-    def __init__(self, speed, tile, group, preferred_speed, max_velocity=7):
+    def __init__(self, speed, tile, group, preferred_speed, speed_distance_preferences=None, max_velocity=7):
         """
         initializes Motorcycle with parameters
         :param speed: integer, current initial speed
         :param tile: tile obj, the tile in the street where it is positioned
         :param group: integer, biker group number
-        :param preferred_speed: dictionary of preferred speed e.g. {'cautious' : None}
+        :param preferred_speed: dictionary of preferred speed. Available: 'speed', 'average', 'cautious'
         :param max_velocity:
         :param fun: ToDo
         """
@@ -22,9 +22,17 @@ class Motorcycle(Vehicle):
         self.ahead = None
         self.behind = None
         self.group = group
-        self.preferred_speed = preferred_speed
-        self.fun = 0
         self.symbol = 'M'
+
+        self.speed_preference = preferred_speed
+        # available 'small', 'avg', 'high', 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+        # 'high_high', 'high_small', 'high_avg', 'avg_small'
+        self.speed_distance_preferences = speed_distance_preferences
+        if speed_distance_preferences is not None:
+            self.behind_gap_preference = speed_distance_preferences['behind_gap_preference']
+            self.front_gap_preference = speed_distance_preferences['front_gap_preference']
+            self.inbetween_gap_preference = speed_distance_preferences['inbetween_gap_preference']
+        self.fun = 0
 
     def update_speed(self):
         """
@@ -80,10 +88,79 @@ class Motorcycle(Vehicle):
         self.update_partners()
         # ToDo update fun
 
+    def update_speed_preference(self):
+        """
+        Todo
+        updates its speed with regard to its preference before actual moving
+        lookat_positional_environment has to be updated first
+        :return:
+        """
+        self.look_at_positional_environment()
+        self.calc_distance_behind_partner()
+        self.calc_distance_ahead_partner()
+
+
+
+
+
+
+
+
+        #---------------------------------------------
+        '''
+        self.look_at_positional_environment()
+        self.calc_distance_behind_partner()
+        self.calc_distance_ahead_partner()
+
+        # 1. Acceleration: accelerate if max speed not achieved if distance allows it. No security distance of 1 tile
+        # cannot accelerate more than tile speed limit
+        if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV()\
+                and self.get_speed() < self.get_tile().get_speed_limit():
+
+            # additional acceleration if too far from ahead partner
+            if self.distance_front > self.get_speed() + self.catch_up() and \
+                    self.get_speed() + self.catch_up() < self.get_maxV() and \
+                    self.get_speed() + self.catch_up() < self.get_tile().get_speed_limit():
+                self.set_speed(self.get_speed() + self.catch_up() + 1)
+
+            else:
+                self.set_speed(self.get_speed() + 1)
+
+        # 2. slowdown if too far from behind partner
+        # in case of first and second if statement are true, then offset initial catch_up speed
+        if self.distance_behind_partner > self.get_speed() + self.slow_down() > 0:
+            # consider what speed the vehicle behind has before slowing down
+            this_is_my_lane = self.get_tile().get_lane()
+            this_is_distance_behind = self.distance_behind
+            behind_vehicle = self.look_at_vehicle_at_pos(self.distance_behind, self.get_tile().get_lane())
+
+            if behind_vehicle is not self.get_behind_partner():
+                if self.distance_behind > self.get_speed() + self.slow_down() > 0:
+                    self.set_speed(self.get_speed() + self.slow_down())
+
+        # 3. Slowing down with no tile security distance. No security distance
+        if self.distance_front <= self.get_speed() != 0:
+            self.set_speed(self.distance_front)
+
+        # 4. Cannot be faster than allowed speed limit of the current tile
+        if self.get_speed() > self.get_tile().get_speed_limit():
+            self.set_speed(self.get_tile().get_speed_limit())
+
+        # 5. Stop if there is no space in front
+        if self.distance_front == 0:
+            self.set_speed(0)
+
+        # 6. Randomization
+        if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
+            self.set_speed(self.get_speed() - 1)
+
+        self.update_partners()
+        # ToDo update fun
+        '''
+
     def catch_up(self):
         """
         speed up velocity if ahead partner motorcyclist is too far away. Ignores other vehicles
-        :param current_speed: the current speed of the vehicle
         :return:
         """
         speed_up = 0
@@ -96,7 +173,6 @@ class Motorcycle(Vehicle):
     def slow_down(self):
         """
         slow down speed if behind partner motorcyclist is too far away. Ignores other vehicles
-        :param current_speed:
         :return:
         """
         slow_down = 0

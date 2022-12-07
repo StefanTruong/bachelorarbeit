@@ -6,6 +6,8 @@ from movementLogic.MyTrafficSimulation import *
 from plotAndVisualize import Plotter
 from StreetAttributes.tileAttrSetting import *
 from Analyse.collisionChecker import CollisionChecker
+from configuration.config import ConfigPreference
+from preferences.PreferenceNV import Preferences
 
 # select what visualization should be started. Use the console to give argument
 # selection 1   debug scenario. Visualizes each vehicle movement step by step and the whole street. No probabilities
@@ -23,35 +25,19 @@ from Analyse.collisionChecker import CollisionChecker
 #               saves an attribute dict s.t. it can be filled with speed limit and curvature
 #               visualizes time distance time-line diagram of motorcyclist and cars
 #               visualizes velocity distribution of motorcyclists
+# selection 9   like selection 8 but motorcyclist consider speed adjustments according to its preferences
 
 
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
 else:
-    selection = 8  # ToDo change to selection which should be run on IDE
+    selection = 9  # ToDo change to selection which should be run on IDE
 
 # ---------------------------------- selection 1 ------------------------------------
 if selection == 1:
     print('Selection Mode: ', selection)
-    # Has to be set in class Trafficsimulation again
-    model_settings = {
-        'length': 40,  # don't use more than 50 for visualization as console cannot display more at once
-        'density': 0.5,
-        'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': -1,
-        'prob_changelane': 1,
-        'car_share': 0.9,
-        'number_platoons': 3,
-        'platoon_size': 3,
-        'speed_preferences': {
-            'cautious': None,
-            'average': None,
-            'speed': None,
-        },
-        'total_amount_steps': 10
-    }
-
-    sim = TrafficSimulation(**model_settings)
+    cfg = ConfigPreference('selection_1')
+    sim = TrafficSimulation(**cfg.model_settings)
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
@@ -75,24 +61,8 @@ if selection == 1:
 # ---------------------------------- selection 2 ------------------------------------
 elif selection == 2:
     print('Selection Mode: ', selection)
-    model_settings = {
-        'length': 20,  # don't use more than 50 for visualization as console cannot display more at once
-        'density': 1,
-        'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.1,
-        'prob_changelane': 0.5,
-        'car_share': 0.9,
-        'number_platoons': 1,
-        'platoon_size': 3,
-        'speed_preferences': {
-            'cautious': None,
-            'average': None,
-            'speed': None,
-        },
-        'total_amount_steps': 100
-    }
-
-    sim = TrafficSimulation(**model_settings)
+    cfg = ConfigPreference('selection_2')
+    sim = TrafficSimulation(**cfg.model_settings)
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
@@ -115,24 +85,8 @@ elif selection == 2:
 # ---------------------------------- selection 3 ------------------------------------
 elif selection == 3:
     print('Selection Mode: ', selection)
-    model_settings = {
-        'length': 50,
-        'density': 0.5,
-        'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': -1,
-        'prob_changelane': 1,
-        'car_share': 0.9,
-        'number_platoons': 1,
-        'platoon_size': 1,
-        'speed_preferences': {
-            'cautious': None,
-            'average': None,
-            'speed': None,
-        },
-        'total_amount_steps': 100
-    }
-
-    sim = TrafficSimulation(**model_settings)
+    cfg = ConfigPreference('selection_3')
+    sim = TrafficSimulation(**cfg.model_settings)
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
@@ -171,24 +125,8 @@ elif selection == 3:
 # ---------------------------------- selection 4 ------------------------------------
 elif selection == 4:
     print('Selection Mode: ', selection)
-    model_settings = {
-        'length': 40,
-        'density': 2,
-        'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.2,
-        'prob_changelane': 0.5,
-        'car_share': 0.9,
-        'number_platoons': 1,
-        'platoon_size': 3,
-        'speed_preferences': {
-            'cautious': None,
-            'average': None,
-            'speed': None,
-        },
-        'total_amount_steps': 100
-    }
-
-    sim = TrafficSimulation(**model_settings)
+    cfg = ConfigPreference('selection_4')
+    sim = TrafficSimulation(**cfg.model_settings)
     sim.initialize()
     checker = CollisionChecker(sim)
     analyzer = AnalyzerSingleSim(sim)
@@ -205,9 +143,9 @@ elif selection == 4:
             analyzer.update()
         flows.append(analyzer.get_traffic_flow_all_lanes())
 
-    print('\n', 'Length:         ', model_settings['length'], '\n',
+    print('\n', 'Length:         ', cfg.model_settings['length'], '\n',
           'Number_vehicles:', sim.get_number_total_vehicles(), '\n',
-          'Density:        ', model_settings['density'], '\n',
+          'Density:        ', cfg.model_settings['density'], '\n',
           'number of loops:', number_of_loops, '\n',
           'Flows:          ', flows, '\n',
           'avg flow:       ', sum(flows) / len(flows), '\n',
@@ -226,25 +164,11 @@ elif selection == 4:
 # ---------------------------------- selection 5 ------------------------------------
 elif selection == 5:
     print('Selection Mode: ', selection)
-    model_settings = {
-        'length': 100,
-        'density': 0.2,  # Hint will be changed in selection 5
-        'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.2,
-        'prob_changelane': 0.5,
-        'car_share': 0.9,
-        'number_platoons': 3,  # Hint will be adjusted in selection 5
-        'platoon_size': 3,  # Hint will be adjusted in selection 5
-        'speed_preferences': {
-            'cautious': None,
-            'average': None,
-            'speed': None,
-        },
-        'total_amount_steps': 100
-    }
+    cfg = ConfigPreference('selection_5')
 
     # what densities shall be calculated. Lowest density should be number of bikers, which is fixed
-    lowest_density = (model_settings['platoon_size'] * model_settings['number_platoons']) / model_settings['length']
+    lowest_density = \
+        (cfg.model_settings['platoon_size'] * cfg.model_settings['number_platoons']) / cfg.model_settings['length']
     density_list = np.linspace(lowest_density, 2, 15)
 
     avgFlows = []
@@ -252,8 +176,8 @@ elif selection == 5:
 
     for density in density_list:
         singleFlows = []
-        model_settings['density'] = density
-        sim = TrafficSimulation(**model_settings)
+        cfg.model_settings['density'] = density
+        sim = TrafficSimulation(**cfg.model_settings)
         sim.initialize()
         checker = CollisionChecker(sim)
         analyzer = AnalyzerSingleSim(sim)
@@ -288,24 +212,8 @@ elif selection == 5:
 # ---------------------------------- selection 6 ------------------------------------
 elif selection == 6:
     print('Selection Mode: ', selection)
-    model_settings = {
-        'length': 100,
-        'density': 0.5,
-        'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.1,
-        'prob_changelane': 0.5,
-        'car_share': 0.9,
-        'number_platoons': 1,
-        'platoon_size': 3,
-        'speed_preferences': {
-            'cautious': None,
-            'average': None,
-            'speed': None,
-        },
-        'total_amount_steps': 100
-    }
-
-    sim = TrafficSimulation(**model_settings)
+    cfg = ConfigPreference('selection_6')
+    sim = TrafficSimulation(**cfg.model_settings)
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
@@ -329,24 +237,8 @@ elif selection == 6:
 # ---------------------------------- selection 7 ------------------------------------
 elif selection == 7:
     print('Selection Mode: ', selection)
-    model_settings = {
-        'length': 30,
-        'density': 0.5,
-        'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.1,
-        'prob_changelane': 0.2,
-        'car_share': 0.9,
-        'number_platoons': 1,
-        'platoon_size': 3,
-        'speed_preferences': {
-            'cautious': None,
-            'average': None,
-            'speed': None,
-        },
-        'total_amount_steps': 2
-    }
-
-    sim = TrafficSimulation(**model_settings)
+    cfg = ConfigPreference('selection_7')
+    sim = TrafficSimulation(**cfg.model_settings)
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
@@ -369,24 +261,8 @@ elif selection == 7:
 # ---------------------------------- selection 8 ------------------------------------
 elif selection == 8:
     print('Selection Mode: ', selection)
-    model_settings = {
-        'length': 1000,
-        'density': 0.1,
-        'num_lanes': 1,  # [0,1] do not change
-        'prob_slowdown': 0.1,
-        'prob_changelane': 1,
-        'car_share': 1,
-        'number_platoons': 1,
-        'platoon_size': 4,
-        'speed_preferences': {
-            'cautious': None,
-            'average': None,
-            'speed': None,
-        },
-        'total_amount_steps': 100
-    }
-
-    sim = TrafficSimulation(**model_settings)
+    cfg = ConfigPreference('selection_8')
+    sim = TrafficSimulation(**cfg.model_settings)
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
@@ -431,3 +307,14 @@ elif selection == 8:
     sys.stdout.write('\n')
 
 
+# ---------------------------------- selection 9 ------------------------------------
+elif selection == 9:
+    print('Selection Mode: ', selection)
+    cfg = ConfigPreference('default')
+    pref = Preferences(cfg)
+    sim = TrafficSimulation(**cfg.model_settings)
+    sim.initialize()
+    checker = CollisionChecker(sim)
+    vis = VisualizeStreet(sim)
+    analyzer = AnalyzerSingleSim(sim)
+    tileAttrSetting = TileAttributeSetter(sim, modus='constant', generate=True, constant_speed_limit=30)
