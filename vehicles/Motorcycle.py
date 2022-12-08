@@ -90,7 +90,7 @@ class Motorcycle(Vehicle):
 
     def update_speed_preference(self):
         """
-        Todo
+        Todo implementation
         updates its speed with regard to its preference before actual moving
         lookat_positional_environment has to be updated first
         :return:
@@ -98,6 +98,13 @@ class Motorcycle(Vehicle):
         self.look_at_positional_environment()
         self.calc_distance_behind_partner()
         self.calc_distance_ahead_partner()
+
+        # 1. Check if the vehicle ahead is a motorcycle
+        vehicle = self.look_at_vehicle_at_pos(self.distance_front + 1, self.tile.get_lane())
+        if type(vehicle) is Motorcycle and vehicle.get_group() == self.get_group():
+            pass
+        else:
+            pass
 
 
 

@@ -192,13 +192,13 @@ class ConfigPreference:
 
         # # Preference Settings
         # distance preference single sided
-        self.dist_mean_small = 6
+        self.dist_mean_small = 3    # 50[km/h] ~ 13[m/s]*2[sec] / 4[m/tile] ~ 3[tiles]
         self.dist_sd_small = 1
         self.dist_ampl_small = 1
-        self.dist_mean_avg = 8
+        self.dist_mean_avg = 5
         self.dist_sd_avg = 1
         self.dist_ampl_avg = 1
-        self.dist_mean_high = 10
+        self.dist_mean_high = 7
         self.dist_sd_high = 1
         self.dist_ampl_high = 1
 

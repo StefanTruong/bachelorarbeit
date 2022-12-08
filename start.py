@@ -242,7 +242,7 @@ elif selection == 7:
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
-    tileAttrSetting = TileAttributeSetter(sim, modus='sinus', generate=True, amplitude=7, frequency=0.2)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus', generate=True, amplitude=7, frequency=0.2)
 
     vis.traffic_vis_tiles(display_curve=True)
 
@@ -267,7 +267,7 @@ elif selection == 8:
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
     analyzer = AnalyzerSingleSim(sim)
-    tileAttrSetting = TileAttributeSetter(sim, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
 
     # choose which vehicle should be focused on
     vis.traffic_vis_tiles()
@@ -316,7 +316,7 @@ elif selection == 9:
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)
     analyzer = AnalyzerSingleSim(sim)
-    tileAttrSetting = TileAttributeSetter(sim, modus='constant', generate=True, constant_speed_limit=30)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_speed_limit=30)
 
     # choose which vehicle should be focused on
     vis.traffic_vis_tiles()
