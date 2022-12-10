@@ -6,6 +6,13 @@ from configuration.config import *
 
 
 def plot_nv(pref_range, pdf, label='Missing Label'):
+    """
+    plot NV
+    :param pref_range: x-axis range
+    :param pdf:
+    :param label:
+    :return:
+    """
     plt.plot(pref_range, pdf, color='red')
     plt.xlabel(label)
     plt.ylabel('Probability Density')
@@ -35,9 +42,9 @@ def normal_dist(values, mean, sd, amp=1):
     """
     calculate normal distribution matching the values list length
     :param amp: amplitude of NV to strengthen preference
-    :param values: list of sight distance values to be plotted
-    :param mean: mean of the preference
-    :param sd: standard deviation of the preference
+    :param values: list of sight distance values to be plotted (x-axis values)
+    :param mean: mean of the preference normal distribution
+    :param sd: standard deviation of the preference normal distribution
     :return: list of normal distribution values matching the values list length
     """
     prob_density = []
@@ -52,8 +59,9 @@ def normal_dist(values, mean, sd, amp=1):
 
 def calc_gradient(pdf, dist_preference_range):
     """
-    calculate gradient sign for distance given a preference distribution
-    :param pdf: probability density function
+    calculate gradient sign for distance given a preference distribution in a list
+    Attention the gradient have a flipped sign compared to the actual gradient. See the paper for more information
+    :param pdf: probability density function saved in a list
     :param dist_preference_range: range of distance preference
     :return:
     """
@@ -64,20 +72,23 @@ def calc_gradient(pdf, dist_preference_range):
     gradient_sign = []
     for i in range(start, end):
         if gradient[i] >= 0:
-            sign = 1
-        else:
             sign = -1
+        else:
+            sign = 1
         gradient_sign.append(sign)
     return gradient_sign
 
 
 def save_dict(dictionary):
-    with open('./preferences/speed_gap_preferences.json', 'w') as fp:
+    with open('speed_gap_preferences.json', 'w') as fp:
         json.dump(dictionary, fp, indent=4)
 
 
 class Preferences:
     def __init__(self, cfg):
+        # for global configuration
+        self.cfg = cfg
+
         # distance preference single sided
         self.dist_mean_small = cfg.dist_mean_small
         self.dist_sd_small = cfg.dist_sd_small
@@ -101,10 +112,7 @@ class Preferences:
         self.curve_ampl_speed = cfg.curve_ampl_speed
 
         # How far the NV should be calculated. Length of data has to match with length for pdf and gradient to match
-        dist_preference_sight = cfg.dist_preference_sight
-
-        # for global configuration
-        self.cfg = cfg
+        self.dist_preference_sight = cfg.dist_preference_sight
 
         # summarized preferences for dist and curve_speed
         # dist_preference_all = {'small':   {pdf: dist_preference_small,
@@ -124,13 +132,13 @@ class Preferences:
 
         # calculate pdf for single distance preference used for leader or sweeper
         # calculate pdf for mixed distance preference used for inbetween vehicles
-        self.calc_distance_pdf(dist_preference_sight)
+        self.calc_distance_pdf(self.dist_preference_sight)
 
         # calculate pdf for speed-curvature preference
-        self.calc_curvature_pdf(dist_preference_sight)
+        self.calc_curvature_pdf(self.dist_preference_sight)
 
         # merge curvature-speed preference and distance preference
-        self.calc_merged_preference(dist_preference_sight)
+        self.calc_merged_preference(self.dist_preference_sight)
 
         # check linear combination of pdfs
         '''
@@ -170,7 +178,7 @@ class Preferences:
         :param dist_preference_sight:
         :return:
         """
-        # calculate y-values for each onesided preference
+        # calculate y-values for each one sided preference
         pdf_small = normal_dist(dist_preference_sight, self.dist_mean_small, self.dist_sd_small, self.dist_ampl_small)
         pdf_avg = normal_dist(dist_preference_sight, self.dist_mean_avg, self.dist_sd_avg, self.dist_ampl_avg)
         pdf_high = normal_dist(dist_preference_sight, self.dist_mean_high, self.dist_sd_high, self.dist_ampl_high)
@@ -247,9 +255,6 @@ class Preferences:
         :return:    curve_preference = {'speed' :   {velo1: {range: range(), pdf: pdf, mean: mean, sd: sd, ampl: ampl},
                                         'average': ...
         """
-        # From tileAttrSetting.py curve-speed-limit
-        speedlimit_to_curvature = self.cfg.speedlimit_to_curvature
-
         # The speed type wants to ride maximum speed
         self.curve_preference_speed = self.cfg.curve_preference_speed
 
@@ -343,5 +348,6 @@ class Preferences:
 
 if __name__ == '__main__':
     config = ConfigPreference()
-    distance_preferences = Preferences(config)
-    print(distance_preferences.get_speed_gap_preferences())
+    preferences = Preferences(config)
+    print(preferences.get_speed_gap_preferences())
+    plot_nv(preferences.dist_preference_sight, preferences.get_speed_gap_preferences()['speed']['small'][10]['pdf'])

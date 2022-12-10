@@ -138,7 +138,7 @@ class ConfigPreference:
                     average_only: only average speed preference in the platoon
                     cautious_only: only cautious speed preference in the platoon
                     speed_only: only speed speed preference in the platoon
-            :param update_speed_modus: when Motorcyclist should update its speed according to its speed-gap preference
+            :param adjust_speed_preference: when Motorcyclist should update its speed according to its speed-gap pref
             """
             self.model_settings = {
                 'length': 1000,
@@ -150,10 +150,11 @@ class ConfigPreference:
                 'car_share': 1,
                 'number_platoons': 1,
                 'platoon_size': 4,
-                'car_max_velocity': 10,
-                'bike_max_velocity': 2,
-                'motorcycle_max_velocity': 7,
+                'car_max_velocity': 11,  # 120[km/h] = 33.33[m/s] ~ 33/3 = 11
+                'bike_max_velocity': 2,  # 20[km/h] = 5.56[m/s] ~ 5/3 = 1.67
+                'motorcycle_max_velocity': 9,  # 100[km/h] = 27.78[m/s] ~ 27/3 = 9
                 'speed_preferences': ['cautious', 'average', 'speed'],
+                # available distance_preferences one-sided or behind_ahead
                 'distance_preferences': ['small', 'avg', 'high',
                                          'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
                                          'high_high', 'high_small', 'high_avg', 'avg_small'],
@@ -190,9 +191,23 @@ class ConfigPreference:
         else:
             raise ValueError('Unknown configuration')
 
+        # # curve-speed-limit
+        self.speedlimit_to_curvature = {
+            10: (0, 500),  # 10tiles ~ 40 m/s ~ 144 km/h
+            9: (500, 800),  # 9 tiles ~ 36 m/s ~ 129 km/h
+            8: (800, 1000),  # 8 tiles ~ 32 m/s ~ 115 km/h
+            7: (1000, 1200),  # 7 tiles ~ 28 m/s ~ 101 km/h
+            6: (1200, 1400),  # 6 tiles ~ 24 m/s ~ 86 km/h
+            5: (1400, 1600),  # 5 tiles ~ 20 m/s ~ 72 km/h
+            4: (1600, 1800),  # 4 tiles ~ 16 m/s ~ 57 km/h
+            3: (1800, 2000),  # 3 tiles ~ 12 m/s ~ 43 km/h
+            2: (2000, 3000),  # 2 tiles ~ 8 m/s ~ 29 km/h
+            1: (3000, 10000),  # 1 tile ~ 4 m/s ~ 14 km/h
+        }
+
         # # Preference Settings
         # distance preference single sided
-        self.dist_mean_small = 3    # 50[km/h] ~ 13[m/s]*2[sec] / 4[m/tile] ~ 3[tiles]
+        self.dist_mean_small = 3  # 50[km/h] ~ 13[m/s]*2[sec] / 4[m/tile] ~ 3[tiles]
         self.dist_sd_small = 1
         self.dist_ampl_small = 1
         self.dist_mean_avg = 5
@@ -216,23 +231,10 @@ class ConfigPreference:
         # How far the NV should be calculated. Length of data has to match with length for pdf and gradient to match
         self.dist_preference_sight = np.linspace(0, 50, 50)
 
-        # From tileAttrSetting.py curve-speed-limit
-        self.speedlimit_to_curvature = {
-            10: (0, 500),  # 10tiles ~ 40 m/s ~ 144 km/h
-            9: (500, 800),  # 9 tiles ~ 36 m/s ~ 129 km/h
-            8: (800, 1000),  # 8 tiles ~ 32 m/s ~ 115 km/h
-            7: (1000, 1200),  # 7 tiles ~ 28 m/s ~ 101 km/h
-            6: (1200, 1400),  # 6 tiles ~ 24 m/s ~ 86 km/h
-            5: (1400, 1600),  # 5 tiles ~ 20 m/s ~ 72 km/h
-            4: (1600, 1800),  # 4 tiles ~ 16 m/s ~ 57 km/h
-            3: (1800, 2000),  # 3 tiles ~ 12 m/s ~ 43 km/h
-            2: (2000, 3000),  # 2 tiles ~ 8 m/s ~ 29 km/h
-            1: (3000, 10000),  # 1 tile ~ 4 m/s ~ 14 km/h
-        }
         # The speed type wants to ride maximum speed
         self.curve_preference_speed = self.speedlimit_to_curvature
 
-        # The average type wants to ride one speed less
+        # The average type wants to ride roughly one speed less
         self.curve_preference_average = {
             9: (0, 500),
             8: (500, 800),
@@ -245,7 +247,7 @@ class ConfigPreference:
             1: (3000, 10000),
         }
 
-        # The cautious type wants to ride two speed less
+        # The cautious type wants to ride roughly two speed less
         self.curve_preference_cautious = {
             8: (0, 500),
             7: (500, 800),
@@ -256,6 +258,57 @@ class ConfigPreference:
             2: (1600, 3000),
             1: (3000, 10000),
         }
+
+    # ToDo check if this works
+    def get_distance_preference(self, speed_preference):
+        """
+        get the desired distance preference for the given speed preference
+        :param speed_preference: 'cautious', 'average', 'speed'
+        :return: behind_gap_preference, front_gap_preference, inbetween_gap_preference
+        """
+        preference_behind = self.model_settings['speed_distance_preferences'][speed_preference]['behind_gap_preference']
+        if preference_behind == 'high':
+            behind_gap_preference = self.dist_mean_high
+        elif preference_behind == 'avg':
+            behind_gap_preference = self.dist_mean_avg
+        elif preference_behind == 'small':
+            behind_gap_preference = self.dist_mean_small
+        else:
+            raise ValueError('Unknown behind_gap_preference')
+        preference_ahead = self.model_settings['speed_distance_preferences'][speed_preference]['front_gap_preference']
+        if preference_ahead == 'high':
+            front_gap_preference = self.dist_mean_high
+        elif preference_ahead == 'avg':
+            front_gap_preference = self.dist_mean_avg
+        elif preference_ahead == 'small':
+            front_gap_preference = self.dist_mean_small
+        else:
+            raise ValueError('Unknown front_gap_preference')
+
+        preference_inbetween = \
+            self.model_settings['speed_distance_preferences'][speed_preference]['inbetween_gap_preference']
+        if preference_inbetween == 'small_small':
+            inbetween_gap_preference = self.dist_mean_small - self.dist_mean_small
+        elif preference_inbetween == 'small_avg':
+            inbetween_gap_preference = self.dist_small - self.dist_mean_avg
+        elif preference_inbetween == 'small_high':
+            inbetween_gap_preference = self.dist_small - self.dist_mean_high
+        elif preference_inbetween == 'avg_avg':
+            inbetween_gap_preference = self.dist_mean_avg - self.dist_mean_avg
+        elif preference_inbetween == 'avg_high':
+            inbetween_gap_preference = self.dist_mean_avg - self.dist_mean_high
+        elif preference_inbetween == 'high_high':
+            inbetween_gap_preference = self.dist_mean_high - self.dist_mean_high
+        elif preference_inbetween == 'high_small':
+            inbetween_gap_preference = self.dist_mean_high - self.dist_mean_small
+        elif preference_inbetween == 'high_avg':
+            inbetween_gap_preference = self.dist_mean_high - self.dist_mean_avg
+        elif preference_inbetween == 'avg_small':
+            inbetween_gap_preference = self.dist_mean_avg - self.dist_mean_small
+        else:
+            raise ValueError('Unknown inbetween_gap_preference')
+
+        return behind_gap_preference, front_gap_preference, inbetween_gap_preference
 
 
 if __name__ == '__main__':

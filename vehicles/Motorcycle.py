@@ -11,6 +11,9 @@ class Motorcycle(Vehicle):
         :param tile: tile obj, the tile in the street where it is positioned
         :param group: integer, biker group number
         :param preferred_speed: dictionary of preferred speed. Available: 'speed', 'average', 'cautious'
+        see config speed_preferences
+        :param speed_distance_preferences: dict how far the distance should be for speed type
+        see config speed_distance_preferences
         :param max_velocity:
         :param fun: ToDo
         """
@@ -24,14 +27,14 @@ class Motorcycle(Vehicle):
         self.group = group
         self.symbol = 'M'
 
+        # available: 'cautious', 'average', 'speed'
         self.speed_preference = preferred_speed
-        # available 'small', 'avg', 'high', 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
-        # 'high_high', 'high_small', 'high_avg', 'avg_small'
-        self.speed_distance_preferences = speed_distance_preferences
-        if speed_distance_preferences is not None:
-            self.behind_gap_preference = speed_distance_preferences['behind_gap_preference']
-            self.front_gap_preference = speed_distance_preferences['front_gap_preference']
-            self.inbetween_gap_preference = speed_distance_preferences['inbetween_gap_preference']
+
+        # ToDo Logic to set position in group
+        self.is_leader = False
+        self.is_sweeper = False
+        self.is_inbetween = False
+
         self.fun = 0
 
     def update_speed(self):
@@ -106,13 +109,6 @@ class Motorcycle(Vehicle):
         else:
             pass
 
-
-
-
-
-
-
-
         #---------------------------------------------
         '''
         self.look_at_positional_environment()
@@ -164,6 +160,47 @@ class Motorcycle(Vehicle):
         self.update_partners()
         # ToDo update fun
         '''
+
+    # ToDo
+    def calc_peak_value(self, current_curvature):
+        """
+        calculates the peak value of the merged pdf
+        :param current_curvature:   what curvature has the current tile
+        speed_peak:          speed mean preference according to curvature
+        ahead_dist_peak:     distance mean preference to the vehicle in front used for the sweeper
+        behind_dist_peak:    distance mean preference to the vehicle behind used for the leader
+        tolerance:           tolerance of the peak value location of the merged pdf
+        :return:                    overall peak value
+        """
+        speed_peak_found = False
+        optimal_distance_found = False
+
+        cfg = self.sim.get_config_object()
+        if self.speed_preference == "cautious":
+            for speed, curvature_range in cfg.curve_preference_cautious.items():
+                if curvature_range[0] <= current_curvature <= curvature_range[1]:
+                    speed_peak = speed
+                    speed_peak_found = True
+                    break
+
+            self.behind_gap_preference
+            cfg.dist_mean_high
+        elif self.speed_preference == "average":
+            pass
+        elif self.speed_preference == "speed":
+            pass
+
+        # if motorcyclist is leader
+        if self.is_leader:
+            return speed_peak + (self.get_distance_behind_partner() - behind_dist_peak)
+        # if motorcyclist is sweeper
+        elif self.is_sweeper:
+            return speed_peak + (ahead_dist_peak - self.get_distance_ahead_partner())
+        # else motorcyclist is in between
+        elif self.is_in_between:
+            return speed_peak + (self.get_distance_behind_partner() - self.get_distance_ahead_partner())
+        else:
+            raise ValueError("Motorcyclist location not in a group")
 
     def catch_up(self):
         """

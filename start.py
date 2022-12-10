@@ -312,6 +312,8 @@ elif selection == 9:
     cfg = ConfigPreference('default')
     pref = Preferences(cfg)
     sim = TrafficSimulation(**cfg.model_settings)
+    sim.set_config_object(cfg)
+    sim.set_preference_object(pref)
     sim.initialize()
     checker = CollisionChecker(sim)
     vis = VisualizeStreet(sim)

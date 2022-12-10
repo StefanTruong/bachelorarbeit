@@ -55,8 +55,11 @@ class TrafficSimulation:
         self.biker_composition_modus = biker_composition_modus
         self.adjust_speed_preference = adjust_speed_preference
 
-        self.platoon_composition = None  # ['cautious', 'cautious', 'average', 'speed']
+        self.platoon_composition = None  # equal: ['cautious', 'cautious', 'average', 'speed']
         self.distribute_biker_speed_preference()
+
+        self.preference_object = None
+        self.config_object = None
 
     def distribute_biker_speed_preference(self):
         """
@@ -172,16 +175,13 @@ class TrafficSimulation:
             for biker_number in range(0, self.platoon_size):
                 tile = tiles[tile_index][0]
 
-                if self.platoon_composition is not None and self.speed_distance_preferences is not None:
+                if self.platoon_composition is not None:
                     preferred_speed = self.platoon_composition[biker_number]
-                    speed_distance_preferences = self.speed_distance_preferences[preferred_speed]
                 else:
                     preferred_speed = None
-                    speed_distance_preferences = None
 
                 motorcyclist = Motorcycle(speed=0, tile=tile, group=platoon,
                                           preferred_speed=preferred_speed,
-                                          speed_distance_preferences=speed_distance_preferences,
                                           max_velocity=self.motorcycle_max_velocity)
 
                 # chain motorcyclist in a platoon together
@@ -390,3 +390,15 @@ class TrafficSimulation:
         for vehicle in vehicle_list:
             vehicle.set_id(identifier)
             identifier += 1
+
+    def get_preference_object(self):
+        return self.preference_object
+
+    def get_config_object(self):
+        return self.config_object
+
+    def set_preference_object(self, preference_object):
+        self.preference_object = preference_object
+
+    def set_config_object(self, cfg):
+        self.config_object = cfg
