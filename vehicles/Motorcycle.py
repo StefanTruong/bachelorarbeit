@@ -48,7 +48,7 @@ class Motorcycle(Vehicle):
 
         # 1. Acceleration: accelerate if max speed not achieved if distance allows it. No security distance of 1 tile
         # cannot accelerate more than tile speed limit
-        if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV()\
+        if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV() \
                 and self.get_speed() < self.get_tile().get_speed_limit():
 
             # additional acceleration if too far from ahead partner
@@ -102,6 +102,11 @@ class Motorcycle(Vehicle):
         self.calc_distance_behind_partner()
         self.calc_distance_ahead_partner()
 
+        # Todo just for Testing
+        self.get_role()
+        self.calc_peak_value(self.tile.get_curvature())
+
+        '''
         # 1. Check if the vehicle ahead is a motorcycle
         vehicle = self.look_at_vehicle_at_pos(self.distance_front + 1, self.tile.get_lane())
         if type(vehicle) is Motorcycle and vehicle.get_group() == self.get_group():
@@ -109,8 +114,8 @@ class Motorcycle(Vehicle):
         else:
             pass
 
-        #---------------------------------------------
-        '''
+        # ---------------------------------------------
+        
         self.look_at_positional_environment()
         self.calc_distance_behind_partner()
         self.calc_distance_ahead_partner()
@@ -172,35 +177,37 @@ class Motorcycle(Vehicle):
         tolerance:           tolerance of the peak value location of the merged pdf
         :return:                    overall peak value
         """
-        speed_peak_found = False
-        optimal_distance_found = False
+        current_speed_preference = self.sim.get_config_object().\
+            get_speed_preference(self.speed_preference, current_curvature)
 
-        cfg = self.sim.get_config_object()
-        if self.speed_preference == "cautious":
-            for speed, curvature_range in cfg.curve_preference_cautious.items():
-                if curvature_range[0] <= current_curvature <= curvature_range[1]:
-                    speed_peak = speed
-                    speed_peak_found = True
-                    break
+        behind_gap_preference, front_gap_preference, inbetween_gap_preference = \
+            self.sim.get_config_object().get_distance_preference(self.speed_preference)
 
-            self.behind_gap_preference
-            cfg.dist_mean_high
-        elif self.speed_preference == "average":
-            pass
-        elif self.speed_preference == "speed":
-            pass
+        behind_gap_ampl, front_gap_ampl = self.sim.get_config_object(). \
+            get_distance_weight(self.speed_preference)
 
-        # if motorcyclist is leader
-        if self.is_leader:
-            return speed_peak + (self.get_distance_behind_partner() - behind_dist_peak)
+        speed_ampl = self.sim.get_config_object(). \
+            get_speed_weight(self.speed_preference)
+
+        # if motorcyclist is inbetween
+        if self.is_inbetween:
+            peak = speed_ampl * current_speed_preference + \
+                (behind_gap_ampl * behind_gap_preference - front_gap_ampl * front_gap_preference)
         # if motorcyclist is sweeper
         elif self.is_sweeper:
-            return speed_peak + (ahead_dist_peak - self.get_distance_ahead_partner())
-        # else motorcyclist is in between
-        elif self.is_in_between:
-            return speed_peak + (self.get_distance_behind_partner() - self.get_distance_ahead_partner())
+            peak = speed_ampl * current_speed_preference + \
+                   (front_gap_ampl * front_gap_preference - front_gap_ampl * self.get_distance_ahead_partner())
+        # else motorcyclist is leader
+        elif self.is_leader:
+            peak = speed_ampl * current_speed_preference + \
+                   (behind_gap_ampl * self.get_distance_behind_partner() - behind_gap_ampl * behind_gap_preference)
         else:
             raise ValueError("Motorcyclist location not in a group")
+
+        if peak <= 0:
+            raise ValueError("Peak value cannot be negative. Motorcyclist should at least move one tile forward")
+
+        return peak
 
     def catch_up(self):
         """
@@ -280,6 +287,28 @@ class Motorcycle(Vehicle):
                     idx_behind_in_position = True
             else:
                 idx_behind_in_position = True
+
+    def get_role(self):
+        """
+        determines if the motorcyclist is a leader, sweeper or inbetween
+        :return:
+        """
+        if self.get_ahead_partner() is not None and self.get_behind_partner() is not None:
+            self.is_inbetween = True
+            self.is_leader = False
+            self.is_sweeper = False
+        elif self.get_ahead_partner() is not None:
+            self.is_sweeper = True
+            self.is_leader = False
+            self.is_inbetween = False
+        elif self.get_behind_partner() is not None:
+            self.is_leader = True
+            self.is_inbetween = False
+            self.is_sweeper = False
+        else:
+            self.is_leader = False
+            self.is_sweeper = False
+            self.is_inbetween = False
 
     def check_switch_position(self):
         """

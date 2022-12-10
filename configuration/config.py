@@ -262,10 +262,11 @@ class ConfigPreference:
     # ToDo check if this works
     def get_distance_preference(self, speed_preference):
         """
-        get the desired distance preference for the given speed preference
+        get the weighted desired distance preference for the given speed preference
         :param speed_preference: 'cautious', 'average', 'speed'
         :return: behind_gap_preference, front_gap_preference, inbetween_gap_preference
         """
+        # one-sided behind distance preference
         preference_behind = self.model_settings['speed_distance_preferences'][speed_preference]['behind_gap_preference']
         if preference_behind == 'high':
             behind_gap_preference = self.dist_mean_high
@@ -275,6 +276,8 @@ class ConfigPreference:
             behind_gap_preference = self.dist_mean_small
         else:
             raise ValueError('Unknown behind_gap_preference')
+
+        # one-sided front distance preference
         preference_ahead = self.model_settings['speed_distance_preferences'][speed_preference]['front_gap_preference']
         if preference_ahead == 'high':
             front_gap_preference = self.dist_mean_high
@@ -285,14 +288,15 @@ class ConfigPreference:
         else:
             raise ValueError('Unknown front_gap_preference')
 
+        # inbetween distance preference
         preference_inbetween = \
             self.model_settings['speed_distance_preferences'][speed_preference]['inbetween_gap_preference']
         if preference_inbetween == 'small_small':
             inbetween_gap_preference = self.dist_mean_small - self.dist_mean_small
         elif preference_inbetween == 'small_avg':
-            inbetween_gap_preference = self.dist_small - self.dist_mean_avg
+            inbetween_gap_preference = self.dist_mean_small - self.dist_mean_avg
         elif preference_inbetween == 'small_high':
-            inbetween_gap_preference = self.dist_small - self.dist_mean_high
+            inbetween_gap_preference = self.dist_mean_small - self.dist_mean_high
         elif preference_inbetween == 'avg_avg':
             inbetween_gap_preference = self.dist_mean_avg - self.dist_mean_avg
         elif preference_inbetween == 'avg_high':
@@ -309,6 +313,75 @@ class ConfigPreference:
             raise ValueError('Unknown inbetween_gap_preference')
 
         return behind_gap_preference, front_gap_preference, inbetween_gap_preference
+
+    def get_speed_preference(self, behavior, current_curvature):
+        """
+        get the weighted desired speed preference for the given speed preference behavior and curvature of the tile
+        :param behavior: cautious, average, speed
+        :param current_curvature: curvature of the tile
+        :return: desired mean speed according to curvature
+        """
+        if behavior == 'cautious':
+            for speed, curvature_range in self.curve_preference_cautious.items():
+                if curvature_range[0] <= current_curvature <= curvature_range[1]:
+                    current_speed_preference = speed
+                    break
+        if behavior == 'average':
+            for speed, curvature_range in self.curve_preference_average.items():
+                if curvature_range[0] <= current_curvature <= curvature_range[1]:
+                    current_speed_preference = speed
+                    break
+        if behavior == 'speed':
+            for speed, curvature_range in self.curve_preference_speed.items():
+                if curvature_range[0] <= current_curvature <= curvature_range[1]:
+                    current_speed_preference = speed
+                    break
+        return current_speed_preference
+
+    def get_distance_weight(self, behavior):
+        """
+        gets the amplitude of the distance as weighting for linear combination of distance and speed
+        :param behavior: cautious, average, speed
+        :return: distance amplitude for weighting
+        """
+        # one-sided behind distance weights
+        preference_behind = self.model_settings['speed_distance_preferences'][behavior]['behind_gap_preference']
+        if preference_behind == 'high':
+            behind_gap_ampl = self.dist_ampl_high
+        elif preference_behind == 'avg':
+            behind_gap_ampl = self.dist_ampl_avg
+        elif preference_behind == 'small':
+            behind_gap_ampl = self.dist_ampl_small
+        else:
+            raise ValueError('Unknown behind_gap_ampl')
+
+        # one-sided front distance weights
+        preference_ahead = self.model_settings['speed_distance_preferences'][behavior]['front_gap_preference']
+        if preference_ahead == 'high':
+            front_gap_ampl = self.dist_ampl_high
+        elif preference_ahead == 'avg':
+            front_gap_ampl = self.dist_ampl_avg
+        elif preference_ahead == 'small':
+            front_gap_ampl = self.dist_ampl_small
+        else:
+            raise ValueError('Unknown front_gap_ampl')
+
+        return behind_gap_ampl, front_gap_ampl
+
+    def get_speed_weight(self, behavior):
+        """
+        gets the amplitude of the curve-speed as weighting for linear combination of distance and speed
+        :param behavior:
+        :return:
+        """
+        if behavior == 'cautious':
+            return self.curve_ampl_cautious
+        if behavior == 'average':
+            return self.curve_ampl_average
+        if behavior == 'speed':
+            return self.curve_ampl_speed
+        else:
+            raise ValueError('Unknown behavior')
 
 
 if __name__ == '__main__':
