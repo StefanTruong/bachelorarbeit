@@ -97,12 +97,104 @@ class Motorcycle(Vehicle):
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
 
+    # todo implement
+    def update_speed_preference(self):
+        """
+        updates its speed with regard to its preference before actual moving
+        lookat_positional_environment has to be updated first
+        :return:
+        """
+        self.look_at_positional_environment()
+        self.calc_distance_behind_partner()
+        self.calc_distance_ahead_partner()
+        self.update_partners()
+        self.update_role()
+        self.update_preferences(self.tile.get_curvature())
+
+        close_up_dist_behind = self.estimate_close_up_distance('behind')
+        close_up_dist_ahead = self.estimate_close_up_distance('ahead')
+
+        # the leader decides the speed of the platoon
+        if self.is_leader:
+            # accelerate if behind distance is too near
+            if close_up_dist_behind < self.behind_gap_preference:
+
+                # Acceleration: accelerate if max speed not achieved if distance allows it. No security of 1 tile
+                # cannot accelerate more than tile speed limit
+                if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV() \
+                        and self.get_speed() < self.get_tile().get_speed_limit():
+                    self.set_speed(self.get_speed() + 1)
+
+            # Decelerate if behind distance is too far
+            if close_up_dist_behind > self.behind_gap_preference:
+                self.set_speed(self.get_speed() - 1)
+
+            # Hold optimal distance. Accelerate or Decelerate if not speed_preference achieved
+            if close_up_dist_behind == self.behind_gap_preference:
+                if self.get_speed() < self.current_speed_preference:
+                    if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV() \
+                            and self.get_speed() < self.get_tile().get_speed_limit():
+                        self.set_speed(self.get_speed() + 1)
+
+                elif self.get_speed() > self.current_speed_preference:
+                    self.set_speed(self.get_speed() - 1)
+
+        # the sweeper and inbetween motorcyclists follow the ahead_partner if he is insight
+        ahead_vehicle = self.look_at_vehicle_at_pos(self.distance_front + 1, self.tile.get_lane())
+        partner_in_sight = False
+        if type(ahead_vehicle) is Motorcycle and ahead_vehicle.get_group() == self.get_group():
+            partner_in_sight = True
+
+        if partner_in_sight:
+            # accelerate if ahead distance too far
+            if close_up_dist_ahead > self.front_gap_preference:
+                # Acceleration: accelerate if max speed not achieved if distance allows it. No security of 1 tile
+                # cannot accelerate more than tile speed limit
+                if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV() \
+                        and self.get_speed() < self.get_tile().get_speed_limit():
+                    self.set_speed(self.get_speed() + 1)
+                # Decelerate if ahead distance too near
+            if close_up_dist_ahead < self.front_gap_preference:
+                self.set_speed(self.get_speed() - 1)
+            # Hold optimal distance. No acceleration or deceleration for sweeper and inbetween motorcyclists
+            if close_up_dist_ahead == self.front_gap_preference:
+                pass
+        else:
+            # if not partner in sight, adjust speed to speed_preference
+            if self.get_speed() < self.current_speed_preference:
+                if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV() \
+                        and self.get_speed() < self.get_tile().get_speed_limit():
+                    self.set_speed(self.get_speed() + 1)
+            elif self.get_speed() > self.current_speed_preference:
+                self.set_speed(self.get_speed() - 1)
+            else:
+                pass
+
+        # general_speed_adjustments for all scenarios
+        # 2. Slowing down with no tile security distance. No security distance
+        if self.distance_front <= self.get_speed() != 0:
+            self.set_speed(self.distance_front)
+
+        # 3. Cannot be faster than allowed speed limit of the current tile
+        if self.get_speed() > self.get_tile().get_speed_limit():
+            self.set_speed(self.get_tile().get_speed_limit())
+
+        # 4. Stop if there is no space in front
+        if self.distance_front == 0:
+            self.set_speed(0)
+
+        # 5. Randomization
+        if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
+            self.set_speed(self.get_speed() - 1)
+
         # todo check if necessary here
         self.update_partners()
 
-    def update_speed_preference(self):
+        # ToDo update fun
+
+    # todo delete
+    def tobedeleted_update_speed_preference(self):
         """
-        Todo implementation
         updates its speed with regard to its preference before actual moving
         lookat_positional_environment has to be updated first
         :return:
@@ -113,7 +205,7 @@ class Motorcycle(Vehicle):
         self.update_partners()
         self.update_role()
 
-        peak = self.calc_peak_value(self.tile.get_curvature())
+        peak = self.estimate_close_up_distance(self.tile.get_curvature())
         zeiger = self.fun_weight * self.speed
 
         # Todo leader logic for take over
@@ -134,7 +226,8 @@ class Motorcycle(Vehicle):
                     behind_vehicle_same_group = True
 
         # At least one partner has to be in sight
-        if partner_in_sight and (ahead_vehicle_same_group or behind_vehicle_same_group) or self.is_leader or self.is_sweeper:
+        if partner_in_sight and (
+                ahead_vehicle_same_group or behind_vehicle_same_group) or self.is_leader or self.is_sweeper:
             # accelerate
             if zeiger < peak:
                 if self.distance_front > self.get_speed() and self.get_speed() < self.get_maxV() \
@@ -228,7 +321,6 @@ class Motorcycle(Vehicle):
 
         # ToDo update fun
 
-    # Todo
     def update_preferences(self, current_curvature):
         """
         updates the preferences and weights for acceleration/deacceleration logic
@@ -249,8 +341,8 @@ class Motorcycle(Vehicle):
 
         self.fun_weight = self.sim.get_config_object().get_curve_fun_weight(current_curvature)
 
-    # ToDo
-    def calc_peak_value(self, current_curvature):
+    # ToDo delete
+    def tobedeleted_calc_peak_value(self, current_curvature):
         """
         calculates the peak value of the merged pdf
         :param current_curvature:   what curvature has the current tile
@@ -286,6 +378,22 @@ class Motorcycle(Vehicle):
             paek = 1
 
         return peak
+
+    # todo check distance to partner
+    def estimate_close_up_distance(self, partner):
+        """
+        calculates the distance
+        :param partner: 'behind' or 'ahead'. The partner to which the distance is calculated
+        :return: close_up_dist estimation of the distance_behind_partner for the next step
+        """
+        close_up_dist = 0
+        if partner == 'behind' and not self.is_sweeper:
+            close_up_dist = \
+                self.get_distance_behind_partner() - self.get_behind_partner().get_speed() + self.get_speed()
+        elif partner == 'ahead' and not self.is_leader:
+            close_up_dist = \
+                self.get_distance_ahead_partner() + self.get_ahead_partner().get_speed() - self.get_speed()
+        return close_up_dist
 
     def catch_up(self):
         """

@@ -340,7 +340,7 @@ class Preferences:
                         {'pdf': merged_pdf, 'range': values['range'], 'gradient': gradient}
 
         self.speed_gap_preferences = speed_gap_preferences
-        save_dict(self.speed_gap_preferences)
+        # save_dict(self.speed_gap_preferences)
 
     def get_speed_gap_preferences(self):
         return self.speed_gap_preferences

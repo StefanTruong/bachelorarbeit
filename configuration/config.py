@@ -259,12 +259,12 @@ class ConfigPreference:
             1: (3000, 10000),
         }
 
-        # more curvature more fun
+        # more curvature more fun. Keys [0,1] in relation to distance preference
         self.curve_fun_preference = {
-            1: (0, 800),
-            2: (1200, 1400),
-            3: (1400, 3000),
-            4: (3000, 10000),
+            0.25: (0, 800),
+            0.5: (1200, 1400),
+            0.75: (1400, 3000),
+            1: (3000, 10000),
         }
 
     # ToDo check if this works
