@@ -87,15 +87,17 @@ class Vehicle:
         # switching only possible if side is free
         if self.sim.tiles[self.tile.get_index()][self.tile.get_lane() + other_lane].get_vehicle() is None:
 
-            # T2 more space than current velocity + 1
-            if self.distance_front_other_lane > (self.get_speed() + 1):
+            # T2 more space than current velocity + 1 and tile max speed limit is not exceeded
+            if self.distance_front_other_lane > (self.get_speed() + 1) and \
+                    self.get_speed() < self.get_tile().get_speed_limit():
 
                 # Look what kind of vehicle is behind me
                 look_street_idx = (self.tile.get_index() - self.distance_behind_other_lane) % self.sim.length
                 behind_vehicle = self.look_at_vehicle_at_pos(look_street_idx, self.tile.get_lane() + other_lane)
 
+                # todo max speed or actual speed?
                 if behind_vehicle is not None:
-                    behind_max_speed = behind_vehicle.get_maxV()
+                    behind_max_speed = behind_vehicle.get_speed()
                 else:
                     behind_max_speed = 0
 

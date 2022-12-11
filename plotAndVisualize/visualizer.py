@@ -124,6 +124,8 @@ class VisualizeStreet:
         else:
             shift_carret = "2"
 
+        focus_vehicle.set_symbol('X')
+
         # calculates the right index to display
         behind = (focus_vehicle.get_tile().get_index() - view_distance) % self.simulation.get_length()
         ahead = (focus_vehicle.get_tile().get_index() + view_distance) % self.simulation.get_length()

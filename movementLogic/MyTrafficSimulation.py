@@ -235,7 +235,7 @@ class TrafficSimulation:
                                 self.number_bikes)
 
         self.tiles = tiles
-        self.vehicle_list = vehicle_list
+        self.vehicle_list = vehicle_list[::-1]
         self.set_uniqueid(vehicle_list)
 
     def initialize(self):

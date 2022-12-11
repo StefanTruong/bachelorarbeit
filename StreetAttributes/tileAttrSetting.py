@@ -131,7 +131,8 @@ class TileAttributeSetter:
         Third value is the beauty
         :return:
         """
-        with open('./StreetAttributes/attr_list.json', 'r') as f:
+        with open('./StreetAttributes/'
+                  'attr_list.json', 'r') as f:
             self.attr_dict = json.load(f)
 
         for key, value in self.attr_dict.items():

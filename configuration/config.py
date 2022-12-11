@@ -142,14 +142,14 @@ class ConfigPreference:
             """
             self.model_settings = {
                 'length': 1000,
-                'total_amount_steps': 100,
-                'density': 0.1,
+                'total_amount_steps': 20,
+                'density': 0.003,
                 'num_lanes': 1,  # [0,1] do not change
                 'prob_slowdown': 0.1,
                 'prob_changelane': 1,
                 'car_share': 1,
                 'number_platoons': 1,
-                'platoon_size': 4,
+                'platoon_size': 3,
                 'car_max_velocity': 11,  # 120[km/h] = 33.33[m/s] ~ 33/3 = 11
                 'bike_max_velocity': 2,  # 20[km/h] = 5.56[m/s] ~ 5/3 = 1.67
                 'motorcycle_max_velocity': 9,  # 100[km/h] = 27.78[m/s] ~ 27/3 = 9
@@ -207,13 +207,13 @@ class ConfigPreference:
 
         # # Preference Settings
         # distance preference single sided
-        self.dist_mean_small = 3  # 50[km/h] ~ 13[m/s]*2[sec] / 4[m/tile] ~ 3[tiles]
+        self.dist_mean_small = 2  # 50[km/h] ~ 13[m/s]*2[sec] / 4[m/tile] ~ 3[tiles]
         self.dist_sd_small = 1
         self.dist_ampl_small = 1
-        self.dist_mean_avg = 5
+        self.dist_mean_avg = 3
         self.dist_sd_avg = 1
         self.dist_ampl_avg = 1
-        self.dist_mean_high = 7
+        self.dist_mean_high = 4
         self.dist_sd_high = 1
         self.dist_ampl_high = 1
 
@@ -334,16 +334,18 @@ class ConfigPreference:
                 if curvature_range[0] <= current_curvature <= curvature_range[1]:
                     current_speed_preference = speed
                     break
-        if behavior == 'average':
+        elif behavior == 'average':
             for speed, curvature_range in self.curve_preference_average.items():
                 if curvature_range[0] <= current_curvature <= curvature_range[1]:
                     current_speed_preference = speed
                     break
-        if behavior == 'speed':
+        elif behavior == 'speed':
             for speed, curvature_range in self.curve_preference_speed.items():
                 if curvature_range[0] <= current_curvature <= curvature_range[1]:
                     current_speed_preference = speed
                     break
+        else:
+            raise ValueError('Unknown behavior')
         return current_speed_preference
 
     def get_distance_weight(self, behavior):
