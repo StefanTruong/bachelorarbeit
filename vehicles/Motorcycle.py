@@ -102,7 +102,7 @@ class Motorcycle(Vehicle):
         self.calc_distance_behind_partner()
         self.calc_distance_ahead_partner()
 
-        # Todo just for Testing
+        # Todo delete or change. it is just for Testing
         self.get_role()
         self.calc_peak_value(self.tile.get_curvature())
 
@@ -188,6 +188,8 @@ class Motorcycle(Vehicle):
 
         speed_ampl = self.sim.get_config_object(). \
             get_speed_weight(self.speed_preference)
+
+        fun_weight = self.sim.get_config_object().get_curve_fun_weight(current_curvature)
 
         # if motorcyclist is inbetween
         if self.is_inbetween:

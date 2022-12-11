@@ -259,6 +259,14 @@ class ConfigPreference:
             1: (3000, 10000),
         }
 
+        # more curvature more fun
+        self.curve_fun_preference = {
+            1: (0, 800),
+            2: (1200, 1400),
+            3: (1400, 3000),
+            4: (3000, 10000),
+        }
+
     # ToDo check if this works
     def get_distance_preference(self, speed_preference):
         """
@@ -382,6 +390,16 @@ class ConfigPreference:
             return self.curve_ampl_speed
         else:
             raise ValueError('Unknown behavior')
+
+    def get_curve_fun_weight(self, current_curvature):
+        """
+        get the fun out of the curvature
+        :param current_curvature: the curvature the motorcyclist is currently on
+        :return: how much the fun is weighted depending on curvature. Used for linear combination of speed and distance
+        """
+        for fun_weight, curvature_range in self.curve_fun_preference.items():
+            if curvature_range[0] <= current_curvature <= curvature_range[1]:
+                return fun_weight
 
 
 if __name__ == '__main__':
