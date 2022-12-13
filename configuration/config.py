@@ -278,12 +278,12 @@ class ConfigPreference:
             """
             self.model_settings = {
                 'length': 1000,
-                'total_amount_steps': 200,
-                'density': 0.003,
+                'total_amount_steps': 2000,
+                'density': 0.103,
                 'num_lanes': 1,  # [0,1] do not change
                 'prob_slowdown': 0,
                 'prob_changelane': 1,
-                'car_share': 1,
+                'car_share': 0.9,
                 'number_platoons': 1,
                 'platoon_size': 3,
                 'car_max_velocity': 11,  # 120[km/h] = 33.33[m/s] ~ 33/3 = 11
@@ -372,10 +372,9 @@ class ConfigPreference:
 
         # The average type wants to ride roughly one speed less
         self.curve_preference_average = {
-            9: (0, 500),
-            8: (500, 800),
-            7: (800, 1000),
-            6: (1000, 1200),
+            8: (0, 500),
+            7: (500, 800),
+            6: (800, 1200),
             5: (1200, 1400),
             4: (1400, 1600),
             3: (1600, 1800),

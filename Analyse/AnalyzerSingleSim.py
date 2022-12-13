@@ -67,6 +67,9 @@ class AnalyzerSingleSim:
                 'std_ahead_dist_partner': 0,  # std of the dist of the behind partner
 
                 # ToDo add changes to update_vehicle_summary_dict
+                'sum_is_leader': 0,  # sum of time the vehicle was the leader
+                'sum_is_sweeper': 0,  # sum of time the vehicle was the sweeper
+                'sum_is_inbetween': 0,  # sum of time the vehicle was in between
                 'incr_fun': 0,  # motorcyclist fun in this step
                 'sum_fun': 0,  # motorcyclist overall fun
 
@@ -132,6 +135,13 @@ class AnalyzerSingleSim:
                     self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] / self.step
                 self.vehicle_summary_dict[i]['std_ahead_dist_partner'] = \
                     np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
+
+                if vehicle.get_role() == 'leader':
+                    self.vehicle_summary_dict[i]['sum_is_leader'] += 1
+                elif vehicle.get_role() == 'sweeper':
+                    self.vehicle_summary_dict[i]['sum_is_sweeper'] += 1
+                elif vehicle.get_role() == 'inbetween':
+                    self.vehicle_summary_dict[i]['sum_is_inbetween'] += 1
 
     def incr_step(self):
         """
