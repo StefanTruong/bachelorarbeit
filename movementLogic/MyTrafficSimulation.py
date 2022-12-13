@@ -350,7 +350,7 @@ class TrafficSimulation:
         for vehicle in self.vehicle_list:
             # first update speed of all vehicles according to its surroundings
             if self.adjust_speed_preference and type(vehicle) is Motorcycle:
-                vehicle.update_speed_preference()
+                vehicle.update_speed_with_preference()
             else:
                 vehicle.update_speed()
 
@@ -360,11 +360,20 @@ class TrafficSimulation:
             # after moving prepare for switching lane
             self.update_lane_position(vehicle)
 
+            # the vehicle has been moved
+            vehicle.set_moved(True)
+
             # which visualization should be used
             if vis_modus == 'step':
                 vis.traffic_vis_tiles_step_by_step(vehicle, display_curve=True)
             else:
                 pass
+
+        self.done_moving_all_vehicles()
+
+    def done_moving_all_vehicles(self):
+        for vehicles in self.vehicle_list:
+            vehicles.set_moved(False)
 
     def get_tiles(self):
         return self.tiles

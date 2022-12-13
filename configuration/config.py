@@ -15,6 +15,23 @@ class ConfigPreference:
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
         'motorcycle_max_velocity': 7,
+        'speed_preferences': ['cautious', 'average', 'speed'],
+        # available distance_preferences one-sided or behind_ahead
+        'distance_preferences': ['small', 'avg', 'high',
+                                 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+                                 'high_high', 'high_small', 'high_avg', 'avg_small'],
+        'speed_distance_preferences': {
+            'cautious': {'behind_gap_preference': 'high',
+                         'front_gap_preference': 'high',
+                         'inbetween_gap_preference': 'high_high'},
+            'average': {'behind_gap_preference': 'avg',
+                        'front_gap_preference': 'avg',
+                        'inbetween_gap_preference': 'avg_avg'},
+            'speed': {'behind_gap_preference': 'small',
+                      'front_gap_preference': 'small',
+                      'inbetween_gap_preference': 'small_small'},
+        },
+        'biker_composition_modus': 'equal',
         'adjust_speed_preference': False}
     selection_2 = {
         'length': 20,  # don't use more than 50 for visualization as console cannot display more at once
@@ -29,6 +46,23 @@ class ConfigPreference:
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
         'motorcycle_max_velocity': 7,
+        'speed_preferences': ['cautious', 'average', 'speed'],
+        # available distance_preferences one-sided or behind_ahead
+        'distance_preferences': ['small', 'avg', 'high',
+                                 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+                                 'high_high', 'high_small', 'high_avg', 'avg_small'],
+        'speed_distance_preferences': {
+            'cautious': {'behind_gap_preference': 'high',
+                         'front_gap_preference': 'high',
+                         'inbetween_gap_preference': 'high_high'},
+            'average': {'behind_gap_preference': 'avg',
+                        'front_gap_preference': 'avg',
+                        'inbetween_gap_preference': 'avg_avg'},
+            'speed': {'behind_gap_preference': 'small',
+                      'front_gap_preference': 'small',
+                      'inbetween_gap_preference': 'small_small'},
+        },
+        'biker_composition_modus': 'equal',
         'adjust_speed_preference': False}
     selection_3 = {
         'length': 50,  # don't use more than 50 for visualization as console cannot display more at once
@@ -43,6 +77,23 @@ class ConfigPreference:
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
         'motorcycle_max_velocity': 7,
+        'speed_preferences': ['cautious', 'average', 'speed'],
+        # available distance_preferences one-sided or behind_ahead
+        'distance_preferences': ['small', 'avg', 'high',
+                                 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+                                 'high_high', 'high_small', 'high_avg', 'avg_small'],
+        'speed_distance_preferences': {
+            'cautious': {'behind_gap_preference': 'high',
+                         'front_gap_preference': 'high',
+                         'inbetween_gap_preference': 'high_high'},
+            'average': {'behind_gap_preference': 'avg',
+                        'front_gap_preference': 'avg',
+                        'inbetween_gap_preference': 'avg_avg'},
+            'speed': {'behind_gap_preference': 'small',
+                      'front_gap_preference': 'small',
+                      'inbetween_gap_preference': 'small_small'},
+        },
+        'biker_composition_modus': 'equal',
         'adjust_speed_preference': False}
     selection_4 = {
         'length': 40,  # don't use more than 50 for visualization as console cannot display more at once
@@ -57,6 +108,23 @@ class ConfigPreference:
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
         'motorcycle_max_velocity': 7,
+        'speed_preferences': ['cautious', 'average', 'speed'],
+        # available distance_preferences one-sided or behind_ahead
+        'distance_preferences': ['small', 'avg', 'high',
+                                 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+                                 'high_high', 'high_small', 'high_avg', 'avg_small'],
+        'speed_distance_preferences': {
+            'cautious': {'behind_gap_preference': 'high',
+                         'front_gap_preference': 'high',
+                         'inbetween_gap_preference': 'high_high'},
+            'average': {'behind_gap_preference': 'avg',
+                        'front_gap_preference': 'avg',
+                        'inbetween_gap_preference': 'avg_avg'},
+            'speed': {'behind_gap_preference': 'small',
+                      'front_gap_preference': 'small',
+                      'inbetween_gap_preference': 'small_small'},
+        },
+        'biker_composition_modus': 'equal',
         'adjust_speed_preference': False}
     selection_5 = {
         'length': 100,  # don't use more than 50 for visualization as console cannot display more at once
@@ -71,6 +139,23 @@ class ConfigPreference:
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
         'motorcycle_max_velocity': 7,
+        'speed_preferences': ['cautious', 'average', 'speed'],
+        # available distance_preferences one-sided or behind_ahead
+        'distance_preferences': ['small', 'avg', 'high',
+                                 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+                                 'high_high', 'high_small', 'high_avg', 'avg_small'],
+        'speed_distance_preferences': {
+            'cautious': {'behind_gap_preference': 'high',
+                         'front_gap_preference': 'high',
+                         'inbetween_gap_preference': 'high_high'},
+            'average': {'behind_gap_preference': 'avg',
+                        'front_gap_preference': 'avg',
+                        'inbetween_gap_preference': 'avg_avg'},
+            'speed': {'behind_gap_preference': 'small',
+                      'front_gap_preference': 'small',
+                      'inbetween_gap_preference': 'small_small'},
+        },
+        'biker_composition_modus': 'equal',
         'adjust_speed_preference': False}
     selection_6 = {
         'length': 100,  # don't use more than 50 for visualization as console cannot display more at once
@@ -85,6 +170,23 @@ class ConfigPreference:
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
         'motorcycle_max_velocity': 7,
+        'speed_preferences': ['cautious', 'average', 'speed'],
+        # available distance_preferences one-sided or behind_ahead
+        'distance_preferences': ['small', 'avg', 'high',
+                                 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+                                 'high_high', 'high_small', 'high_avg', 'avg_small'],
+        'speed_distance_preferences': {
+            'cautious': {'behind_gap_preference': 'high',
+                         'front_gap_preference': 'high',
+                         'inbetween_gap_preference': 'high_high'},
+            'average': {'behind_gap_preference': 'avg',
+                        'front_gap_preference': 'avg',
+                        'inbetween_gap_preference': 'avg_avg'},
+            'speed': {'behind_gap_preference': 'small',
+                      'front_gap_preference': 'small',
+                      'inbetween_gap_preference': 'small_small'},
+        },
+        'biker_composition_modus': 'equal',
         'adjust_speed_preference': False}
     selection_7 = {
         'length': 30,  # don't use more than 50 for visualization as console cannot display more at once
@@ -99,6 +201,23 @@ class ConfigPreference:
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
         'motorcycle_max_velocity': 7,
+        'speed_preferences': ['cautious', 'average', 'speed'],
+        # available distance_preferences one-sided or behind_ahead
+        'distance_preferences': ['small', 'avg', 'high',
+                                 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+                                 'high_high', 'high_small', 'high_avg', 'avg_small'],
+        'speed_distance_preferences': {
+            'cautious': {'behind_gap_preference': 'high',
+                         'front_gap_preference': 'high',
+                         'inbetween_gap_preference': 'high_high'},
+            'average': {'behind_gap_preference': 'avg',
+                        'front_gap_preference': 'avg',
+                        'inbetween_gap_preference': 'avg_avg'},
+            'speed': {'behind_gap_preference': 'small',
+                      'front_gap_preference': 'small',
+                      'inbetween_gap_preference': 'small_small'},
+        },
+        'biker_composition_modus': 'equal',
         'adjust_speed_preference': False}
     selection_8 = {
         'length': 1000,  # don't use more than 50 for visualization as console cannot display more at once
@@ -113,6 +232,23 @@ class ConfigPreference:
         'car_max_velocity': 10,
         'bike_max_velocity': 2,
         'motorcycle_max_velocity': 7,
+        'speed_preferences': ['cautious', 'average', 'speed'],
+        # available distance_preferences one-sided or behind_ahead
+        'distance_preferences': ['small', 'avg', 'high',
+                                 'small_small', 'small_avg', 'small_high', 'avg_avg', 'avg_high',
+                                 'high_high', 'high_small', 'high_avg', 'avg_small'],
+        'speed_distance_preferences': {
+            'cautious': {'behind_gap_preference': 'high',
+                         'front_gap_preference': 'high',
+                         'inbetween_gap_preference': 'high_high'},
+            'average': {'behind_gap_preference': 'avg',
+                        'front_gap_preference': 'avg',
+                        'inbetween_gap_preference': 'avg_avg'},
+            'speed': {'behind_gap_preference': 'small',
+                      'front_gap_preference': 'small',
+                      'inbetween_gap_preference': 'small_small'},
+        },
+        'biker_composition_modus': 'equal',
         'adjust_speed_preference': False}
     selection_9 = None
 
@@ -142,10 +278,10 @@ class ConfigPreference:
             """
             self.model_settings = {
                 'length': 1000,
-                'total_amount_steps': 20,
+                'total_amount_steps': 200,
                 'density': 0.003,
                 'num_lanes': 1,  # [0,1] do not change
-                'prob_slowdown': 0.1,
+                'prob_slowdown': 0,
                 'prob_changelane': 1,
                 'car_share': 1,
                 'number_platoons': 1,

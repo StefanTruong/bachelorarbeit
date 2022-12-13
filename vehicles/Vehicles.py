@@ -14,6 +14,10 @@ class Vehicle:
         self.icon = 'Das soll nicht geprinted werden!'
         self.id = 666
 
+        # values if the motorcyclist has moved in the current time step. see moving_each_vehicle in MyTrafficSimulation
+        # Will be first moved forward then switch position vehicle by vehicle
+        self.moved = False
+
     def calc_dist_front_vehicle(self, lane):
         """
         calculates how much distance is ahead according to left or right lane
@@ -91,13 +95,12 @@ class Vehicle:
             if self.distance_front_other_lane > (self.get_speed() + 1) and \
                     self.get_speed() < self.get_tile().get_speed_limit():
 
-                # Look what kind of vehicle is behind me
+                # Look what kind of vehicle is behind me. Todo check if -1 for look_street_idx is correct
                 look_street_idx = (self.tile.get_index() - self.distance_behind_other_lane) % self.sim.length
                 behind_vehicle = self.look_at_vehicle_at_pos(look_street_idx, self.tile.get_lane() + other_lane)
 
-                # todo max speed or actual speed?
                 if behind_vehicle is not None:
-                    behind_max_speed = behind_vehicle.get_speed()
+                    behind_max_speed = behind_vehicle.get_maxV()
                 else:
                     behind_max_speed = 0
 
@@ -185,6 +188,9 @@ class Vehicle:
     def get_id(self):
         return self.id
 
+    def get_moved(self):
+        return self.moved
+
     def get_type(self):
         return type(self).__name__
 
@@ -202,6 +208,9 @@ class Vehicle:
             self.icon = '' + symbol + speed_str + '  '
         elif len(speed_str) == 3:
             self.icon = '' + symbol + speed_str + ' '
+
+    def set_moved(self, moved=False):
+        self.moved = moved
 
 
 # --------------------------------------------------------------------------------------------------------------------
