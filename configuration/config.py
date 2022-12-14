@@ -285,7 +285,7 @@ class ConfigPreference:
                 'prob_changelane': 1,
                 'car_share': 0.9,
                 'number_platoons': 1,
-                'platoon_size': 3,
+                'platoon_size': 30,
                 'car_max_velocity': 11,  # 120[km/h] = 33.33[m/s] ~ 33/3 = 11
                 'bike_max_velocity': 2,  # 20[km/h] = 5.56[m/s] ~ 5/3 = 1.67
                 'motorcycle_max_velocity': 9,  # 100[km/h] = 27.78[m/s] ~ 27/3 = 9

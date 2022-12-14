@@ -43,6 +43,9 @@ class Motorcycle(Vehicle):
         self.is_sweeper = False
         self.is_inbetween = False
 
+        # list of all platoon members
+        self.my_platoon = []
+
         self.fun = 0
 
     def update_speed(self):
@@ -51,8 +54,6 @@ class Motorcycle(Vehicle):
         :return:
         """
         self.look_at_positional_environment()
-        self.calc_distance_behind_partner()
-        self.calc_distance_ahead_partner()
         self.update_partners()
 
         # 1. Acceleration: accelerate if max speed not achieved if distance allows it. No security distance of 1 tile
@@ -96,17 +97,14 @@ class Motorcycle(Vehicle):
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
 
-    # todo check if this is it
+    # todo check if this is finale version
     def update_speed_with_preference(self):
         """
         first the leader adjust its distance. All other motorcyclist adjust to the ahead partner distance
         :return:
         """
         self.look_at_positional_environment()
-        self.calc_distance_behind_partner()
-        self.calc_distance_ahead_partner()
         self.update_partners()
-        self.update_role()
         self.update_preferences(self.tile.get_curvature())
 
         close_up_dist_behind = self.estimate_close_up_distance('behind')
@@ -157,7 +155,7 @@ class Motorcycle(Vehicle):
                     self.set_speed(self.get_speed() + 1)
 
             # todo implement recursive distance berechnung
-            calc_platoon_distance = self.platoon_distance_too_far()
+            # calc_platoon_distance = self.platoon_distance_too_far()
         else:
             # the sweeper and inbetween motorcyclists follow the ahead_partner if he is insight
             ahead_vehicle = self.look_at_vehicle_at_pos(self.get_tile().get_index() + self.distance_front + 1,
@@ -211,7 +209,7 @@ class Motorcycle(Vehicle):
         # #
         # ToDo update fun
 
-    # todo implement if preference only possiblle
+    # todo implement if preference only possible
     def deleted_update_speed_preferenceV4(self):
         """
         updates its speed with regard to its preference before actual moving
@@ -219,10 +217,7 @@ class Motorcycle(Vehicle):
         :return:
         """
         self.look_at_positional_environment()
-        self.calc_distance_behind_partner()
-        self.calc_distance_ahead_partner()
         self.update_partners()
-        self.update_role()
 
         peak = self.estimate_close_up_distance(self.tile.get_curvature())
         # zeiger = self.fun_weight * self.speed
@@ -338,12 +333,9 @@ class Motorcycle(Vehicle):
             if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
                 self.set_speed(self.get_speed() - 1)
 
-        # todo check if necessary here
-        self.update_partners()
-
         # ToDo update fun
 
-    # todo iterative calculating distance
+    # todo delete if not used anymore
     def platoon_distance_too_far(self):
         """
         calculates if the overall distance of the platoon is too far. Only the leader adjust its speed to platoon spread
@@ -380,7 +372,7 @@ class Motorcycle(Vehicle):
 
         self.fun_weight = self.sim.get_config_object().get_curve_fun_weight(current_curvature)
 
-    # ToDo delete
+    # ToDo delete if not used anymore
     def tobedeleted_calc_peak_value(self, current_curvature):
         """
         calculates the peak value of the merged pdf
@@ -490,44 +482,32 @@ class Motorcycle(Vehicle):
 
     def update_partners(self):
         """
-        updates the partners of the motorcyclist
+        updates the ahead and behind partners of the motorcyclist
         :return:
         """
-        idx_front_in_position = False
-        idx_behind_in_position = False
+        # order list of motorcyclists according to their position on the road
+        self.my_platoon = sorted(self.my_platoon, key=lambda x: x.get_tile().get_index(), reverse=False)
 
-        while not (idx_front_in_position and idx_behind_in_position):
-            # current motorcyclist overtakes ahead partner
-            if self.get_ahead_partner() is not None:
-                if self.get_ahead_partner().get_tile().get_index() < self.get_tile().get_index():
-                    old_ahead_partner = self.get_ahead_partner()
-                    old_behind_partner = self.get_behind_partner()
-                    self.set_ahead_partner(self.get_ahead_partner().get_ahead_partner())
-                    self.set_behind_partner(old_ahead_partner)
-                    old_ahead_partner.set_ahead_partner(self)
-                    old_ahead_partner.set_behind_partner(old_behind_partner)
-                else:
-                    idx_front_in_position = True
+        # update ahead and behind partners of all motorcyclists
+        for i in range(len(self.my_platoon)):
+            if i == 0:
+                self.my_platoon[i].set_ahead_partner(self.my_platoon[i + 1])
+                self.my_platoon[i].set_behind_partner(None)
+            elif i == len(self.my_platoon) - 1:
+                self.my_platoon[i].set_ahead_partner(None)
+                self.my_platoon[i].set_behind_partner(self.my_platoon[i - 1])
             else:
-                idx_front_in_position = True
+                self.my_platoon[i].set_ahead_partner(self.my_platoon[i + 1])
+                self.my_platoon[i].set_behind_partner(self.my_platoon[i - 1])
 
-            # behind partner overtakes current motorcyclist
-            if self.get_behind_partner() is not None:
-                if self.get_behind_partner().get_tile().get_index() > self.get_tile().get_index():
-                    old_ahead_partner = self.get_ahead_partner()
-                    old_behind_partner = self.get_behind_partner()
-                    self.set_behind_partner(self.get_behind_partner().get_behind_partner())
-                    self.set_ahead_partner(old_behind_partner)
-                    old_behind_partner.set_behind_partner(self)
-                    old_behind_partner.set_ahead_partner(old_ahead_partner)
-                else:
-                    idx_behind_in_position = True
-            else:
-                idx_behind_in_position = True
+        self.update_role()
+        self.calc_distance_behind_partner()
+        self.calc_distance_ahead_partner()
 
     def update_role(self):
         """
         determines if the motorcyclist is a leader, sweeper or inbetween
+        update_partners has to be called before
         :return:
         """
         if self.get_ahead_partner() is not None and self.get_behind_partner() is not None:
@@ -555,6 +535,7 @@ class Motorcycle(Vehicle):
         switch_lane = False
 
         self.look_at_positional_environment()
+        self.update_partners()
 
         # asymmetric condition for switching lanes L->R see Rickert (T2-T4)
         if self.tile.get_lane() == 0:
@@ -589,7 +570,6 @@ class Motorcycle(Vehicle):
 
         return switch_lane
 
-    # todo
     def switch_possible(self):
         """
         returns a Boolean if Motorcyclist should switch lane. Instead, looking at maxV it looks at actual velocity
@@ -646,6 +626,9 @@ class Motorcycle(Vehicle):
 
     def set_ahead_partner(self, partner):
         self.ahead = partner
+
+    def set_my_platoon(self, platoon):
+        self.my_platoon = platoon
 
     def set_symbol(self, symbol):
         self.symbol = symbol

@@ -171,6 +171,7 @@ class TrafficSimulation:
         tile_index = 0
         for platoon in range(0, self.number_platoons):
             last_motorcyclist = None
+            platoon_list = []
 
             for biker_number in range(0, self.platoon_size):
                 tile = tiles[tile_index][0]
@@ -194,7 +195,12 @@ class TrafficSimulation:
 
                 tiles[tile_index][0].set_vehicle(motorcyclist)
                 vehicle_list.append(motorcyclist)
+                platoon_list.append(motorcyclist)
                 tile_index += 1
+
+            # set platoon list into all motorcyclist
+            for motorcyclist in platoon_list:
+                motorcyclist.set_my_platoon(platoon_list)
 
             # offset between each platoon
             tile_index += offset

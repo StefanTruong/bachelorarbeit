@@ -338,8 +338,8 @@ elif selection == 9:
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        # time.sleep(1.1)
-        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        time.sleep(1.1)
+        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         # sim.moving(vis, vis_modus='step')
         analyzer.update()
