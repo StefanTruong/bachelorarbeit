@@ -197,6 +197,9 @@ class Vehicle:
     def get_icon_granular(self):
         return '.'
 
+    def get_role(self):
+        return None
+
     def set_MyTrafficSimulation(self, sim):
         self.sim = sim
 

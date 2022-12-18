@@ -44,6 +44,10 @@ class Motorcycle(Vehicle):
         self.is_sweeper = False
         self.is_inbetween = False
 
+        # optimal distance in last step achieved
+        self.behind_optimal_distance = False
+        self.front_optimal_distance = False
+
         # list of all platoon members
         self.my_platoon = []
 
@@ -110,6 +114,8 @@ class Motorcycle(Vehicle):
         close_up_dist_behind = self.estimate_close_up_distance_partner('behind')
         close_up_dist_ahead = self.estimate_close_up_distance_partner('ahead')
 
+        changed_speed = False
+
         if self.tile.get_lane() == 0:
             other_lane = 1
         elif self.tile.get_lane() == 1:
@@ -128,42 +134,62 @@ class Motorcycle(Vehicle):
 
         ahead_partner_in_sight = False
         behind_partner_in_sight = False
-        if (ahead_vehicle is self.get_ahead_partner() or ahead_vehicle_other_lane is self.get_ahead_partner())\
-                and not ahead_vehicle.get_role() == 'sweeper':
-            ahead_partner_in_sight = True
-        if (behind_vehicle is self.get_behind_partner() or behind_vehicle_other_lane is self.get_behind_partner())\
-                and not behind_vehicle.get_role() == 'leader':
-            behind_partner_in_sight = True
+        if ahead_vehicle is self.get_ahead_partner() or ahead_vehicle_other_lane is self.get_ahead_partner():
+            if ahead_vehicle is not None:
+                if ahead_vehicle.get_role() != 'sweeper':
+                    ahead_partner_in_sight = True
+            if ahead_vehicle_other_lane is not None:
+                if ahead_vehicle_other_lane.get_role() != 'sweeper':
+                    ahead_partner_in_sight = True
+        if behind_vehicle is self.get_behind_partner() or behind_vehicle_other_lane is self.get_behind_partner():
+            if behind_vehicle is not None:
+                if behind_vehicle.get_role() != 'leader':
+                    behind_partner_in_sight = True
+                if behind_vehicle_other_lane is not None:
+                    if behind_vehicle_other_lane.get_role() != 'leader':
+                        behind_partner_in_sight = True
 
-        # 1. adjust speed to get optimal distance to ahead partner
-        if ahead_partner_in_sight and self.get_role() == 'sweeper':
-            if close_up_dist_ahead >= self.front_gap_preference + 1:
-                # decelerate if too close to ahead partner
-                if close_up_dist_ahead > self.front_gap_preference:
-                    self.set_speed(self.get_speed() + 1)
-                # accelerate if too far from ahead partner
-                elif close_up_dist_ahead < self.front_gap_preference:
-                    self.set_speed(self.get_speed() - 1)
-                # adjust speed to preference
-                elif close_up_dist_ahead == self.front_gap_preference:
-                    if self.get_speed() < self.current_speed_preference:
-                        self.set_speed(self.get_speed() + 1)
-                    elif self.get_speed() > self.current_speed_preference:
-                        self.set_speed(self.get_speed() - 1)
-                    else:
-                        # everything optimal
-                        pass
-
-        # 2. adjust speed to get optimal distance to behind partner
-        if behind_partner_in_sight:
+        # 1. adjust speed to get optimal distance to behind partner
+        if behind_partner_in_sight or self.get_role() == 'sweeper':
             # decelerate if too close to behind partner. But be faster than a Bike
             if close_up_dist_behind > self.behind_gap_preference and self.get_speed() > 2:
                 self.set_speed(self.get_speed() - 1)
+                changed_speed = True
             # accelerate if too far from behind partner
             elif close_up_dist_behind < self.behind_gap_preference:
                 self.set_speed(self.get_speed() + 1)
+                changed_speed = True
+
+        # 2. adjust speed to get optimal distance to ahead partner
+        if ahead_partner_in_sight and not changed_speed:
+            # decelerate if too close to ahead partner
+            if close_up_dist_ahead > self.front_gap_preference:
+                self.set_speed(self.get_speed() + 1)
+            # accelerate if too far from ahead partner
+            elif close_up_dist_ahead < self.front_gap_preference:
+                self.set_speed(self.get_speed() - 1)
             # adjust speed to preference
-            elif close_up_dist_behind == self.behind_gap_preference:
+            # elif close_up_dist_ahead == self.front_gap_preference:
+            #     if self.get_speed() < self.current_speed_preference:
+            #         self.set_speed(self.get_speed() + 1)
+            #     elif self.get_speed() > self.current_speed_preference:
+            #        self.set_speed(self.get_speed() - 1)
+            #    else:
+            #        # everything optimal
+            #        pass
+
+        # 3. if optimal distance behind achieved
+        if close_up_dist_behind == self.behind_gap_preference and not changed_speed:
+            if self.get_speed() < self.current_speed_preference:
+                self.set_speed(self.get_speed() + 1)
+            elif self.get_speed() > self.current_speed_preference:
+                self.set_speed(self.get_speed() - 1)
+            else:
+                # everything optimal
+                pass
+        else:
+            # adjust speed to preference
+            if close_up_dist_ahead == self.front_gap_preference and not changed_speed:
                 if self.get_speed() < self.current_speed_preference:
                     self.set_speed(self.get_speed() + 1)
                 elif self.get_speed() > self.current_speed_preference:
@@ -172,7 +198,7 @@ class Motorcycle(Vehicle):
                     # everything optimal
                     pass
 
-        # 3. if neither is in direct sight, then adjust speed to preference
+        # 4. if neither is in direct sight, then adjust speed to preference
         if not ahead_partner_in_sight and not behind_partner_in_sight:
             if self.get_speed() < self.current_speed_preference:
                 self.set_speed(self.get_speed() + 1)
@@ -191,7 +217,7 @@ class Motorcycle(Vehicle):
             if self.estimate_close_up_distance(idx, lane) < 0:
                 self.set_speed(self.get_speed() + 1)
             else:
-                # hold the current speed according to other rules
+                # hold the current speed according to other rules and abort overtaking
                 pass
 
         # general_speed_adjustments for all scenarios
@@ -218,8 +244,6 @@ class Motorcycle(Vehicle):
         # 5. Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
-
-
 
     # todo delete
     def update_speed_with_preferenceV5(self):
@@ -580,7 +604,8 @@ class Motorcycle(Vehicle):
             if vehicle.get_moved():
                 dist_diff = (idx - self.get_tile().get_index() - self.get_speed()) % self.sim.get_length()
             else:
-                dist_diff = (idx - self.get_tile().get_index() + vehicle.get_speed() - self.get_speed()) % self.sim.get_length()
+                dist_diff = (
+                                        idx - self.get_tile().get_index() + vehicle.get_speed() - self.get_speed()) % self.sim.get_length()
         return dist_diff
 
     def estimate_catch_up_distance(self, idx, lane):
@@ -596,7 +621,8 @@ class Motorcycle(Vehicle):
             if vehicle.get_moved():
                 dist_diff = (self.get_tile().get_index() - idx + self.get_speed()) % self.sim.get_length()
             else:
-                dist_diff = (self.get_tile().get_index() - idx - vehicle.get_speed() + self.get_speed()) % self.sim.get_length()
+                dist_diff = (
+                                        self.get_tile().get_index() - idx - vehicle.get_speed() + self.get_speed()) % self.sim.get_length()
         return dist_diff
 
     def speed_up(self):
@@ -774,7 +800,7 @@ class Motorcycle(Vehicle):
         self.update_partners()
 
         idx_ahead = (self.tile.get_index() + self.distance_front + 1) % self.sim.get_length()
-        vehicle = self.look_at_vehicle_at_pos(idx_ahead, self.tile.get_lane())
+        ahead_vehicle = self.look_at_vehicle_at_pos(idx_ahead, self.tile.get_lane())
 
         # asymmetric condition for switching lanes L->R see Rickert (T2-T4)
         if self.tile.get_lane() == 0:
@@ -786,21 +812,20 @@ class Motorcycle(Vehicle):
             # Hint self.distance_front + 1 mandatory, since distance_front calculates the actual empty distance
             # Hint the leader isn't affected since it has no partner ahead
             if self.distance_front < self.sim.get_length() / 10:
-                if type(vehicle) is Motorcycle:
-                    if vehicle.get_group() == self.get_group():
+                if type(ahead_vehicle) is Motorcycle:
+                    if ahead_vehicle.get_group() == self.get_group() and ahead_vehicle.get_role() != "sweeper":
                         switch_lane = False
 
         # asymmetric condition for switching lanes R->L see Rickert (T1-T4)
         elif self.tile.get_lane() == 1:
 
-            # current lane ahead has smaller space than current velocity + 1  security tile distance (T1)
-            if self.distance_front < self.get_speed() + 1:
+            # current lane ahead has smaller space than 2 * current velocity + 1 security tile distance (T1)
+            if self.distance_front < 2 * self.get_speed() + 1:
                 switch_lane = self.switch_possible()
 
             # do not switch lane if direct vehicle ahead is a platoon member
-            # Hint self.distance_front + 1 mandatory, since distance_front calculates the actual empty distance
-            if type(vehicle) is Motorcycle:
-                if vehicle.get_group() == self.get_group():
+            if type(ahead_vehicle) is Motorcycle:
+                if ahead_vehicle.get_group() == self.get_group() and ahead_vehicle.get_role() != "sweeper":
                     switch_lane = False
 
         return switch_lane
@@ -848,16 +873,14 @@ class Motorcycle(Vehicle):
                     if np.random.random() < self.sim.prob_changelane:
                         switch = True
 
-            # if motorcyclist is on the left lane and on the right lane front is a platoon member
-            # behind vehicle other lane should not move up to my position
-            elif self.get_tile().get_lane() == 0 and type(behind_vehicle_other_lane) is Motorcycle:
-                if behind_vehicle_other_lane.get_group() == self.get_group():
-                    # the behind_motorcyclist is not faster than the current motorcyclist
-                    # if behind_vehicle.get_speed() <= self.get_speed():
+            # if motorcyclist is on the right lane and on the left lane front is a platoon member
+            elif type(ahead_vehicle_other_lane) is Motorcycle:
+                if ahead_vehicle_other_lane.get_group() == self.get_group() and ahead_vehicle_other_lane.get_role() != "sweeper":
                     if np.random.random() < self.sim.prob_changelane:
                         switch = True
-            elif self.get_tile().get_lane() == 0 and type(ahead_vehicle_other_lane) is Motorcycle:
-                if ahead_vehicle_other_lane.get_group() == self.get_group():
+
+            elif self.get_tile().get_lane() == 1 and type(behind_vehicle_other_lane) is Motorcycle:
+                if behind_vehicle_other_lane.get_group() == self.get_group() and behind_vehicle_other_lane.get_role() != "sweeper":
                     if np.random.random() < self.sim.prob_changelane:
                         switch = True
 
