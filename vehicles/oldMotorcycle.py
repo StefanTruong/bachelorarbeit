@@ -63,10 +63,10 @@ class Motorcycle(Vehicle):
                 and self.get_speed() < self.get_tile().get_speed_limit():
 
             # additional acceleration if too far from ahead partner
-            if self.distance_front > self.get_speed() + self.speed_up() and \
-                    self.get_speed() + self.speed_up() < self.get_maxV() and \
-                    self.get_speed() + self.speed_up() < self.get_tile().get_speed_limit():
-                self.set_speed(self.get_speed() + self.speed_up() + 1)
+            if self.distance_front > self.get_speed() + self.catch_up() and \
+                    self.get_speed() + self.catch_up() < self.get_maxV() and \
+                    self.get_speed() + self.catch_up() < self.get_tile().get_speed_limit():
+                self.set_speed(self.get_speed() + self.catch_up() + 1)
 
             else:
                 self.set_speed(self.get_speed() + 1)
@@ -98,131 +98,8 @@ class Motorcycle(Vehicle):
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
 
+    # todo check if this is finale version
     def update_speed_with_preference(self):
-        """
-        all motorcyclist have the same set of rules
-        :return:
-        """
-        self.look_at_positional_environment()
-        self.update_partners()
-        self.update_preferences(self.tile.get_curvature())
-
-        close_up_dist_behind = self.estimate_close_up_distance_partner('behind')
-        close_up_dist_ahead = self.estimate_close_up_distance_partner('ahead')
-
-        if self.tile.get_lane() == 0:
-            other_lane = 1
-        elif self.tile.get_lane() == 1:
-            other_lane = -1
-
-        # Look what kind of vehicle around me
-        idx_behind = (self.tile.get_index() - self.distance_behind - 1) % self.sim.get_length()
-        idx_ahead = (self.tile.get_index() + self.distance_front + 1) % self.sim.get_length()
-        behind_vehicle = self.look_at_vehicle_at_pos(idx_behind, self.get_tile().get_lane())
-        ahead_vehicle = self.look_at_vehicle_at_pos(idx_ahead, self.tile.get_lane())
-
-        idx_behind_other = (self.tile.get_index() - self.distance_behind_other_lane - 1) % self.sim.get_length()
-        idx_ahead_other = (self.tile.get_index() + self.distance_front_other_lane + 1) % self.sim.get_length()
-        behind_vehicle_other_lane = self.look_at_vehicle_at_pos(idx_behind_other, self.tile.get_lane() + other_lane)
-        ahead_vehicle_other_lane = self.look_at_vehicle_at_pos(idx_ahead_other, self.tile.get_lane() + other_lane)
-
-        ahead_partner_in_sight = False
-        behind_partner_in_sight = False
-        if (ahead_vehicle is self.get_ahead_partner() or ahead_vehicle_other_lane is self.get_ahead_partner())\
-                and not ahead_vehicle.get_role() == 'sweeper':
-            ahead_partner_in_sight = True
-        if (behind_vehicle is self.get_behind_partner() or behind_vehicle_other_lane is self.get_behind_partner())\
-                and not behind_vehicle.get_role() == 'leader':
-            behind_partner_in_sight = True
-
-        # 1. adjust speed to get optimal distance to ahead partner
-        if ahead_partner_in_sight and self.get_role() == 'sweeper':
-            if close_up_dist_ahead >= self.front_gap_preference + 1:
-                # decelerate if too close to ahead partner
-                if close_up_dist_ahead > self.front_gap_preference:
-                    self.set_speed(self.get_speed() + 1)
-                # accelerate if too far from ahead partner
-                elif close_up_dist_ahead < self.front_gap_preference:
-                    self.set_speed(self.get_speed() - 1)
-                # adjust speed to preference
-                elif close_up_dist_ahead == self.front_gap_preference:
-                    if self.get_speed() < self.current_speed_preference:
-                        self.set_speed(self.get_speed() + 1)
-                    elif self.get_speed() > self.current_speed_preference:
-                        self.set_speed(self.get_speed() - 1)
-                    else:
-                        # everything optimal
-                        pass
-
-        # 2. adjust speed to get optimal distance to behind partner
-        if behind_partner_in_sight:
-            # decelerate if too close to behind partner. But be faster than a Bike
-            if close_up_dist_behind > self.behind_gap_preference and self.get_speed() > 2:
-                self.set_speed(self.get_speed() - 1)
-            # accelerate if too far from behind partner
-            elif close_up_dist_behind < self.behind_gap_preference:
-                self.set_speed(self.get_speed() + 1)
-            # adjust speed to preference
-            elif close_up_dist_behind == self.behind_gap_preference:
-                if self.get_speed() < self.current_speed_preference:
-                    self.set_speed(self.get_speed() + 1)
-                elif self.get_speed() > self.current_speed_preference:
-                    self.set_speed(self.get_speed() - 1)
-                else:
-                    # everything optimal
-                    pass
-
-        # 3. if neither is in direct sight, then adjust speed to preference
-        if not ahead_partner_in_sight and not behind_partner_in_sight:
-            if self.get_speed() < self.current_speed_preference:
-                self.set_speed(self.get_speed() + 1)
-            elif self.get_speed() > self.current_speed_preference:
-                self.set_speed(self.get_speed() - 1)
-            else:
-                # optimal speed
-                pass
-
-        # todo adjust speed for more cases
-        # if motorcyclist is on the left lane he wants to overtake the slower vehicle on the right lane
-        if self.tile.get_lane() == 0 and ahead_vehicle_other_lane is not None:
-            idx = ahead_vehicle_other_lane.get_tile().get_index()
-            lane = ahead_vehicle_other_lane.get_tile().get_lane()
-            # vehicle can be overtaken since it is slower than the motorcyclist
-            if self.estimate_close_up_distance(idx, lane) < 0:
-                self.set_speed(self.get_speed() + 1)
-            else:
-                # hold the current speed according to other rules
-                pass
-
-        # general_speed_adjustments for all scenarios
-        # 0. Cannot drive backwards
-        if self.get_speed() < 0:
-            self.set_speed(0)
-
-        # 1. Cannot be faster than motorcycle max speed
-        if self.get_speed() > self.get_maxV():
-            self.set_speed(self.get_maxV())
-
-        # 2. Slowing down with no tile security distance. No security distance
-        if self.distance_front <= self.get_speed() != 0:
-            self.set_speed(self.distance_front)
-
-        # 3. Cannot be faster than allowed speed limit of the current tile
-        if self.get_speed() > self.get_tile().get_speed_limit():
-            self.set_speed(self.get_tile().get_speed_limit())
-
-        # 4. Stop if there is no space in front
-        if self.distance_front == 0:
-            self.set_speed(0)
-
-        # 5. Randomization
-        if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
-            self.set_speed(self.get_speed() - 1)
-
-
-
-    # todo delete
-    def update_speed_with_preferenceV5(self):
         """
         first the leader adjust its distance. All other motorcyclist adjust to the ahead partner distance
         :return:
@@ -231,8 +108,8 @@ class Motorcycle(Vehicle):
         self.update_partners()
         self.update_preferences(self.tile.get_curvature())
 
-        close_up_dist_behind = self.estimate_close_up_distance_partner('behind')
-        close_up_dist_ahead = self.estimate_close_up_distance_partner('ahead')
+        close_up_dist_behind = self.estimate_close_up_distance('behind')
+        close_up_dist_ahead = self.estimate_close_up_distance('ahead')
 
         # the leader decides the speed of the platoon
         if self.is_leader:
@@ -343,7 +220,7 @@ class Motorcycle(Vehicle):
         self.look_at_positional_environment()
         self.update_partners()
 
-        peak = self.estimate_close_up_distance_partner(self.tile.get_curvature())
+        peak = self.estimate_close_up_distance(self.tile.get_curvature())
         # zeiger = self.fun_weight * self.speed
         zeiger = self.speed
 
@@ -470,7 +347,7 @@ class Motorcycle(Vehicle):
             last_motorcycle_position = 0
             current_motorcycle = self
             while current_motorcycle.get_behind_partner() is not None:
-                overall_gap_distance += self.estimate_close_up_distance_partner('behind')
+                overall_gap_distance += self.estimate_close_up_distance('behind')
                 current_motorcycle = current_motorcycle.get_behind_partner()
             last_motorcycle_position = current_motorcycle.get_tile().get_index()
         else:
@@ -535,7 +412,7 @@ class Motorcycle(Vehicle):
         return peak
 
     # todo check distance to partner
-    def estimate_close_up_distance_partner(self, partner):
+    def estimate_close_up_distance(self, partner):
         """
         calculates the distance ahead and behind if current speed wouldn't be changed
         :param partner: 'behind' or 'ahead'. The partner to which the distance is calculated
@@ -556,50 +433,13 @@ class Motorcycle(Vehicle):
             else:
                 close_up_dist = \
                     self.get_distance_ahead_partner() + self.get_ahead_partner().get_speed() - self.get_speed()
-        elif self.get_ahead_partner() is None:
-            close_up_dist = self.front_gap_preference
-        elif self.get_behind_partner() is None:
-            close_up_dist = self.behind_gap_preference
         else:
             # if self is leader he does not have a partner ahead. if self is sweeper he does not have a partner behind
             pass
 
         return close_up_dist
 
-    def estimate_close_up_distance(self, idx, lane):
-        """
-        estimated distance to the vehicle in front or other lane at idx tile to itself
-        :param lane: the lane position of the vehicle in question
-        :param idx: idx of the vehicle
-        :return: estimated distance to the vehicle. Positive means the vehicle will be further away. Negative means the
-        vehicle can be overtaken
-        """
-        vehicle = self.look_at_vehicle_at_pos(idx, lane)
-        dist_diff = -1
-        if vehicle is not None:
-            if vehicle.get_moved():
-                dist_diff = (idx - self.get_tile().get_index() - self.get_speed()) % self.sim.get_length()
-            else:
-                dist_diff = (idx - self.get_tile().get_index() + vehicle.get_speed() - self.get_speed()) % self.sim.get_length()
-        return dist_diff
-
-    def estimate_catch_up_distance(self, idx, lane):
-        """
-        estimated distance to the vehicle behind or other lane at idx tile to itself
-        :param idx: idx of the vehicle
-        :param lane: lane position of the vehicle
-        :return: estimated distance to the vehicle. Positive means the vehicle cannot overtake us. Negative it can
-        """
-        vehicle = self.look_at_vehicle_at_pos(idx, lane)
-        dist_diff = 1
-        if vehicle is not None:
-            if vehicle.get_moved():
-                dist_diff = (self.get_tile().get_index() - idx + self.get_speed()) % self.sim.get_length()
-            else:
-                dist_diff = (self.get_tile().get_index() - idx - vehicle.get_speed() + self.get_speed()) % self.sim.get_length()
-        return dist_diff
-
-    def speed_up(self):
+    def catch_up(self):
         """
         speed up velocity if ahead partner motorcyclist is too far away. Ignores other vehicles
         :return:
@@ -623,30 +463,6 @@ class Motorcycle(Vehicle):
 
         return slow_down
 
-    def slow_down_to_behind_partner(self):
-        """
-        extra slow_down to behind partner if behind partner is too far away
-        :return: -1 if too far away else 0
-        """
-        slow_down = 0
-        if self.get_behind_partner() is not None:
-            if self.distance_behind_partner + 1 > self.behind_gap_preference:
-                slow_down = -1
-
-        return slow_down
-
-    def speed_up_to_ahead_partner(self):
-        """
-        extra speed_up to ahead partner if ahead partner is too far away
-        :return: 1 if too far away else 0
-        """
-        speed_up = 0
-        if self.get_ahead_partner() is not None:
-            if self.distance_ahead_partner - 1 < self.front_gap_preference:
-                speed_up = 1
-
-        return speed_up
-
     def calc_distance_behind_partner(self):
         """
         calculates how far the distance the motorcyclist behind is. Has to be subtracted by oneto get actual distance
@@ -655,9 +471,6 @@ class Motorcycle(Vehicle):
         if self.get_behind_partner() is not None:
             self.distance_behind_partner = (self.get_tile().get_index() -
                                             self.get_behind_partner().get_tile().get_index() - 1) % self.sim.length
-        else:
-            # if there is no behind partner than the optimal length distance if always achieved
-            self.distance_behind_partner = self.behind_gap_preference
 
     def calc_distance_ahead_partner(self):
         """
@@ -667,9 +480,6 @@ class Motorcycle(Vehicle):
         if self.get_ahead_partner() is not None:
             self.distance_ahead_partner = (self.get_ahead_partner().get_tile().get_index() -
                                            self.get_tile().get_index() - 1) % self.sim.length
-        else:
-            # if there is no ahead partner than the optimal length distance if always achieved
-            self.distance_ahead_partner = self.front_gap_preference
 
     def update_partners(self):
         """
@@ -682,46 +492,46 @@ class Motorcycle(Vehicle):
         # update ahead and behind partners of all motorcyclists
         for i in range(len(self.my_platoon)):
             if i == 0:
-                if self.my_platoon[i].get_tile().get_index() == self.my_platoon[i + 1].get_tile().get_index():
+                if self.my_platoon[i].get_tile().get_index() == self.my_platoon[i+1].get_tile().get_index():
                     # same tile index but one is on the right lane
-                    if self.my_platoon[i].get_tile().get_lane() > self.my_platoon[i + 1].get_tile().get_lane():
-                        self.my_platoon[i + 1].set_behind_partner(self.my_platoon[i])
-                        self.my_platoon[i].set_ahead_partner(self.my_platoon[i + 1])
+                    if self.my_platoon[i].get_tile().get_lane() > self.my_platoon[i+1].get_tile().get_lane():
+                        self.my_platoon[i+1].set_behind_partner(self.my_platoon[i])
+                        self.my_platoon[i].set_ahead_partner(self.my_platoon[i+1])
                         self.my_platoon[i].set_behind_partner(None)
                     else:
-                        self.my_platoon[i].set_behind_partner(self.my_platoon[i + 1])
-                        self.my_platoon[i + 1].set_ahead_partner(self.my_platoon[i])
-                        self.my_platoon[i + 1].set_behind_partner(None)
+                        self.my_platoon[i].set_behind_partner(self.my_platoon[i+1])
+                        self.my_platoon[i+1].set_ahead_partner(self.my_platoon[i])
+                        self.my_platoon[i+1].set_behind_partner(None)
                 else:
-                    self.my_platoon[i].set_ahead_partner(self.my_platoon[i + 1])
-                    self.my_platoon[i + 1].set_behind_partner(self.my_platoon[i])
+                    self.my_platoon[i].set_ahead_partner(self.my_platoon[i+1])
+                    self.my_platoon[i+1].set_behind_partner(self.my_platoon[i])
                     self.my_platoon[i].set_behind_partner(None)
 
             elif i == len(self.my_platoon) - 1:
-                if self.my_platoon[i].get_tile().get_index() == self.my_platoon[i - 1].get_tile().get_index():
+                if self.my_platoon[i].get_tile().get_index() == self.my_platoon[i-1].get_tile().get_index():
                     # same tile index but one is on the right lane
-                    if self.my_platoon[i].get_tile().get_lane() > self.my_platoon[i - 1].get_tile().get_lane():
-                        self.my_platoon[i - 1].set_behind_partner(self.my_platoon[i])
-                        self.my_platoon[i].set_ahead_partner(self.my_platoon[i - 1])
-                        self.my_platoon[i - 1].set_ahead_partner(None)
+                    if self.my_platoon[i].get_tile().get_lane() > self.my_platoon[i-1].get_tile().get_lane():
+                        self.my_platoon[i-1].set_behind_partner(self.my_platoon[i])
+                        self.my_platoon[i].set_ahead_partner(self.my_platoon[i-1])
+                        self.my_platoon[i-1].set_ahead_partner(None)
                     else:
-                        self.my_platoon[i].set_behind_partner(self.my_platoon[i - 1])
-                        self.my_platoon[i - 1].set_ahead_partner(self.my_platoon[i])
+                        self.my_platoon[i].set_behind_partner(self.my_platoon[i-1])
+                        self.my_platoon[i-1].set_ahead_partner(self.my_platoon[i])
                         self.my_platoon[i].set_ahead_partner(None)
                 else:
                     self.my_platoon[i].set_ahead_partner(None)
-                    self.my_platoon[i].set_behind_partner(self.my_platoon[i - 1])
+                    self.my_platoon[i].set_behind_partner(self.my_platoon[i-1])
             else:
-                if self.my_platoon[i].get_tile().get_index() == self.my_platoon[i + 1].get_tile().get_index():
-                    if self.my_platoon[i].get_tile().get_lane() > self.my_platoon[i + 1].get_tile().get_lane():
-                        self.my_platoon[i + 1].set_behind_partner(self.my_platoon[i])
-                        self.my_platoon[i].set_ahead_partner(self.my_platoon[i + 1])
+                if self.my_platoon[i].get_tile().get_index() == self.my_platoon[i+1].get_tile().get_index():
+                    if self.my_platoon[i].get_tile().get_lane() > self.my_platoon[i+1].get_tile().get_lane():
+                        self.my_platoon[i+1].set_behind_partner(self.my_platoon[i])
+                        self.my_platoon[i].set_ahead_partner(self.my_platoon[i+1])
                     else:
-                        self.my_platoon[i].set_behind_partner(self.my_platoon[i + 1])
-                        self.my_platoon[i + 1].set_ahead_partner(self.my_platoon[i])
+                        self.my_platoon[i].set_behind_partner(self.my_platoon[i+1])
+                        self.my_platoon[i+1].set_ahead_partner(self.my_platoon[i])
                 else:
-                    self.my_platoon[i].set_ahead_partner(self.my_platoon[i + 1])
-                    self.my_platoon[i + 1].set_behind_partner(self.my_platoon[i])
+                    self.my_platoon[i].set_ahead_partner(self.my_platoon[i+1])
+                    self.my_platoon[i+1].set_behind_partner(self.my_platoon[i])
 
         self.update_role()
         self.check_roles()
@@ -773,9 +583,6 @@ class Motorcycle(Vehicle):
         self.look_at_positional_environment()
         self.update_partners()
 
-        idx_ahead = (self.tile.get_index() + self.distance_front + 1) % self.sim.get_length()
-        vehicle = self.look_at_vehicle_at_pos(idx_ahead, self.tile.get_lane())
-
         # asymmetric condition for switching lanes L->R see Rickert (T2-T4)
         if self.tile.get_lane() == 0:
 
@@ -784,8 +591,10 @@ class Motorcycle(Vehicle):
 
             # do not switch lane if direct vehicle ahead is a platoon member. Shouldn't be too far away
             # Hint self.distance_front + 1 mandatory, since distance_front calculates the actual empty distance
-            # Hint the leader isn't affected since it has no partner ahead
+            # the leader isn't affected since it has no partner ahead
             if self.distance_front < self.sim.get_length() / 10:
+                vehicle = self.look_at_vehicle_at_pos(self.get_tile().get_index() + self.distance_front + 1,
+                                                      self.tile.get_lane())
                 if type(vehicle) is Motorcycle:
                     if vehicle.get_group() == self.get_group():
                         switch_lane = False
@@ -799,6 +608,8 @@ class Motorcycle(Vehicle):
 
             # do not switch lane if direct vehicle ahead is a platoon member
             # Hint self.distance_front + 1 mandatory, since distance_front calculates the actual empty distance
+            vehicle = self.look_at_vehicle_at_pos(self.get_tile().get_index() + self.distance_front + 1,
+                                                  self.tile.get_lane())
             if type(vehicle) is Motorcycle:
                 if vehicle.get_group() == self.get_group():
                     switch_lane = False
@@ -820,17 +631,11 @@ class Motorcycle(Vehicle):
         # switching only possible if side is free
         if self.sim.tiles[self.tile.get_index()][self.tile.get_lane() + other_lane].get_vehicle() is None:
 
-            # Look what kind of vehicle around me
-            idx_behind = (self.tile.get_index() - self.distance_behind - 1) % self.sim.get_length()
-            idx_ahead = (self.tile.get_index() + self.distance_front + 1) % self.sim.get_length()
-            behind_vehicle = self.look_at_vehicle_at_pos(idx_behind, self.get_tile().get_lane())
-            ahead_vehicle = self.look_at_vehicle_at_pos(idx_ahead, self.tile.get_lane())
-
-            idx_behind_other = (self.tile.get_index() - self.distance_behind_other_lane - 1) % self.sim.get_length()
-            idx_ahead_other = (self.tile.get_index() + self.distance_front_other_lane + 1) % self.sim.get_length()
-
-            behind_vehicle_other_lane = self.look_at_vehicle_at_pos(idx_behind_other, self.tile.get_lane() + other_lane)
-            ahead_vehicle_other_lane = self.look_at_vehicle_at_pos(idx_ahead_other, self.tile.get_lane() + other_lane)
+            # Look what kind of vehicle is behind me
+            look_street_idx = (self.tile.get_index() - self.distance_behind_other_lane - 1) % self.sim.length
+            behind_vehicle_other_lane = self.look_at_vehicle_at_pos(look_street_idx, self.tile.get_lane() + other_lane)
+            ahead_vehicle_other_lane = self.look_at_vehicle_at_pos(
+                self.tile.get_index() + self.distance_front_other_lane + 1, self.tile.get_lane() + other_lane)
 
             # T2 more space than current velocity + 1
             if self.distance_front_other_lane > (self.get_speed() + 1):
@@ -848,8 +653,7 @@ class Motorcycle(Vehicle):
                     if np.random.random() < self.sim.prob_changelane:
                         switch = True
 
-            # if motorcyclist is on the left lane and on the right lane front is a platoon member
-            # behind vehicle other lane should not move up to my position
+            # if motorcyclist is on the left lane and on the right lane is a platoon member, switch lane. and not leader
             elif self.get_tile().get_lane() == 0 and type(behind_vehicle_other_lane) is Motorcycle:
                 if behind_vehicle_other_lane.get_group() == self.get_group():
                     # the behind_motorcyclist is not faster than the current motorcyclist
