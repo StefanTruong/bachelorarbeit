@@ -2,6 +2,7 @@ from movementLogic.MyTrafficSimulation import *
 import copy
 from vehicles.Motorcycle import Motorcycle
 import numpy as np
+import json
 
 
 class AnalyzerSingleSim:
@@ -70,8 +71,7 @@ class AnalyzerSingleSim:
                 'sum_is_leader': 0,  # sum of time the vehicle was the leader
                 'sum_is_sweeper': 0,  # sum of time the vehicle was the sweeper
                 'sum_is_inbetween': 0,  # sum of time the vehicle was in between
-                'incr_fun': 0,  # motorcyclist fun in this step
-                'sum_fun': 0,  # motorcyclist overall fun
+                'fun_list': [],  # list of the fun values
 
                 'sum_ping_pong_lane_changes': 0,  # sum of ping pong lane changes
             }
@@ -143,6 +143,8 @@ class AnalyzerSingleSim:
                 elif vehicle.get_role() == 'inbetween':
                     self.vehicle_summary_dict[i]['sum_is_inbetween'] += 1
 
+                self.vehicle_summary_dict[i]['fun_list'].append(vehicle.get_fun())
+
     def incr_step(self):
         """
         increments the step
@@ -190,6 +192,9 @@ class AnalyzerSingleSim:
     def get_vehicle_summary_dict(self):
         return self.vehicle_summary_dict
 
+    def save_results(self):
+        with open('./Analyse/results.json', 'w+') as fp:
+            json.dump(self.get_vehicle_summary_dict(), fp, indent=4)
 
 # ToDo Delete if not used
 class SaveResults:

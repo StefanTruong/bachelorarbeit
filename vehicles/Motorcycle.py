@@ -3,6 +3,21 @@ import math
 
 
 # --------------------------------------------------------------------------------------------------------------------
+def normal_dist(diff, mean=0, sd=1, amp=1):
+    """
+    calculate value from normal distribution
+    :param diff: the difference from optimal value
+    :param amp: amplitude of NV to strengthen preference
+    :param mean: mean of the preference normal distribution. usually zero
+    :param sd: standard deviation of the preference normal distribution
+    """
+    var = float(sd) ** 2
+    denominator = (2 * math.pi * var) ** .5
+    num = math.exp(-(float(diff) - float(mean)) ** 2 / (2 * var))
+
+    return amp * (num / denominator)
+
+
 class Motorcycle(Vehicle):
     # max_velocity: 100km/h = 30m/s -> 30m/s / 3,75m = 8tiles
     def __init__(self, speed, tile, group, preferred_speed, speed_distance_preferences=None, max_velocity=7):
@@ -244,6 +259,8 @@ class Motorcycle(Vehicle):
         # 5. Randomization
         if self.get_speed() > 0 and np.random.random() < self.sim.prob_slowdown:
             self.set_speed(self.get_speed() - 1)
+
+        self.calculate_fun()
 
     # todo delete
     def update_speed_with_preferenceV5(self):
@@ -605,7 +622,7 @@ class Motorcycle(Vehicle):
                 dist_diff = (idx - self.get_tile().get_index() - self.get_speed()) % self.sim.get_length()
             else:
                 dist_diff = (
-                                        idx - self.get_tile().get_index() + vehicle.get_speed() - self.get_speed()) % self.sim.get_length()
+                                    idx - self.get_tile().get_index() + vehicle.get_speed() - self.get_speed()) % self.sim.get_length()
         return dist_diff
 
     def estimate_catch_up_distance(self, idx, lane):
@@ -622,7 +639,7 @@ class Motorcycle(Vehicle):
                 dist_diff = (self.get_tile().get_index() - idx + self.get_speed()) % self.sim.get_length()
             else:
                 dist_diff = (
-                                        self.get_tile().get_index() - idx - vehicle.get_speed() + self.get_speed()) % self.sim.get_length()
+                                    self.get_tile().get_index() - idx - vehicle.get_speed() + self.get_speed()) % self.sim.get_length()
         return dist_diff
 
     def speed_up(self):
@@ -886,23 +903,39 @@ class Motorcycle(Vehicle):
 
         return switch
 
-    def normal_dist(self, values, mean, sd, amp=1):
+    def calculate_fun(self):
         """
-        calculate normal distribution matching the values list length
-        :param amp: amplitude of NV to strengthen preference
-        :param values: list of sight distance values to be plotted (x-axis values)
-        :param mean: mean of the preference normal distribution
-        :param sd: standard deviation of the preference normal distribution
-        :return: list of normal distribution values matching the values list length
+        calculates the fun. Fun depends on actual distance to partners on distance preference and speed preference
+        :return:
         """
-        prob_density = []
-        for x in values:
-            var = float(sd) ** 2
-            denominator = (2 * math.pi * var) ** .5
-            num = math.exp(-(float(x) - float(mean)) ** 2 / (2 * var))
-            prob_density.append(amp * (num / denominator))
+        gain_ahead = 0
+        gain_behind = 0
+        gain_speed = 0
 
-        return prob_density
+        if self.get_role() == "inbetween":
+            diff_ahead_partner = abs(self.distance_ahead_partner - self.front_gap_preference)
+            diff_behind_partner = abs(self.distance_behind_partner - self.behind_gap_preference)
+            diff_speed = abs(self.get_speed() - self.current_speed_preference)
+
+            gain_ahead = normal_dist(diff_ahead_partner, 1, self.front_gap_ampl)
+            gain_behind = normal_dist(diff_behind_partner, 1, self.behind_gap_ampl)
+            gain_speed = normal_dist(diff_speed, 1, self.speed_ampl)
+
+        if self.get_role() == 'leader':
+            diff_behind_partner = abs(self.distance_behind_partner - self.behind_gap_preference)
+            diff_speed = abs(self.get_speed() - self.current_speed_preference)
+
+            gain_behind = normal_dist(diff_behind_partner, 1, self.behind_gap_ampl)
+            gain_speed = normal_dist(diff_speed, 1, self.speed_ampl)
+
+        if self.get_role() == 'sweeper':
+            diff_ahead_partner = abs(self.distance_ahead_partner - self.front_gap_preference)
+            diff_speed = abs(self.get_speed() - self.current_speed_preference)
+
+            gain_ahead = normal_dist(diff_ahead_partner, 1, self.front_gap_ampl)
+            gain_speed = normal_dist(diff_speed, 1, self.speed_ampl)
+
+        self.fun = gain_ahead + gain_behind + gain_speed
 
     def set_behind_partner(self, partner):
         self.behind = partner
@@ -929,6 +962,14 @@ class Motorcycle(Vehicle):
             self.is_leader = False
             self.is_inbetween = False
             self.is_sweeper = True
+
+    def set_moved(self, moved=False):
+        """
+        last function call for this cycle
+        :param moved:
+        :return:
+        """
+        self.moved = moved
 
     def get_behind_partner(self):
         return self.behind
@@ -958,3 +999,6 @@ class Motorcycle(Vehicle):
             return "sweeper"
         else:
             return "none"
+
+    def get_fun(self):
+        return self.fun

@@ -278,7 +278,7 @@ class ConfigPreference:
             """
             self.model_settings = {
                 'length': 1000,
-                'total_amount_steps': 2000,
+                'total_amount_steps': 20,
                 'density': 0.104,
                 'num_lanes': 1,  # [0,1] do not change
                 'prob_slowdown': 0,
