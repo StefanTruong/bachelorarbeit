@@ -224,7 +224,7 @@ class Motorcycle(Vehicle):
                 pass
 
         # todo adjust speed for more cases
-        # if motorcyclist is on the left lane he wants to overtake the slower vehicle on the right lane
+        # 5. if motorcyclist is on the left lane he wants to overtake the slower vehicle on the right lane
         if self.tile.get_lane() == 0 and ahead_vehicle_other_lane is not None:
             idx = ahead_vehicle_other_lane.get_tile().get_index()
             lane = ahead_vehicle_other_lane.get_tile().get_lane()
@@ -695,9 +695,14 @@ class Motorcycle(Vehicle):
         calculates how far the distance the motorcyclist behind is. Has to be subtracted by oneto get actual distance
         :return:
         """
+        '''
         if self.get_behind_partner() is not None:
             self.distance_behind_partner = (self.get_tile().get_index() -
                                             self.get_behind_partner().get_tile().get_index() - 1) % self.sim.length
+        '''
+        if self.get_behind_partner() is not None:
+            self.distance_behind_partner = (abs(self.get_tile().get_index() -
+                                            self.get_behind_partner().get_tile().get_index() - 1))
         else:
             # if there is no behind partner than the optimal length distance if always achieved
             self.distance_behind_partner = self.behind_gap_preference
@@ -708,8 +713,8 @@ class Motorcycle(Vehicle):
         :return:
         """
         if self.get_ahead_partner() is not None:
-            self.distance_ahead_partner = (self.get_ahead_partner().get_tile().get_index() -
-                                           self.get_tile().get_index() - 1) % self.sim.length
+            self.distance_ahead_partner = (abs(self.get_ahead_partner().get_tile().get_index() -
+                                           self.get_tile().get_index() - 1)) 
         else:
             # if there is no ahead partner than the optimal length distance if always achieved
             self.distance_ahead_partner = self.front_gap_preference

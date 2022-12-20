@@ -84,7 +84,6 @@ class AnalyzerSingleSim:
         """
         for vehicle in self.new_vehicle_list:
             i = vehicle.get_id()
-
             # the former new position is now the old position. The new one is the current position
             self.vehicle_summary_dict[i]['old_pos'] = self.vehicle_summary_dict[i]['new_pos']
             self.vehicle_summary_dict[i]['new_pos'] = vehicle.get_tile().get_index()
@@ -120,21 +119,24 @@ class AnalyzerSingleSim:
 
             # Motorcyclist specific data
             if type(vehicle) is Motorcycle:
-                self.vehicle_summary_dict[i]['behind_dist_partner'] = vehicle.get_distance_behind_partner()
-                self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(vehicle.get_distance_behind_partner())
-                self.vehicle_summary_dict[i]['sum_behind_dist_partner'] += vehicle.get_distance_behind_partner()
-                self.vehicle_summary_dict[i]['avg_behind_dist_partner'] = \
-                    self.vehicle_summary_dict[i]['sum_behind_dist_partner'] / self.step
-                self.vehicle_summary_dict[i]['std_behind_dist_partner'] = \
-                    np.std(self.vehicle_summary_dict[i]['behind_dist_partner_list'])
+                vehicle.update_partners()
+                if vehicle.get_behind_partner() is not None:
+                    self.vehicle_summary_dict[i]['behind_dist_partner'] = vehicle.get_distance_behind_partner()
+                    self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(vehicle.get_distance_behind_partner())
+                    self.vehicle_summary_dict[i]['sum_behind_dist_partner'] += vehicle.get_distance_behind_partner()
+                    self.vehicle_summary_dict[i]['avg_behind_dist_partner'] = \
+                        self.vehicle_summary_dict[i]['sum_behind_dist_partner'] / self.step
+                    self.vehicle_summary_dict[i]['std_behind_dist_partner'] = \
+                        np.std(self.vehicle_summary_dict[i]['behind_dist_partner_list'])
 
-                self.vehicle_summary_dict[i]['ahead_dist_partner'] = vehicle.get_distance_ahead_partner()
-                self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(vehicle.get_distance_ahead_partner())
-                self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] += vehicle.get_distance_ahead_partner()
-                self.vehicle_summary_dict[i]['avg_ahead_dist_partner'] = \
-                    self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] / self.step
-                self.vehicle_summary_dict[i]['std_ahead_dist_partner'] = \
-                    np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
+                if vehicle.get_ahead_partner() is not None:
+                    self.vehicle_summary_dict[i]['ahead_dist_partner'] = vehicle.get_distance_ahead_partner()
+                    self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(vehicle.get_distance_ahead_partner())
+                    self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] += vehicle.get_distance_ahead_partner()
+                    self.vehicle_summary_dict[i]['avg_ahead_dist_partner'] = \
+                        self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] / self.step
+                    self.vehicle_summary_dict[i]['std_ahead_dist_partner'] = \
+                        np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
 
                 if vehicle.get_role() == 'leader':
                     self.vehicle_summary_dict[i]['sum_is_leader'] += 1
