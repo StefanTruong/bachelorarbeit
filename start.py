@@ -13,7 +13,8 @@ from preferences.PreferenceNV import Preferences
 # selection 1   debug scenario. Visualizes each vehicle movement step by step and the whole street. No probabilities
 # selection 2   movement simulation with fixed street for 0.8 steps/sec. No probabilities
 #               only on console. Save before running. Use full-screen
-# selection 3   movement focused on one vehicle and portion of the street behind and ahead. No probabilities
+# selection 3   Depreciated
+#               movement focused on one vehicle and portion of the street behind and ahead. No probabilities
 #               only on console. Save before running. Use full-screen
 # selection 4   calculates a single average flow-density
 # selection 5   plots a flow-density diagram in an error bar
@@ -26,12 +27,14 @@ from preferences.PreferenceNV import Preferences
 #               visualizes time distance time-line diagram of motorcyclist and cars
 #               visualizes velocity distribution of motorcyclists
 # selection 9   like selection 8 but motorcyclist consider speed adjustments according to its preferences
-
+# selection 10  like selection 9, motorcyclist orient to its partners and preferences. Plots flow-density diagram,
+#               2D-Pixel Plot for street with curvature and speed limit for each density. Use selection 9
+#               if movement should be visualized only
 
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
 else:
-    selection = 9  # ToDo change to selection which should be run on IDE
+    selection = 10  # ToDo change to selection which should be run on IDE
 
 # ---------------------------------- selection 1 ------------------------------------
 if selection == 1:
@@ -339,11 +342,15 @@ elif selection == 9:
 
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
-        time.sleep(1.0)
-        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        vis.traffic_vis_tiles_granular()
+        time.sleep(0.0)
+        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         # sim.moving(vis, vis_modus='step')
         analyzer.update()
+
+    for lane in range(0, sim.get_lanes() + 1):
+        Plotter.time_space_granular(vis.get_time_space_data(lane))
 
     analyzer.save_results()
     sys.stdout.write('\n')
@@ -356,3 +363,65 @@ elif selection == 9:
     sys.stdout.write('\n')
     sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
     sys.stdout.write('\n')
+
+# ---------------------------------- selection 10 ------------------------------------
+elif selection == 10:
+    print('Selection Mode: ', selection)
+    cfg = ConfigPreference('default')
+    pref = Preferences(cfg)
+
+    # what densities shall be calculated. Lowest density should be number of bikers, which is fixed
+    lowest_density = \
+        (cfg.model_settings['platoon_size'] * cfg.model_settings['number_platoons']) / cfg.model_settings['length']
+    density_list = np.linspace(lowest_density, 2, 10)
+
+    avgFlows = []
+    stdFlows = []
+
+    for density in density_list:
+        singleFlows = []
+        cfg.model_settings['density'] = density
+
+        sim = TrafficSimulation(**cfg.model_settings)
+        sim.set_config_object(cfg)
+        sim.set_preference_object(pref)
+        sim.initialize()
+        checker = CollisionChecker(sim)
+        vis = VisualizeStreet(sim)
+        analyzer = AnalyzerSingleSim(sim)
+
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_speed_limit=30)
+
+        # for each density, the simulation will be run 10 times to get a variance
+        for i in range(0, 3):
+            for i in range(0, sim.total_amount_steps):
+                checker.check_for_inconsistencies()
+                vis.traffic_vis_tiles_granular()
+                sim.moving(vis)
+                analyzer.update()
+
+            for lane in range(0, sim.get_lanes() + 1):
+                Plotter.time_space_granular(vis.get_time_space_data(lane))
+
+            singleFlows.append(analyzer.get_traffic_flow_all_lanes())
+            # saving results for plotting flow-density diagram not necessary
+            # analyzer.save_results(f'_density_{density}')
+
+        avgFlows.append(np.mean(singleFlows))
+        stdFlows.append(np.std(singleFlows, ddof=0))
+
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'density:                     {density}')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+        sys.stdout.write('\n')
+
+    Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
+    print(avgFlows)

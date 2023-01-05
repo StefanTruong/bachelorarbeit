@@ -117,7 +117,7 @@ class VisualizeStreet:
         :param focus_vehicle: the vehicle the visualization should focus on
         :return:
         """
-        view_distance = 20  # how far should be displayed before and after the focused vehicle
+        view_distance = 18  # how far should be displayed before and after the focused vehicle
 
         if display_curve:
             shift_carret = "4"

@@ -194,9 +194,13 @@ class AnalyzerSingleSim:
     def get_vehicle_summary_dict(self):
         return self.vehicle_summary_dict
 
-    def save_results(self):
-        with open('./Analyse/results.json', 'w+') as fp:
-            json.dump(self.get_vehicle_summary_dict(), fp, indent=4)
+    def save_results(self, special_name=None):
+        if special_name == None:
+            with open('./Analyse/results.json', 'w+') as fp:
+                json.dump(self.get_vehicle_summary_dict(), fp, indent=4)
+        else:
+            with open(f'./Analyse/results{special_name}.json', 'w+') as fp:
+                json.dump(self.get_vehicle_summary_dict(), fp, indent=4)
 
 # ToDo Delete if not used
 class SaveResults:
