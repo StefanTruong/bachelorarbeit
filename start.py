@@ -27,9 +27,10 @@ from preferences.PreferenceNV import Preferences
 #               visualizes time distance time-line diagram of motorcyclist and cars
 #               visualizes velocity distribution of motorcyclists
 # selection 9   like selection 8 but motorcyclist consider speed adjustments according to its preferences
-# selection 10  like selection 9, motorcyclist orient to its partners and preferences. Plots flow-density diagram,
-#               2D-Pixel Plot for street with curvature and speed limit for each density. Use selection 9
-#               if movement should be visualized only
+#               Plots 2D-Pixel Plot
+# selection 10  like selection 9, motorcyclist orient to its partners and preferences. Plots flow-density diagram
+#               for street with curvature and speed limit for each density. Use selection 9
+#               if movement should be visualized only and for 2D-Pixel Plot
 
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
@@ -392,6 +393,9 @@ elif selection == 10:
 
         tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_speed_limit=30)
 
+        # shows how initial distribution of vehicles are for each density
+        vis.traffic_vis_tiles()
+
         # for each density, the simulation will be run 10 times to get a variance
         for i in range(0, 3):
             for i in range(0, sim.total_amount_steps):
@@ -404,8 +408,15 @@ elif selection == 10:
                 Plotter.time_space_granular(vis.get_time_space_data(lane))
 
             singleFlows.append(analyzer.get_traffic_flow_all_lanes())
-            # saving results for plotting flow-density diagram not necessary
+            # uncomment if saving results for plotting flow-density diagram necessary
             # analyzer.save_results(f'_density_{density}')
+
+            # Plots Time-Distance Diagram for Motorcyclists and Cars as well as the velocity Distribution
+            Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(),
+                                          plot_type="Time_Distance_Diagram_Motorcyclist")
+            Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Car")
+            Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(),
+                                            plot_type='Velocity_Distribution_Motorcyclist')
 
         avgFlows.append(np.mean(singleFlows))
         stdFlows.append(np.std(singleFlows, ddof=0))

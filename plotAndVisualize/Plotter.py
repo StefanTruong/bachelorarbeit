@@ -57,6 +57,12 @@ def time_distance_diagram(summary_dict, plot_type):
     :return:
     """
     adjusted_results = extractor_summary_dict(summary_dict, plot_type=plot_type)
+
+    # if dataframe is empty e.g. no cars ot bike at all then skip plot
+    if adjusted_results.empty:
+        print(f'empty df for {plot_type}')
+        return
+
     ax = adjusted_results.plot(colormap='viridis')
     ax.set_xlabel('Time')
     ax.set_ylabel('Distance')
