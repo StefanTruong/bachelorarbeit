@@ -344,8 +344,8 @@ elif selection == 9:
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
         vis.traffic_vis_tiles_granular()
-        time.sleep(0.0)
-        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        time.sleep(1.0)
+        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         # sim.moving(vis, vis_modus='step')
         analyzer.update()
@@ -374,7 +374,7 @@ elif selection == 10:
     # what densities shall be calculated. Lowest density should be number of bikers, which is fixed
     lowest_density = \
         (cfg.model_settings['platoon_size'] * cfg.model_settings['number_platoons']) / cfg.model_settings['length']
-    density_list = np.linspace(lowest_density, 2, 10)
+    density_list = np.linspace(lowest_density, 2, 1)
 
     avgFlows = []
     stdFlows = []
@@ -396,27 +396,27 @@ elif selection == 10:
         # shows how initial distribution of vehicles are for each density
         vis.traffic_vis_tiles()
 
-        # for each density, the simulation will be run 10 times to get a variance
-        for i in range(0, 3):
+        # for each density, the simulation will be run x times to get a variance
+        for i in range(0, 1):
             for i in range(0, sim.total_amount_steps):
                 checker.check_for_inconsistencies()
                 vis.traffic_vis_tiles_granular()
                 sim.moving(vis)
                 analyzer.update()
 
-            for lane in range(0, sim.get_lanes() + 1):
-                Plotter.time_space_granular(vis.get_time_space_data(lane))
-
             singleFlows.append(analyzer.get_traffic_flow_all_lanes())
             # uncomment if saving results for plotting flow-density diagram necessary
-            # analyzer.save_results(f'_density_{density}')
+            analyzer.save_results(f'_density_{density}')
+
+            # Plots different graphics for analysis. Problem: plotter overwrites stuff???
+            # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
 
             # Plots Time-Distance Diagram for Motorcyclists and Cars as well as the velocity Distribution
-            Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(),
-                                          plot_type="Time_Distance_Diagram_Motorcyclist")
-            Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Car")
-            Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(),
-                                            plot_type='Velocity_Distribution_Motorcyclist')
+            # Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(),
+            #                               plot_type="Time_Distance_Diagram_Motorcyclist")
+            # Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Car")
+            # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(),
+            #                                 plot_type='Velocity_Distribution_Motorcyclist')
 
         avgFlows.append(np.mean(singleFlows))
         stdFlows.append(np.std(singleFlows, ddof=0))
@@ -434,5 +434,6 @@ elif selection == 10:
         sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
         sys.stdout.write('\n')
 
-    Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
+    # Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
+    Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
     print(avgFlows)

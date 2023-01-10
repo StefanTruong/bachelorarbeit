@@ -78,6 +78,12 @@ def velocity_distro_diagram(summary_dict, plot_type='Velocity_Distribution_Motor
     :return:
     """
     adjusted_results = extractor_summary_dict(summary_dict, plot_type=plot_type)
+
+    # if dataframe is empty skip plot
+    if adjusted_results.empty:
+        print(f'empty df for {plot_type}')
+        return
+
     # cmap = cm.ScalarMappable(cmap='rainbow')
     ax = adjusted_results.plot(kind='box', title=plot_type)
     ax.set_xlabel('Motorcyclist')
@@ -91,6 +97,27 @@ def velocity_distro_diagram(summary_dict, plot_type='Velocity_Distribution_Motor
     boxplot.set_title(plot_type)
     plt.show()
     '''
+
+
+def fun_distro_diagram(summary_dict, plot_type='Fun_Distribution_Motorcyclist'):
+    """
+    Plots the fun distribution of the motorcyclists over time/steps
+    :param summary_dict:
+    :param plot_type:
+    :return:
+    """
+    adjusted_results = extractor_summary_dict(summary_dict, plot_type=plot_type)
+
+    # if dataframe is empty skip plot
+    if adjusted_results.empty:
+        print(f'empty df for {plot_type}')
+        return
+
+    ax = adjusted_results.plot(title=plot_type)
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Fun')
+    ax.set_title(plot_type)
+    plt.show()
 
 
 def extractor_summary_dict(summary_dict, plot_type):
@@ -152,6 +179,23 @@ def extractor_summary_dict(summary_dict, plot_type):
 
         # convert dict into dataframe. Columns are the travel distance from each motorcyclist
         data = pd.DataFrame.from_dict(motorcyclist_only)
+
+        # rename columns to Biker_vehicle index
+        for col in data.columns:
+            name = 'Biker ' + str(col)
+            data.rename(columns={col: name}, inplace=True)
+
+    # Todo check fun curve
+    # Creates a DF from summary_dict for a fun distribution diagram for Motorcyclist only
+    elif plot_type == 'Fun_Distribution_Motorcyclist':
+        fun_motorcyclist_only = {}
+
+        for key in summary_dict:
+            if summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                fun_motorcyclist_only[key] = summary_dict[key]['fun_list']
+
+        # convert dict into dataframe. Columns are the fun for each motorcyclist
+        data = pd.DataFrame.from_dict(fun_motorcyclist_only)
 
         # rename columns to Biker_vehicle index
         for col in data.columns:
