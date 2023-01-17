@@ -42,7 +42,7 @@ def constant_speed(x, number):
 
 class TileAttributeSetter:
 
-    def __init__(self, sim, cfg, modus='sinus', generate=True, amplitude=5, frequency=0.2, constant_speed_limit=5):
+    def __init__(self, sim, cfg, modus='sinus', generate=True, amplitude=5, frequency=0.2, constant_curvature=5):
         self.simulation = sim
         self.cfg = cfg
         self.tiles = sim.get_tiles()
@@ -50,7 +50,7 @@ class TileAttributeSetter:
         self.attr_dict = None
 
         if generate:
-            self.generate_attr_dict(amplitude=amplitude, frequency=frequency, constant_speed_limit=constant_speed_limit)
+            self.generate_attr_dict(amplitude=amplitude, frequency=frequency, constant_curvature=constant_curvature)
             self.save_attr_dict()
         else:
             try:
@@ -58,14 +58,14 @@ class TileAttributeSetter:
             except FileNotFoundError as e:
                 print(e)
 
-    def generate_attr_dict(self, amplitude, frequency, constant_speed_limit):
+    def generate_attr_dict(self, amplitude, frequency, constant_curvature):
         """
         generates a dictionary with the curvature or beauty values for each tile and set the values for the tiles
         Each section have the same curvature and beauty value
         First value is the curvature
         Second value the maximum allowed speed
         Third value is the beauty
-        :param constant_speed_limit: for constant speed limit
+        :param constant_curvature: value if all curves should be constant. Only for modus constant speed
         :param amplitude: for sinus like curvatures
         :param frequency: for sinus like curvatures
         :return:
@@ -88,7 +88,7 @@ class TileAttributeSetter:
                 attr_list.append(attr)
 
             elif self.modus == 'constant':
-                attr = constant_speed(index, constant_speed_limit)
+                attr = constant_speed(index, constant_curvature)
                 attr_list.append(attr)
 
             else:

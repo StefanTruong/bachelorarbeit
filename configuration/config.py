@@ -328,17 +328,18 @@ class ConfigPreference:
             raise ValueError('Unknown configuration')
 
         # # curve-speed-limit
+        # don't forget to adjust the symbol in tile.py for the curvature
         self.speedlimit_to_curvature = {
-            10: (0, 500),  # 10tiles ~ 40 m/s ~ 144 km/h
-            9: (500, 800),  # 9 tiles ~ 36 m/s ~ 129 km/h
-            8: (800, 1000),  # 8 tiles ~ 32 m/s ~ 115 km/h
-            7: (1000, 1200),  # 7 tiles ~ 28 m/s ~ 101 km/h
-            6: (1200, 1400),  # 6 tiles ~ 24 m/s ~ 86 km/h
-            5: (1400, 1600),  # 5 tiles ~ 20 m/s ~ 72 km/h
-            4: (1600, 1800),  # 4 tiles ~ 16 m/s ~ 57 km/h
-            3: (1800, 2000),  # 3 tiles ~ 12 m/s ~ 43 km/h
-            2: (2000, 3000),  # 2 tiles ~ 8 m/s ~ 29 km/h
-            1: (3000, 10000),  # 1 tile ~ 4 m/s ~ 14 km/h
+            11: (0, 500),  # 10tiles ~ 40 m/s ~ 144 km/h
+            10: (500, 800),  # 9 tiles ~ 36 m/s ~ 129 km/h
+            9: (800, 1000),  # 8 tiles ~ 32 m/s ~ 115 km/h
+            8: (1000, 1200),  # 7 tiles ~ 28 m/s ~ 101 km/h
+            7: (1200, 1400),  # 6 tiles ~ 24 m/s ~ 86 km/h
+            6: (1400, 1600),  # 5 tiles ~ 20 m/s ~ 72 km/h
+            5: (1600, 1800),  # 4 tiles ~ 16 m/s ~ 57 km/h
+            4: (1800, 2000),  # 3 tiles ~ 12 m/s ~ 43 km/h
+            3: (2000, 3000),  # 2 tiles ~ 8 m/s ~ 29 km/h
+            2: (3000, 10000),  # 1 tile ~ 4 m/s ~ 14 km/h
         }
 
         # # Preference Settings

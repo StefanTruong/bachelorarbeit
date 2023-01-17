@@ -47,6 +47,7 @@ class Tile:
         returns the curvature of the tile as a string. Since Curvature range [0,9999]
         :return:
         """
+        # curvature symbols depends on config.py
         symbol_to_curvature = {
             'o': range(0, 500),
             '~': range(500, 1000),

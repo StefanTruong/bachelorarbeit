@@ -940,7 +940,7 @@ class Motorcycle(Vehicle):
             gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
         elif self.get_role() == 'sweeper':
-            # Somewhere there is a bug and  I don't know where. Therefore, self.get_speed() is called
+            # the last one cannot see the updated speed. Therefore, self.get_speed() is called
             # s.t. leader and sweeper have the same preference gain over time
             diff_ahead_partner = abs(self.distance_ahead_partner - self.front_gap_preference - self.get_speed())
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
