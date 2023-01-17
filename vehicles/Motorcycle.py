@@ -917,6 +917,9 @@ class Motorcycle(Vehicle):
     def calculate_fun(self):
         """
         calculates the fun. Fun depends on actual distance to partners on distance preference and speed preference
+        speed is weighted according to curvature. See curve_fun_preference in config.py
+        Reminder: motorcyclist only see the actual index of the ahead_partner in the current turn. Thus cannot
+        see itself the updated index nor the updated index of the behind_partner
         :return:
         """
         gain_ahead = 0
@@ -924,7 +927,7 @@ class Motorcycle(Vehicle):
         gain_speed = 0
 
         if self.get_role() == "inbetween":
-            diff_ahead_partner = abs(self.distance_ahead_partner - self.front_gap_preference)
+            diff_ahead_partner = abs(self.distance_ahead_partner - self.front_gap_preference - self.get_speed())
             diff_behind_partner = abs(self.distance_behind_partner - self.behind_gap_preference)
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
 
@@ -940,15 +943,13 @@ class Motorcycle(Vehicle):
             gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
         elif self.get_role() == 'sweeper':
-            # the last one cannot see the updated speed. Therefore, self.get_speed() is called
-            # s.t. leader and sweeper have the same preference gain over time
             diff_ahead_partner = abs(self.distance_ahead_partner - self.front_gap_preference - self.get_speed())
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
 
             gain_ahead = normal_dist(diff_ahead_partner, mean=0, sd=1, amp=self.front_gap_ampl)
             gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
-        self.fun = gain_ahead + gain_behind + gain_speed
+        self.fun = gain_ahead + gain_behind + self.fun_weight * gain_speed
 
     def set_behind_partner(self, partner):
         self.behind = partner

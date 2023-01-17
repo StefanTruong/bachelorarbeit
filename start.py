@@ -324,7 +324,7 @@ elif selection == 9:
     analyzer = AnalyzerSingleSim(sim)
 
     # street with constant curvature or half sinus or constant curvature
-    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=1600)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=2000)
     # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
 
     # choose which vehicle should be focused on
@@ -394,9 +394,8 @@ elif selection == 10:
         vis = VisualizeStreet(sim)
         analyzer = AnalyzerSingleSim(sim)
 
-        # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=30)
-        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000,
-                                              frequency=0.1)
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=2000)
+        # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
 
         # shows how initial distribution of vehicles are for each density
         vis.traffic_vis_tiles()
