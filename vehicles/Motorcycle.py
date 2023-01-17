@@ -928,23 +928,25 @@ class Motorcycle(Vehicle):
             diff_behind_partner = abs(self.distance_behind_partner - self.behind_gap_preference)
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
 
-            gain_ahead = normal_dist(diff_ahead_partner, 1, self.front_gap_ampl)
-            gain_behind = normal_dist(diff_behind_partner, 1, self.behind_gap_ampl)
-            gain_speed = normal_dist(diff_speed, 1, self.speed_ampl)
+            gain_ahead = normal_dist(diff_ahead_partner, mean=0, sd=1, amp=self.front_gap_ampl)
+            gain_behind = normal_dist(diff_behind_partner, mean=0, sd=1, amp=self.behind_gap_ampl)
+            gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
-        if self.get_role() == 'leader':
+        elif self.get_role() == 'leader':
             diff_behind_partner = abs(self.distance_behind_partner - self.behind_gap_preference)
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
 
-            gain_behind = normal_dist(diff_behind_partner, 1, self.behind_gap_ampl)
-            gain_speed = normal_dist(diff_speed, 1, self.speed_ampl)
+            gain_behind = normal_dist(diff_behind_partner, mean=0, sd=1, amp=self.behind_gap_ampl)
+            gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
-        if self.get_role() == 'sweeper':
-            diff_ahead_partner = abs(self.distance_ahead_partner - self.front_gap_preference)
+        elif self.get_role() == 'sweeper':
+            # Somewhere there is a bug and  I don't know where. Therefore, self.get_speed() is called
+            # s.t. leader and sweeper have the same preference gain over time
+            diff_ahead_partner = abs(self.distance_ahead_partner - self.front_gap_preference - self.get_speed())
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
 
-            gain_ahead = normal_dist(diff_ahead_partner, 1, self.front_gap_ampl)
-            gain_speed = normal_dist(diff_speed, 1, self.speed_ampl)
+            gain_ahead = normal_dist(diff_ahead_partner, mean=0, sd=1, amp=self.front_gap_ampl)
+            gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
         self.fun = gain_ahead + gain_behind + gain_speed
 
