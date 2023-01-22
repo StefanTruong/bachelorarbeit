@@ -40,6 +40,24 @@ def constant_speed(x, number):
     return number
 
 
+def step_function(x, amplitude, frequency):
+    """
+    returns the curvature of a sinus as a step function
+    :param x:
+    :param amplitude:
+    :param frequency:
+    :return:
+    """
+    if amplitude > 9999:
+        raise ValueError('amplitude must be smaller than 10000 or visualization will be broken')
+
+    value = amplitude * math.sin(frequency * x)
+    if value > 0:
+        return amplitude
+    elif value <= 0:
+        return 0
+
+
 class TileAttributeSetter:
 
     def __init__(self, sim, cfg, modus='sinus', generate=True, amplitude=5, frequency=0.2, constant_curvature=5):
@@ -89,6 +107,10 @@ class TileAttributeSetter:
 
             elif self.modus == 'constant':
                 attr = constant_speed(index, constant_curvature)
+                attr_list.append(attr)
+
+            elif self.modus == 'step_function':
+                attr = step_function(index, amplitude, frequency)
                 attr_list.append(attr)
 
             else:
