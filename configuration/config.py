@@ -483,6 +483,18 @@ class ConfigPreference:
             raise ValueError('Unknown behavior')
         return current_speed_preference
 
+    def get_speed_limit_for_curvature(self, curvature):
+        """
+        get the speed limit for the given curvature
+        :param curvature: curvature of the tile
+        :return: speed limit
+        """
+        for speed, curvature_range in self.speedlimit_to_curvature.items():
+            if curvature_range[0] <= curvature <= curvature_range[1]:
+                speed_limit = speed
+                break
+        return speed_limit
+
     def get_distance_weight(self, behavior):
         """
         gets the amplitude of the distance as weighting for linear combination of distance and speed
