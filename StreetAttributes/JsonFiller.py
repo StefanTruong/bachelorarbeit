@@ -17,22 +17,25 @@ current_filled_index = 0    # the index of street_dict which is currently filled
 for index, row in street_data.iterrows():
     # get data from csv file if available
     # Hint: values will be set section wise and not tile wise. Meaning the whole section will have the same values
+
+    # km cannot be 0 or empty
+    if row['km'] == 0:
+        street_length = 1
+    else:
+        street_length = row['km']
+
     if row['curvature'] != -1:
-        curvature = row['curvature']
+        curvature = row['curvature'] / street_length
     else:
         curvature = 0
 
-    if row['km'] != -1:
-        street_length = row['km']
-    else:
-        street_length = 0
-
-    if row['speedlimit'] == -1:
+    if row['speedlimit'] == -1 or row['speedlimit'] == '':
         speed_limit = cfg.get_speed_limit_for_curvature(curvature)
     else:
         speed_limit = row['speedlimit']
+        speed_limit = int(speed_limit * 1000 / 3600) / 3
 
-    if row['beauty'] == -1:
+    if row['beauty'] == -1 or row['beauty'] == '':
         beauty = 0
     else:
         beauty = row['beauty']
