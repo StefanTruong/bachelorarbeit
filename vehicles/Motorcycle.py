@@ -20,7 +20,7 @@ def normal_dist(diff, mean=0, sd=1, amp=1):
 
 class Motorcycle(Vehicle):
     # max_velocity: 100km/h = 30m/s -> 30m/s / 3,75m = 8tiles
-    def __init__(self, speed, tile, group, preferred_speed, speed_distance_preferences=None, max_velocity=7):
+    def __init__(self, speed, tile, group, preferred_speed, speed_distance_preferences=None, max_velocity=8):
         """
         initializes Motorcycle with parameters
         :param speed: integer, current initial speed

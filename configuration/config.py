@@ -279,7 +279,7 @@ class ConfigPreference:
             self.model_settings = {
                 'length': 1000,
                 'total_amount_steps': 100,
-                'density': 1.0,
+                'density': 0.003,
                 'num_lanes': 1,  # [0,1] do not change
                 'prob_slowdown': 0,
                 'prob_changelane': 1,
@@ -330,16 +330,13 @@ class ConfigPreference:
         # # curve-speed-limit
         # don't forget to adjust the symbol in tile.py for the curvature
         self.speedlimit_to_curvature = {
-            11: (0, 500),  # 10tiles ~ 40 m/s ~ 144 km/h
-            10: (500, 800),  # 9 tiles ~ 36 m/s ~ 129 km/h
-            9: (800, 1000),  # 8 tiles ~ 32 m/s ~ 115 km/h
-            8: (1000, 1200),  # 7 tiles ~ 28 m/s ~ 101 km/h
-            7: (1200, 1400),  # 6 tiles ~ 24 m/s ~ 86 km/h
-            6: (1400, 1600),  # 5 tiles ~ 20 m/s ~ 72 km/h
-            5: (1600, 1800),  # 4 tiles ~ 16 m/s ~ 57 km/h
-            4: (1800, 2000),  # 3 tiles ~ 12 m/s ~ 43 km/h
-            3: (2000, 3000),  # 2 tiles ~ 8 m/s ~ 29 km/h
-            2: (3000, 10000),  # 1 tile ~ 4 m/s ~ 14 km/h
+            11: (0, 200),  # 7 tiles ~ 28 m/s ~ 101 km/h
+            8: (200, 500),  # 6 tiles ~ 24 m/s ~ 86 km/h
+            7: (500, 900),  # 5 tiles ~ 20 m/s ~ 72 km/h
+            6: (900, 1200),  # 4 tiles ~ 16 m/s ~ 57 km/h
+            5: (1200, 1500),  # 3 tiles ~ 12 m/s ~ 43 km/h
+            4: (1500, 1900),  # 2 tiles ~ 8 m/s ~ 29 km/h
+            3: (1900, 10000),  # 1 tile ~ 4 m/s ~ 14 km/h
         }
 
         # # Preference Settings
@@ -347,7 +344,7 @@ class ConfigPreference:
         self.dist_mean_small = 2  # 50[km/h] ~ 13[m/s]*2[sec] / 4[m/tile] ~ 3[tiles]
         self.dist_sd_small = 1
         self.dist_ampl_small = 1
-        self.dist_mean_avg = 3
+        self.dist_mean_avg = 4
         self.dist_sd_avg = 1
         self.dist_ampl_avg = 1
         self.dist_mean_high = 4
@@ -373,25 +370,24 @@ class ConfigPreference:
 
         # The average type wants to ride roughly one speed less
         self.curve_preference_average = {
-            7: (0, 800),
-            6: (800, 1200),
-            5: (1200, 1400),
-            4: (1400, 1600),
-            3: (1600, 1800),
-            2: (1800, 3000),
-            1: (3000, 10000),
+            8: (0, 200),
+            7: (200, 500),
+            6: (500, 900),
+            5: (900, 1200),
+            4: (1200, 1500),
+            3: (1500, 1900),
+            2: (1900, 10000),
         }
 
         # The cautious type wants to ride roughly two speed less
         self.curve_preference_cautious = {
-            8: (0, 500),
-            7: (500, 800),
-            6: (800, 1000),
-            5: (1000, 1200),
-            4: (1200, 1400),
-            3: (1400, 1600),
-            2: (1600, 3000),
-            1: (3000, 10000),
+            7: (0, 200),
+            6: (200, 500),
+            5: (500, 900),
+            4: (900, 1200),
+            3: (1200, 1500),
+            2: (1500, 1900),
+            1: (1900, 10000),
         }
 
         # more curvature more fun. Keys [0,1] in relation to distance preference
