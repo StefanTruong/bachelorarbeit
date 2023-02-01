@@ -5,7 +5,7 @@ from configuration.config import ConfigPreference
 # fills the street data in json format ########################################
 
 # load csv file as df and configuration file
-street_data = pd.read_csv('./Streets/teststreet.csv', sep=',', header=0)
+street_data = pd.read_csv('./Streets/Wildschapbachstraße (L 93).csv', sep=';', header=0)
 
 # print(street_data.columns.tolist())
 cfg = ConfigPreference()
@@ -19,13 +19,13 @@ for index, row in street_data.iterrows():
     # Hint: values will be set section wise and not tile wise. Meaning the whole section will have the same values
 
     # km cannot be 0 or empty
-    if row['km'] == 0:
-        street_length = 1
+    if row['km'] == 0 or row['km'] == '':
+        street_length = 0.1
     else:
         street_length = row['km']
 
-    if row['curvature'] != -1:
-        curvature = row['curvature'] / street_length
+    if row['curvature'] != -1 and row['curvature'] != '-':
+        curvature = float(row['curvature']) / float(street_length)
     else:
         curvature = 0
 
@@ -33,7 +33,7 @@ for index, row in street_data.iterrows():
     speed_limit = cfg.get_speed_limit_for_curvature(curvature)
 
     # beauty will not be used for analysis since there are no data available
-    if row['beauty'] == -1 or row['beauty'] == '':
+    if row['beauty'] == -1 or row['beauty'] == '' or pd.isnull(row['beauty']):
         beauty = 0
     else:
         beauty = row['beauty']
