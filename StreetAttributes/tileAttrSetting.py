@@ -1,5 +1,7 @@
 import math
 import json
+import numpy as np
+from matplotlib import pyplot as plt
 
 
 def sinus(x, amplitude, frequency):
@@ -56,6 +58,42 @@ def step_function(x, amplitude, frequency):
         return amplitude
     elif value <= 0:
         return 0
+
+
+def step_function_twice(x, amplitude, frequency):
+    """
+    Does not work as intended. Do not use!
+    returns the curvature of an asymmetric sinus like step function according to a fourier series
+    https://www.max-academy.de/contentPlayer/60bdf0ffbf5215007a86d933/606ea3c5d6a1480064c6c94e
+    https://www.elektroniktutor.de/fachmathematik/fourier.html
+    :param x:
+    :param amplitude:
+    :param frequency: Grundfrequenz
+    :return:
+    """
+    w = 2 * math.pi / frequency
+    a0 = amplitude
+    value = a0 / 2 + \
+            0.7484 * math.sin(1 * w * x + math.atan(0.4399 / 0.6055)) + \
+            0.6054 * math.sin(2 * w * x + math.atan(0.5758 / 0.1871)) + \
+            0.4036 * math.sin(3 * w * x + math.atan(0.3839 / -0.1247)) + \
+            0.1871 * math.sin(4 * w * x + math.atan(0.1100 / -0.1514)) + \
+            0.1247 * math.sin(6 * w * x + math.atan(0.0733 / 0.1009)) + \
+            0.1730 * math.sin(7 * w * x + math.atan(0.1645 / 0.0535)) + \
+            0.1514 * math.sin(8 * w * x + math.atan(0.1440 / -0.0468)) + \
+            0.0832 * math.sin(9 * w * x + math.atan(0.0489 / -0.0673))
+    '''
+    A = amplitude
+    A0 = 4 * A
+    A1 = 6.62 * frequency
+    A2 = 3.31 * frequency
+    A3 = 0
+    A4 = -1.65 * frequency
+    w = 2 * math.pi / frequency
+
+    value = A0 + A1 * math.cos(w * x) + A2 * math.cos(2 * w * x) + A3 * math.cos(3 * w * x) + A4 * math.cos(4 * w * x)
+    '''
+    return value
 
 
 class TileAttributeSetter:
@@ -200,3 +238,11 @@ class TileAttributeSetter:
 
     def get_attr_dict(self):
         return self.attr_dict
+
+
+if __name__ == '__main__':
+    # 100 linearly spaced numbers
+    x = np.linspace(-10, 10, 100)
+    step_function_twice_vectorized = np.vectorize(step_function_twice)
+    plt.plot(x, step_function_twice_vectorized(x, 200, 1))
+    plt.show()
