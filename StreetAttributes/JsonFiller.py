@@ -29,12 +29,10 @@ for index, row in street_data.iterrows():
     else:
         curvature = 0
 
-    if row['speedlimit'] == -1 or row['speedlimit'] == '':
-        speed_limit = cfg.get_speed_limit_for_curvature(curvature)
-    else:
-        speed_limit = row['speedlimit']
-        speed_limit = int(speed_limit * 1000 / 3600) / 3
+    #  speedlimit will be used from config instead of data
+    speed_limit = cfg.get_speed_limit_for_curvature(curvature)
 
+    # beauty will not be used for analysis since there are no data available
     if row['beauty'] == -1 or row['beauty'] == '':
         beauty = 0
     else:
