@@ -279,11 +279,11 @@ class ConfigPreference:
             self.model_settings = {
                 'length': 1000,
                 'total_amount_steps': 100,
-                'density': 0.003,
+                'density': 1.0,
                 'num_lanes': 1,  # [0,1] do not change
                 'prob_slowdown': 0,
                 'prob_changelane': 1,
-                'car_share': 0.0,
+                'car_share': 1.0,
                 'number_platoons': 1,
                 'platoon_size': 3,
                 'car_max_velocity': 11,  # 120[km/h] = 33.33[m/s] ~ 33/3 = 11
@@ -397,7 +397,7 @@ class ConfigPreference:
         # more curvature more fun. Keys [0,1] in relation to distance preference
         self.curve_fun_preference = {
             0.25: (0, 800),
-            0.5: (1200, 1400),
+            0.5: (800, 1400),
             0.75: (1400, 3000),
             1: (3000, 10000),
         }

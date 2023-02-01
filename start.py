@@ -324,9 +324,9 @@ elif selection == 9:
     analyzer = AnalyzerSingleSim(sim)
 
     # street with constant curvature or half sinus or constant curvature
-    # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=2000)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=2000)
     # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
-    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=5000, frequency=0.5)
+    # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
 
     # choose which vehicle should be focused on
     vis.traffic_vis_tiles()
@@ -378,7 +378,7 @@ elif selection == 10:
     # what densities shall be calculated. Lowest density should be number of bikers, which is fixed
     lowest_density = \
         (cfg.model_settings['platoon_size'] * cfg.model_settings['number_platoons']) / cfg.model_settings['length']
-    density_list = np.linspace(lowest_density, 2, 1)
+    density_list = np.linspace(lowest_density, 2, 10)
 
     avgFlows = []
     stdFlows = []
@@ -402,7 +402,7 @@ elif selection == 10:
         vis.traffic_vis_tiles()
 
         # for each density, the simulation will be run x times to get a variance
-        for i in range(0, 1):
+        for i in range(0, 5):
             for i in range(0, sim.total_amount_steps):
                 checker.check_for_inconsistencies()
                 vis.traffic_vis_tiles_granular()
@@ -439,6 +439,9 @@ elif selection == 10:
         sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
         sys.stdout.write('\n')
 
-    # Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
-    Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
+    # Flow Density Diagram needs std error. Change density_list as well as inner for loop
+    Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
+
+    # fun time series is defined for only one density and no inner loop
+    # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
     print(avgFlows)
