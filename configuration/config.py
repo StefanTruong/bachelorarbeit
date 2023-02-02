@@ -344,7 +344,7 @@ class ConfigPreference:
         self.dist_mean_small = 2  # 50[km/h] ~ 13[m/s]*2[sec] / 4[m/tile] ~ 3[tiles]
         self.dist_sd_small = 1
         self.dist_ampl_small = 1
-        self.dist_mean_avg = 4
+        self.dist_mean_avg = 5
         self.dist_sd_avg = 1
         self.dist_ampl_avg = 1
         self.dist_mean_high = 4
