@@ -392,16 +392,9 @@ class ConfigPreference:
 
         # more curvature more fun. Keys [0,1] in relation to distance preference
         self.curve_fun_preference = {
-            1: (0, 100000),
+            0.5: (0, 400),
+            1: (400, 10000),
         }
-        '''
-        self.curve_fun_preference = {
-            0.25: (0, 800),
-            0.5: (800, 1400),
-            0.75: (1400, 3000),
-            1: (3000, 10000),
-        }
-        '''
 
     # ToDo check if this works
     def get_distance_preference(self, speed_preference):
