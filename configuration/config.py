@@ -277,13 +277,13 @@ class ConfigPreference:
             :param adjust_speed_preference: when Motorcyclist should update its speed according to its speed-gap pref
             """
             self.model_settings = {
-                'length': 1000,
-                'total_amount_steps': 100,
-                'density': 0.003,
+                'length': 2000,
+                'total_amount_steps': 200,
+                'density': 0.002,
                 'num_lanes': 1,  # [0,1] do not change
-                'prob_slowdown': 0,
+                'prob_slowdown': 0.00,
                 'prob_changelane': 1,
-                'car_share': 1.0,
+                'car_share': 0.0,
                 'number_platoons': 1,
                 'platoon_size': 3,
                 'car_max_velocity': 11,  # 120[km/h] = 33.33[m/s] ~ 33/3 = 11
@@ -344,7 +344,7 @@ class ConfigPreference:
         self.dist_mean_small = 2  # 50[km/h] ~ 13[m/s]*2[sec] / 4[m/tile] ~ 3[tiles]
         self.dist_sd_small = 1
         self.dist_ampl_small = 1
-        self.dist_mean_avg = 5
+        self.dist_mean_avg = 5  # see: https://www.mcuckermark.de/wp-content/uploads/2019/07/Fahren-in-einer-Motorradgruppe.pdf
         self.dist_sd_avg = 1
         self.dist_ampl_avg = 1
         self.dist_mean_high = 4
@@ -392,11 +392,16 @@ class ConfigPreference:
 
         # more curvature more fun. Keys [0,1] in relation to distance preference
         self.curve_fun_preference = {
+            1: (0, 100000),
+        }
+        '''
+        self.curve_fun_preference = {
             0.25: (0, 800),
             0.5: (800, 1400),
             0.75: (1400, 3000),
             1: (3000, 10000),
         }
+        '''
 
     # ToDo check if this works
     def get_distance_preference(self, speed_preference):

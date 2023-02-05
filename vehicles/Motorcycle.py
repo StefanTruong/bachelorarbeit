@@ -931,8 +931,8 @@ class Motorcycle(Vehicle):
             diff_behind_partner = abs(self.distance_behind_partner - self.behind_gap_preference)
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
 
-            gain_ahead = normal_dist(diff_ahead_partner, mean=0, sd=1, amp=self.front_gap_ampl) / 2
-            gain_behind = normal_dist(diff_behind_partner, mean=0, sd=1, amp=self.behind_gap_ampl) / 2
+            gain_ahead = normal_dist(diff_ahead_partner, mean=0, sd=1, amp=self.front_gap_ampl)
+            gain_behind = normal_dist(diff_behind_partner, mean=0, sd=1, amp=self.behind_gap_ampl)
             gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
         elif self.get_role() == 'leader':
@@ -940,6 +940,7 @@ class Motorcycle(Vehicle):
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
 
             gain_behind = normal_dist(diff_behind_partner, mean=0, sd=1, amp=self.behind_gap_ampl)
+            gain_ahead = gain_behind
             gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
         elif self.get_role() == 'sweeper':
@@ -947,6 +948,7 @@ class Motorcycle(Vehicle):
             diff_speed = abs(self.get_speed() - self.current_speed_preference)
 
             gain_ahead = normal_dist(diff_ahead_partner, mean=0, sd=1, amp=self.front_gap_ampl)
+            gain_behind = gain_ahead
             gain_speed = normal_dist(diff_speed, mean=0, sd=1, amp=self.speed_ampl)
 
         self.fun = gain_ahead + gain_behind + self.fun_weight * gain_speed

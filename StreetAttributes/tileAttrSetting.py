@@ -59,6 +59,19 @@ def step_function(x, amplitude, frequency):
     elif value <= 0:
         return 0
 
+def contract_function(x):
+    """
+    returns a function where at the beginning there is a strong curve than no curvature at all to
+    simulate an escape-velocity of the leader.
+    Hint: The breakpoint is hard coded due to time constraints.
+    :param x:
+    :return:
+    """
+    if x < 50:
+        return 2000
+    else:
+        return 0
+
 
 def step_function_twice(x, amplitude, frequency):
     """
@@ -149,6 +162,10 @@ class TileAttributeSetter:
 
             elif self.modus == 'step_function':
                 attr = step_function(index, amplitude, frequency)
+                attr_list.append(attr)
+
+            elif self.modus == 'contract_function':
+                attr = contract_function(index)
                 attr_list.append(attr)
 
             else:
