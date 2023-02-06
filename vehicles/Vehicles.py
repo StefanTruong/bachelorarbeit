@@ -91,9 +91,11 @@ class Vehicle:
         # switching only possible if side is free
         if self.sim.tiles[self.tile.get_index()][self.tile.get_lane() + other_lane].get_vehicle() is None:
 
-            # T2 more space than current velocity + 1 and tile max speed limit is not exceeded
-            if self.distance_front_other_lane > (self.get_speed() + 1) and \
-                    self.get_speed() < self.get_tile().get_speed_limit():
+            # Look what kind of vehicle is behind me. Todo check if -1 for look_street_idx is correct
+            if self.distance_front_other_lane > (self.get_speed() + 1):
+                # removed rule. Don't know why it is here
+                    #and \
+                    #self.get_speed() < self.get_tile().get_speed_limit():
 
                 # Look what kind of vehicle is behind me. Todo check if -1 for look_street_idx is correct
                 look_street_idx = (self.tile.get_index() - self.distance_behind_other_lane) % self.sim.length

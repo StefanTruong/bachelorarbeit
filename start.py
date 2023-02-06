@@ -324,7 +324,7 @@ elif selection == 9:
     analyzer = AnalyzerSingleSim(sim)
 
     # street with constant curvature or half sinus or constant curvature
-    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=500)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=601)
     # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=601, frequency=0.03)
 
     # choose which vehicle should be focused on
@@ -377,7 +377,7 @@ elif selection == 10:
     # what densities shall be calculated. Lowest density should be number of bikers, which is fixed
     lowest_density = \
         (cfg.model_settings['platoon_size'] * cfg.model_settings['number_platoons']) / cfg.model_settings['length']
-    density_list = np.linspace(lowest_density, 2, 1)
+    density_list = np.linspace(lowest_density, 2, 10)
 
     avgFlows = []
     stdFlows = []
@@ -394,14 +394,14 @@ elif selection == 10:
         vis = VisualizeStreet(sim)
         analyzer = AnalyzerSingleSim(sim)
 
-        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=5000)
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=401)
         # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
 
         # shows how initial distribution of vehicles are for each density
         vis.traffic_vis_tiles()
 
         # for each density, the simulation will be run x times to get a variance
-        for i in range(0, 1):
+        for i in range(0, 20):
             for i in range(0, sim.total_amount_steps):
                 checker.check_for_inconsistencies()
                 vis.traffic_vis_tiles_granular()
@@ -413,8 +413,8 @@ elif selection == 10:
             analyzer.save_results(f'_density_{density}')
 
             # Plots different graphics for analysis. Problem: plotter overwrites stuff.
-            # Use only one inner for loop in range and one single density
-            Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
+            # fun time series is defined for only one density and no inner loop
+            # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
 
             # Plots Time-Distance Diagram for Motorcyclists and Cars as well as the velocity Distribution
             # Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(),
@@ -440,7 +440,7 @@ elif selection == 10:
         sys.stdout.write('\n')
 
     # Flow Density Diagram needs std error. Change density_list as well as inner for loop
-    # Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
+    Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
 
     # fun time series is defined for only one density and no inner loop
     # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
