@@ -279,11 +279,11 @@ class ConfigPreference:
             self.model_settings = {
                 'length': 2000,
                 'total_amount_steps': 200,
-                'density': 0.0125,
+                'density': 0.0025,
                 'num_lanes': 1,  # [0,1] do not change
-                'prob_slowdown': 0.01,
+                'prob_slowdown': 0.00,  # should be turned off as Motorcyclist behave irregularly
                 'prob_changelane': 0.99,
-                'car_share': 0.5,
+                'car_share': 1.0,
                 'number_platoons': 1,
                 'platoon_size': 5,
                 'car_max_velocity': 11,  # 120[km/h] = 33.33[m/s] ~ 33/3 = 11

@@ -324,7 +324,7 @@ elif selection == 9:
     analyzer = AnalyzerSingleSim(sim)
 
     # street with constant curvature or half sinus or constant curvature
-    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=601)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=401)
     # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=601, frequency=0.03)
 
     # choose which vehicle should be focused on
@@ -347,14 +347,18 @@ elif selection == 9:
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
         vis.traffic_vis_tiles_granular()
-        # time.sleep(0.8)
+        # time.sleep(1.0)
         # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         # sim.moving(vis, vis_modus='step')
         analyzer.update()
 
-    for lane in range(0, sim.get_lanes() + 1):
-        Plotter.time_space_granular(vis.get_time_space_data(lane))
+    # 2D plot use only one plot as Plotter does remember which plot was used last
+    # for lane in range(0, sim.get_lanes() + 1):
+    #     Plotter.time_space_granular(vis.get_time_space_data(lane))
+
+    # Fun Distribution
+    Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
 
     analyzer.save_results()
     sys.stdout.write('\n')
@@ -377,15 +381,14 @@ elif selection == 10:
     # what densities shall be calculated. Lowest density should be number of bikers, which is fixed
     lowest_density = \
         (cfg.model_settings['platoon_size'] * cfg.model_settings['number_platoons']) / cfg.model_settings['length']
-    density_list = np.linspace(lowest_density, 2, 10)
+    density_list = np.linspace(lowest_density, 2, 1)
 
     avgFlows = []
     stdFlows = []
 
     for density in density_list:
         singleFlows = []
-        cfg.model_settings['density'] = density
-
+        cfg.model_settings['density'] = density     # comment if density shouldn't be changed
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
         sim.set_preference_object(pref)
@@ -401,7 +404,7 @@ elif selection == 10:
         vis.traffic_vis_tiles()
 
         # for each density, the simulation will be run x times to get a variance
-        for i in range(0, 20):
+        for i in range(0, 1):
             for i in range(0, sim.total_amount_steps):
                 checker.check_for_inconsistencies()
                 vis.traffic_vis_tiles_granular()
@@ -414,7 +417,7 @@ elif selection == 10:
 
             # Plots different graphics for analysis. Problem: plotter overwrites stuff.
             # fun time series is defined for only one density and no inner loop
-            # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
+            Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
 
             # Plots Time-Distance Diagram for Motorcyclists and Cars as well as the velocity Distribution
             # Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(),
@@ -440,7 +443,7 @@ elif selection == 10:
         sys.stdout.write('\n')
 
     # Flow Density Diagram needs std error. Change density_list as well as inner for loop
-    Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
+    # Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
 
     # fun time series is defined for only one density and no inner loop
     # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
