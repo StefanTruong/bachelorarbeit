@@ -3,6 +3,7 @@ import copy
 from vehicles.Motorcycle import Motorcycle
 import numpy as np
 import json
+import pandas as pd
 
 
 class AnalyzerSingleSim:
@@ -19,6 +20,7 @@ class AnalyzerSingleSim:
         self.vehicle_summary_dict = None
 
         self.init_vehicle_summary_dict()
+        self.dist_filler = 5  # value from config.py as self.dist_mean_avg()
 
     def update(self):
         """
@@ -128,6 +130,10 @@ class AnalyzerSingleSim:
                         self.vehicle_summary_dict[i]['sum_behind_dist_partner'] / self.step
                     self.vehicle_summary_dict[i]['std_behind_dist_partner'] = \
                         np.std(self.vehicle_summary_dict[i]['behind_dist_partner_list'])
+                else:
+                    # Missing values when biker is leader or sweeper it has no partner,
+                    # or it got lost will be filled with optimal desired distance defined in config.py as dist_mean_avg
+                    self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(self.dist_filler)
 
                 if vehicle.get_ahead_partner() is not None:
                     self.vehicle_summary_dict[i]['ahead_dist_partner'] = vehicle.get_distance_ahead_partner()
@@ -137,6 +143,10 @@ class AnalyzerSingleSim:
                         self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] / self.step
                     self.vehicle_summary_dict[i]['std_ahead_dist_partner'] = \
                         np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
+                else:
+                    # Missing values when biker is leader or sweeper it has no partner,
+                    # or it got lost will be filled with optimal desired distance defined in config.py as dist_mean_avg
+                    self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(self.dist_filler)
 
                 if vehicle.get_role() == 'leader':
                     self.vehicle_summary_dict[i]['sum_is_leader'] += 1
@@ -201,6 +211,109 @@ class AnalyzerSingleSim:
         else:
             with open(f'./Analyse/results{special_name}.json', 'w+') as fp:
                 json.dump(self.get_vehicle_summary_dict(), fp, indent=4)
+
+    def get_fun_data(self):
+        """
+        returns a dataframe with the fun values of motorcyclists
+        :return:
+        """
+        fun_motorcyclist_only = {}
+
+        for key in self.vehicle_summary_dict:
+            if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                fun_motorcyclist_only[key] = self.vehicle_summary_dict[key]['fun_list']
+
+        # convert dict into dataframe. Columns are the fun for each motorcyclist
+        data = pd.DataFrame.from_dict(fun_motorcyclist_only)
+
+        # rename columns to Biker_vehicle index
+        for col in data.columns:
+            name = 'Biker ' + str(col)
+            data.rename(columns={col: name}, inplace=True)
+
+        return data
+
+    def get_time_distance_data(self):
+        """
+        returns a dataframe with the time and distance for each vehicle
+        :return:
+        """
+        motorcyclist_only = {}
+
+        for key in self.vehicle_summary_dict:
+            if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only[key] = self.vehicle_summary_dict[key]['travel_list']
+
+        # convert dict into dataframe. Columns are the travel distance from each motorcyclist
+        data = pd.DataFrame.from_dict(motorcyclist_only)
+
+        # rename columns to Biker_vehicle index
+        for col in data.columns:
+            name = 'Biker ' + str(col)
+            data.rename(columns={col: name}, inplace=True)
+
+        # cumulate the data for each biker
+        for col in data.columns:
+            data[col] = data[col].cumsum()
+
+        return data
+
+    def get_lane_changing_data(self):
+        """
+        returns data as TWO dicts how often a biker was on a specific lane
+        :return:
+        """
+        motorcyclist_only_left = {}
+        motorcyclist_only_right = {}
+
+        for key in self.vehicle_summary_dict:
+            if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only_left[key] = self.vehicle_summary_dict[key]['sum_on_left_lane']
+
+        for key in self.vehicle_summary_dict:
+            if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only_right[key] = self.vehicle_summary_dict[key]['sum_on_right_lane']
+
+        return motorcyclist_only_left, motorcyclist_only_right
+
+    def get_role_data(self):
+        """
+        returns data as dict how often a biker was on a specific role
+        [sweeper, inbetween, leader]
+        """
+        motorcyclist_role = {}
+
+        for key in self.vehicle_summary_dict:
+            if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_role[key] = [self.vehicle_summary_dict[key]['sum_is_sweeper'],
+                                          self.vehicle_summary_dict[key]['sum_is_inbetween'],
+                                          self.vehicle_summary_dict[key]['sum_is_leader']]
+
+        return motorcyclist_role
+
+    def get_distance_to_partner_data(self):
+        """
+        returns two dicts. Each list contains the distance to the partner for each biker. Missing values when
+        biker is leader or sweeper it has no partner, or it got lost will be filled with optimal desired distance
+        defined in config.py as dist_mean_avg. See update_vehicle_summary_dict
+        :return:
+        """
+        behind_distance_to_partner_list = {}
+        ahead_distance_to_partner_list = {}
+
+        for key in self.vehicle_summary_dict:
+            if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                behind_distance_to_partner_list[key] = self.vehicle_summary_dict[key]['behind_dist_partner_list']
+
+        for key in self.vehicle_summary_dict:
+            if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                ahead_distance_to_partner_list[key] = self.vehicle_summary_dict[key]['ahead_dist_partner_list']
+
+        behind_distance_to_partner_dict = pd.DataFrame.from_dict(behind_distance_to_partner_list)
+        ahead_distance_to_partner_dict = pd.DataFrame.from_dict(ahead_distance_to_partner_list)
+
+        return behind_distance_to_partner_dict, ahead_distance_to_partner_dict
+
 
 # ToDo Delete if not used
 class SaveResults:
