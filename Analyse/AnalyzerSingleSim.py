@@ -20,7 +20,6 @@ class AnalyzerSingleSim:
         self.vehicle_summary_dict = None
 
         self.init_vehicle_summary_dict()
-        self.dist_filler = 5  # value from config.py as self.dist_mean_avg()
 
     def update(self):
         """
@@ -131,9 +130,8 @@ class AnalyzerSingleSim:
                     self.vehicle_summary_dict[i]['std_behind_dist_partner'] = \
                         np.std(self.vehicle_summary_dict[i]['behind_dist_partner_list'])
                 else:
-                    # Missing values when biker is leader or sweeper it has no partner,
-                    # or it got lost will be filled with optimal desired distance defined in config.py as dist_mean_avg
-                    self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(self.dist_filler)
+                    # Missing values when biker is leader or sweeper it has no partner, filled with None
+                    self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(None)
 
                 if vehicle.get_ahead_partner() is not None:
                     self.vehicle_summary_dict[i]['ahead_dist_partner'] = vehicle.get_distance_ahead_partner()
@@ -144,9 +142,8 @@ class AnalyzerSingleSim:
                     self.vehicle_summary_dict[i]['std_ahead_dist_partner'] = \
                         np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
                 else:
-                    # Missing values when biker is leader or sweeper it has no partner,
-                    # or it got lost will be filled with optimal desired distance defined in config.py as dist_mean_avg
-                    self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(self.dist_filler)
+                    # Missing values when biker is leader or sweeper it has no partner, filled with None
+                    self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(None)
 
                 if vehicle.get_role() == 'leader':
                     self.vehicle_summary_dict[i]['sum_is_leader'] += 1
@@ -294,8 +291,7 @@ class AnalyzerSingleSim:
     def get_distance_to_partner_data(self):
         """
         returns two dicts. Each list contains the distance to the partner for each biker. Missing values when
-        biker is leader or sweeper it has no partner, or it got lost will be filled with optimal desired distance
-        defined in config.py as dist_mean_avg. See update_vehicle_summary_dict
+        biker is leader or sweeper it has no partner, or it got lost will be filled with None
         :return:
         """
         behind_distance_to_partner_list = {}
