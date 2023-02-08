@@ -2,6 +2,7 @@ import sys
 import time
 
 from Analyse.AnalyzerSingleSim import *
+from Analyse.ResultAnalyzer import *
 from movementLogic.MyTrafficSimulation import *
 from plotAndVisualize import Plotter
 from StreetAttributes.tileAttrSetting import *
@@ -10,32 +11,43 @@ from configuration.config import ConfigPreference
 from preferences.PreferenceNV import Preferences
 
 # select what visualization should be started. Use the console to give argument
-# selection 1   debug scenario. Visualizes each vehicle movement step by step and the whole street. No probabilities
-# selection 2   movement simulation with fixed street for 0.8 steps/sec. No probabilities
+# selection 1   LEGACY
+#               debug scenario. Visualizes each vehicle movement step by step and the whole street. No probabilities
+# selection 2   LEGACY
+#               movement simulation with fixed street for 0.8 steps/sec. No probabilities
 #               only on console. Save before running. Use full-screen
-# selection 3   Depreciated
+# selection 3   LEGACY
 #               movement focused on one vehicle and portion of the street behind and ahead. No probabilities
 #               only on console. Save before running. Use full-screen
-# selection 4   calculates a single average flow-density
-# selection 5   plots a flow-density diagram in an error bar
-# selection 6   like selection 1 but plotting is more granular for each side separately. 2D Pixel Plot
-# selection 7   Tile setting with curvature
-# selection 8   Tile setting with curvature and Motorcyclist simple speed_up and slow_down logic.
+# selection 4   LEGACY
+#               calculates a single average flow-density
+# selection 5   LEGACY
+#               plots a flow-density diagram in an error bar
+# selection 6   LEGACY
+#               like selection 1 but plotting is more granular for each side separately. 2D Pixel Plot
+# selection 7   LEGACY
+#               Tile setting with curvature
+# selection 8   LEGACY
+#               Tile setting with curvature and Motorcyclist simple speed_up and slow_down logic.
 #               Motorcyclist do not overtake Platoon member if on same lane
 #               Visualization with one vehicle focused
 #               saves an attribute dict s.t. it can be filled with speed limit and curvature
 #               visualizes time distance time-line diagram of motorcyclist and cars
 #               visualizes velocity distribution of motorcyclists
-# selection 9   like selection 8 but motorcyclist consider speed adjustments according to its preferences
+# selection 9   USE THIS FOR 2D-PIXEL-PLOT. USE THIS FOR VISUALIZATION OF SIMULATION
+#               like selection 8 but motorcyclist consider speed adjustments according to its preferences
 #               Plots 2D-Pixel Plot
-# selection 10  like selection 9, motorcyclist orient to its partners and preferences. Plots flow-density diagram
+# selection 10  USE THIS FOR FLOW-DENSITY-DIAGRAM
+#               like selection 9, motorcyclist orient to its partners and preferences. Plots flow-density diagram
 #               for street with curvature and speed limit for each density. Use selection 9
 #               if movement should be visualized only and for 2D-Pixel Plot
+# selection 11  USE THIS FOR FUN-DISTRIBUTION-DIAGRAM
+#               visualizes fun-distrubution diagram of motorcyclist x times
 
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
 else:
-    selection = 10  # ToDo change to selection which should be run on IDE
+    selection = 11  # ToDo change to selection which should be run on IDE
 
 # ---------------------------------- selection 1 ------------------------------------
 if selection == 1:
@@ -347,18 +359,15 @@ elif selection == 9:
     for i in range(0, sim.total_amount_steps):
         checker.check_for_inconsistencies()
         vis.traffic_vis_tiles_granular()
-        # time.sleep(1.0)
-        # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+        time.sleep(1.0)
+        vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
         sim.moving(vis)
         # sim.moving(vis, vis_modus='step')
         analyzer.update()
 
     # 2D plot use only one plot as Plotter does remember which plot was used last
-    # for lane in range(0, sim.get_lanes() + 1):
-    #     Plotter.time_space_granular(vis.get_time_space_data(lane))
-
-    # Fun Distribution
-    Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
+    for lane in range(0, sim.get_lanes() + 1):
+        Plotter.time_space_granular(vis.get_time_space_data(lane))
 
     analyzer.save_results()
     sys.stdout.write('\n')
@@ -388,7 +397,7 @@ elif selection == 10:
 
     for density in density_list:
         singleFlows = []
-        cfg.model_settings['density'] = density     # comment if density shouldn't be changed
+        cfg.model_settings['density'] = density  # comment if density shouldn't be changed
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
         sim.set_preference_object(pref)
@@ -443,8 +452,85 @@ elif selection == 10:
         sys.stdout.write('\n')
 
     # Flow Density Diagram needs std error. Change density_list as well as inner for loop
-    # Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
+    Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
 
-    # fun time series is defined for only one density and no inner loop
+    # fun time series is defined for only one density and no inner loop without errorbar. Depreciated use selection 11
     # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
     print(avgFlows)
+
+
+# ---------------------------------- selection 11 ------------------------------------
+elif selection == 11:
+    print('Selection Mode: ', selection)
+    cfg = ConfigPreference('default')
+    pref = Preferences(cfg)
+    result_analyzer = AnalyseResult()
+
+    # initialize pandas dataframes for summing up results
+    df_fun_data = None
+
+    for i in range(0, 5):
+        sim = TrafficSimulation(**cfg.model_settings)
+        sim.set_config_object(cfg)
+        sim.set_preference_object(pref)
+        sim.initialize()
+        checker = CollisionChecker(sim)
+        vis = VisualizeStreet(sim)
+        analyzer = AnalyzerSingleSim(sim)
+
+        # street with constant curvature or half sinus or constant curvature
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=401)
+        # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=601, frequency=0.03)
+
+        # choose which vehicle should be focused on
+        vis.traffic_vis_tiles()
+
+        # print('select vehicle to focus on (choose: (idx, lane) ')
+        vehicle_dict = {}
+        for idx, vehicle in enumerate(sim.vehicle_list):
+            vehicle_dict[idx] = vehicle
+
+        for key, value in vehicle_dict.items():
+            index = vehicle_dict[key].get_tile().get_index()
+            lane = vehicle_dict[key].get_tile().get_lane()
+            # print(f'{key}: {index, lane}')
+
+        # chosen_vehicle_number = input()
+        chosen_vehicle_number = 0  # Supress input as not needed for selection 11
+        focus_vehicle = vehicle_dict[int(chosen_vehicle_number)]
+        focus_vehicle.set_symbol('X')
+
+        for j in range(0, sim.total_amount_steps):
+            checker.check_for_inconsistencies()
+            vis.traffic_vis_tiles_granular()
+            # time.sleep(1.0)
+            # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+            sim.moving(vis)
+            # sim.moving(vis, vis_modus='step')
+            analyzer.update()
+
+        fun_data = analyzer.get_fun_data()
+        time_distance_data = analyzer.get_time_distance_data()
+        sum_left_lane_data, sum_right_lane_data = analyzer.get_lane_changing_data()
+        role_data = analyzer.get_role_data()
+        behind_distance_to_partner_data, ahead_distance_to_partner_data = analyzer.get_distance_to_partner_data()
+
+        result_analyzer.add_dataframes(fun_data, save='fun_data')
+
+        analyzer.save_results()
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+        sys.stdout.write('\n')
+
+    sum_fun_data = result_analyzer.get_fun_data()
+    print(sum_fun_data)
+    # Fun Distribution
+    Plotter.fun_distro_diagram_with_errorbar(sum_fun_data,
+                                             plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
