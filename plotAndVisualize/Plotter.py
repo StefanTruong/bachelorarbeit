@@ -242,15 +242,41 @@ def lane_diagram(left_lane_data, right_lane_data, plot_type='Percentage_being_on
     # plot the percentage of time a biker was on the right lane
     plt.bar(percentage_on_right_lane.keys(), percentage_on_right_lane.values(), width=0.2)
     plt.xlabel('Motorcyclist')
-    plt.ylabel('Percentage')
+    plt.ylabel('Share being on the right Lane [%]')
     plt.title(plot_type)
     plt.show()
 
 
-def extractor_summary_dict(my_dict, plot_type):
+def role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram'):
+    """
+    plots the role diagram histogram for all motorcyclists.
+    First row in sum_role_data is the sum how often a biker was the sweeper
+    Second row in sum_role_data is the sum how often a biker was the inbetween
+    Third row in sum_role_data is the sum how often a biker was the leader
+    column represents the biker
+    :param sum_role_data:
+    :param plot_type:
+    :return:
+    """
+    sum_role_percentage = extractor_summary_dict(sum_role_data, plot_type=plot_type)
+
+    # rename the index of the dataframe
+    sum_role_percentage.index = ['Sweeper', 'Inbetween', 'Leader']
+
+    ax = sum_role_percentage.plot(kind='bar', title=plot_type)
+    # rotate the x-axis labels
+    ax.set_xticklabels(sum_role_percentage.index, rotation=0)
+    ax.set_xlabel('Roles')
+    ax.set_ylabel('Share being in a Role [%]')
+    plt.title(plot_type)
+
+    plt.show()
+
+
+def extractor_summary_dict(my_dataobj, plot_type):
     """
     Extracts the data from the summary dict and returns a dict with the adjusted data for different plots
-    :param my_dict: can be the actual summary dict or some adjusted one!!!
+    :param my_dataobj: can be the actual summary dict or a dataframe!!!
     :param plot_type:
     :return:
     """
@@ -260,9 +286,9 @@ def extractor_summary_dict(my_dict, plot_type):
     if plot_type == 'Time_Distance_Diagram_Motorcyclist':
         motorcyclist_only = {}
 
-        for key in my_dict:
-            if my_dict[key]['vehicle_type'] == 'Motorcycle':
-                motorcyclist_only[key] = my_dict[key]['travel_list']
+        for key in my_dataobj:
+            if my_dataobj[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only[key] = my_dataobj[key]['travel_list']
 
         # convert dict into dataframe. Columns are the travel distance from each motorcyclist
         data = pd.DataFrame.from_dict(motorcyclist_only)
@@ -280,9 +306,9 @@ def extractor_summary_dict(my_dict, plot_type):
     elif plot_type == 'Time_Distance_Diagram_Car':
         car_only = {}
 
-        for key in my_dict:
-            if my_dict[key]['vehicle_type'] == 'Car':
-                car_only[key] = my_dict[key]['travel_list']
+        for key in my_dataobj:
+            if my_dataobj[key]['vehicle_type'] == 'Car':
+                car_only[key] = my_dataobj[key]['travel_list']
 
         # convert dict into dataframe. Columns are the travel distance from each car
         data = pd.DataFrame.from_dict(car_only)
@@ -300,9 +326,9 @@ def extractor_summary_dict(my_dict, plot_type):
     elif plot_type == 'Velocity_Distribution_Motorcyclist':
         motorcyclist_only = {}
 
-        for key in my_dict:
-            if my_dict[key]['vehicle_type'] == 'Motorcycle':
-                motorcyclist_only[key] = my_dict[key]['travel_list']
+        for key in my_dataobj:
+            if my_dataobj[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only[key] = my_dataobj[key]['travel_list']
 
         # convert dict into dataframe. Columns are the travel distance from each motorcyclist
         data = pd.DataFrame.from_dict(motorcyclist_only)
@@ -317,9 +343,9 @@ def extractor_summary_dict(my_dict, plot_type):
     elif plot_type == 'Fun_Distribution_Motorcyclist':
         fun_motorcyclist_only = {}
 
-        for key in my_dict:
-            if my_dict[key]['vehicle_type'] == 'Motorcycle':
-                fun_motorcyclist_only[key] = my_dict[key]['fun_list']
+        for key in my_dataobj:
+            if my_dataobj[key]['vehicle_type'] == 'Motorcycle':
+                fun_motorcyclist_only[key] = my_dataobj[key]['fun_list']
 
         # convert dict into dataframe. Columns are the fun for each motorcyclist
         data = pd.DataFrame.from_dict(fun_motorcyclist_only)
@@ -334,7 +360,7 @@ def extractor_summary_dict(my_dict, plot_type):
         z_score_fun_motorcyclist_only = {}
 
         # calculate average and z scores for each biker to each time step
-        for biker, values in my_dict.items():
+        for biker, values in my_dataobj.items():
             mean_for_all_time_steps = []
             z_score_for_all_time_steps = []
 
@@ -359,7 +385,7 @@ def extractor_summary_dict(my_dict, plot_type):
         std_dist_motorcyclist_only = {}
 
         # calculate average and std for each biker to each time step
-        for biker, values in my_dict.items():
+        for biker, values in my_dataobj.items():
             mean_for_all_time_steps = []
             std_for_all_time_steps = []
 
@@ -377,8 +403,15 @@ def extractor_summary_dict(my_dict, plot_type):
 
     elif plot_type == 'Velocity_Distribution_Diagram_with_errorbar_Motorcyclist':
         # converts dict to dataframe
-        converted_dict_to_df = pd.DataFrame.from_dict(my_dict)
+        converted_dict_to_df = pd.DataFrame.from_dict(my_dataobj)
         data = converted_dict_to_df
+
+    elif plot_type == 'Role_Distribution_Histogram':
+        # calculates percentage of each role in a dataframe
+        for column in my_dataobj:
+            my_dataobj[column] = my_dataobj[column] / sum(my_dataobj[column]) * 100
+
+        data = my_dataobj
 
     else:
         raise ValueError('Plot type not supported')

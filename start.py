@@ -524,6 +524,8 @@ elif selection == 11:
         result_analyzer.add_dataframes(velocity_distribution_data, temp_save='velocity_distribution_data')
         result_analyzer.add_dataframes(left_lane_data, temp_save='left_lane_data')
         result_analyzer.add_dataframes(right_lane_data, temp_save='right_lane_data')
+        result_analyzer.add_dataframes(role_data, temp_save='role_data')
+
 
         # For plotting a single run
         # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Velocity_Distribution_Motorcyclist')
@@ -549,6 +551,7 @@ elif selection == 11:
     sum_velocity_data = result_analyzer.get_aggregated_velocity_data()
     sum_left_lane_data = result_analyzer.get_aggregated_left_lane_data()
     sum_right_lane_data = result_analyzer.get_aggregated_right_lane_data()
+    sum_role_data = result_analyzer.get_aggregated_role_data()
 
 
     # Fun Distribution
@@ -561,6 +564,7 @@ elif selection == 11:
     # Plotter.velocity_distribution_diagram_with_errorbar(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
 
     # Plots lane data
-    Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
+    # Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
 
-
+    # Plots role data
+    Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')

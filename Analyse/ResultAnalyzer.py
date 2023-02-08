@@ -10,6 +10,7 @@ class AnalyseResult:
         self.velocity_results = None
         self.sum_left_lane_results = None
         self.sum_right_lane_results = None
+        self.role_results = None
 
     def add_dataframes(self, dataframe, temp_save):
         """
@@ -84,6 +85,16 @@ class AnalyseResult:
                     for col in dataframe.columns:
                         self.sum_right_lane_results[col] = [*self.sum_right_lane_results[col], *dataframe[col]]
 
+        elif temp_save == 'role_data':
+            # Biker 4 | ... | Biker 0
+            # 0     0 | ... | 3         first row is the role sweeper
+            # 1     0 | ... | 0         second row is the role inbetween
+            # 2     3 | ... | 0         third row is the role leader
+            if self.role_results is None:
+                self.role_results = dataframe
+            else:
+                self.role_results += dataframe
+
         else:
             raise Exception('unknown temp_save modus')
 
@@ -101,6 +112,9 @@ class AnalyseResult:
 
     def get_aggregated_right_lane_data(self):
         return self.sum_right_lane_results
+
+    def get_aggregated_role_data(self):
+        return self.role_results
 
     def load_result(self, filename=None):
         """

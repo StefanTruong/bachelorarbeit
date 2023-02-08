@@ -322,7 +322,10 @@ class AnalyzerSingleSim:
                                           self.vehicle_summary_dict[key]['sum_is_inbetween'],
                                           self.vehicle_summary_dict[key]['sum_is_leader']]
 
-        return motorcyclist_role
+        # convert dict into dataframe
+        motorcyclist_role_df = pd.DataFrame.from_dict(motorcyclist_role)
+
+        return motorcyclist_role_df
 
     def get_distance_to_partner_data(self):
         """
