@@ -11,6 +11,11 @@ class AnalyseResult:
         """
         add two dataframes, where elements are lists
         :return:
+        {'Biker 4': [[number of loops],
+                      number of time
+                        ],
+        ...
+        }
         """
         if save == 'fun_data':
             # convert dataframe to a dict with list element
