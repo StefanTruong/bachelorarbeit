@@ -7,8 +7,9 @@ class AnalyseResult:
         self.result = None
         self.fun_results = None
         self.time_distance_results = None
+        self.velocity_results = None
 
-    def add_dataframes(self, df1, temp_save='fun_data'):
+    def add_dataframes(self, dataframe, temp_save='fun_data'):
         """
         add two dataframes, where elements are lists
         :return:
@@ -19,9 +20,9 @@ class AnalyseResult:
         }
         """
         if temp_save == 'fun_data':
-            # convert dataframe to a dict with list element
+            # convert dataframe to a dict with list element for each time
             dict_with_list_elements = {}
-            for key, series in df1.iteritems():
+            for key, series in dataframe.iteritems():
                 dict_with_list_elements[key] = []
                 series = series.tolist()
                 for element in series:
@@ -34,10 +35,10 @@ class AnalyseResult:
                     for i in range(0, len(value)):
                         self.fun_results[key][i] += value[i]
 
-        if temp_save == 'time_distance_data':
-            # convert dataframe to a dict with list element
+        elif temp_save == 'time_distance_data':
+            # convert dataframe to a dict with list element for each time
             dict_with_list_elements = {}
-            for key, series in df1.iteritems():
+            for key, series in dataframe.iteritems():
                 dict_with_list_elements[key] = []
                 series = series.tolist()
                 for element in series:
@@ -50,11 +51,27 @@ class AnalyseResult:
                     for i in range(0, len(value)):
                         self.time_distance_results[key][i] += value[i]
 
-    def get_fun_data(self):
+        elif temp_save == 'velocity_distribution_data':
+            # convert dataframe to a dict collecting all velocities over time
+            if self.velocity_results is None:
+                self.velocity_results = {}
+                for col in dataframe.columns:
+                    self.velocity_results[col] = dataframe[col]
+            else:
+                for col in dataframe.columns:
+                    self.velocity_results[col] = [*self.velocity_results[col], *dataframe[col]]
+
+        else:
+            raise Exception('unknown temp_save modus')
+
+    def get_aggregated_fun_data(self):
         return self.fun_results
 
-    def get_time_distance_data(self):
+    def get_aggregated_time_distance_data(self):
         return self.time_distance_results
+
+    def get_aggregated_velocity_data(self):
+        return self.velocity_results
 
     def load_result(self, filename=None):
         """

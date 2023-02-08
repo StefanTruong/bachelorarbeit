@@ -90,13 +90,6 @@ def velocity_distro_diagram(summary_dict, plot_type='Velocity_Distribution_Motor
     ax.set_ylabel('Velocity')
 
     plt.show()
-    '''
-    boxplot = adjusted_results.boxplot()
-    boxplot.set_xlabel('Biker')
-    boxplot.set_ylabel('Velocity')
-    boxplot.set_title(plot_type)
-    plt.show()
-    '''
 
 
 def fun_distro_diagram(summary_dict, plot_type='Fun_Distribution_Motorcyclist'):
@@ -160,7 +153,13 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
 
 
 def time_distance_diagram_with_errorbar(sum_time_distance_data,
-                                        plot_type='Time_Distance_Diagram__with_errorbar_Motorcyclist'):
+                                        plot_type='Time_Distance_Diagram_with_errorbar_Motorcyclist'):
+    """
+    plots a time-distance diagram with errorbars for multiple runs
+    :param sum_time_distance_data:
+    :param plot_type:
+    :return:
+    """
     mean_dist_dict, std_dist_dict = extractor_summary_dict(sum_time_distance_data, plot_type=plot_type)
 
     # time-steps for the x-values as list for x-axis plotting
@@ -191,6 +190,29 @@ def time_distance_diagram_with_errorbar(sum_time_distance_data,
     plt.ylabel('Distance')
     plt.title(plot_type)
     plt.show()
+
+
+def velocity_distribution_diagram_with_errorbar(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist'):
+    """
+    plots the velocity distribution diagram with errorbars for multiple runs
+    :param sum_velocity_data: a dict of velocities of the motorcyclists for all runs
+    :param plot_type:
+    :return:
+    """
+    velocity_dict_to_df = extractor_summary_dict(sum_velocity_data, plot_type=plot_type)
+
+    # if dataframe is empty skip plot
+    if velocity_dict_to_df.empty:
+        print(f'empty df for {plot_type}')
+        return
+
+    # cmap = cm.ScalarMappable(cmap='rainbow')
+    ax = velocity_dict_to_df.plot(kind='box', title=plot_type)
+    ax.set_xlabel('Motorcyclist')
+    ax.set_ylabel('Velocity')
+
+    plt.show()
+
 
 
 def extractor_summary_dict(my_dict, plot_type):
@@ -300,7 +322,7 @@ def extractor_summary_dict(my_dict, plot_type):
 
         data = [mean_fun_motorcyclist_only, z_score_fun_motorcyclist_only]
 
-    elif plot_type == 'Time_Distance_Diagram__with_errorbar_Motorcyclist':
+    elif plot_type == 'Time_Distance_Diagram_with_errorbar_Motorcyclist':
         mean_dist_motorcyclist_only = {}
         std_dist_motorcyclist_only = {}
 
@@ -320,6 +342,11 @@ def extractor_summary_dict(my_dict, plot_type):
             std_dist_motorcyclist_only[biker] = std_for_all_time_steps
 
         data = [mean_dist_motorcyclist_only, std_dist_motorcyclist_only]
+
+    elif plot_type == 'Velocity_Distribution_Diagram_with_errorbar_Motorcyclist':
+        # converts dict to dataframe
+        converted_dict_to_df = pd.DataFrame.from_dict(my_dict)
+        data = converted_dict_to_df
 
     else:
         raise ValueError('Plot type not supported')

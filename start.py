@@ -470,7 +470,7 @@ elif selection == 11:
     # initialize pandas dataframes for summing up results
     df_fun_data = None
 
-    for i in range(0, 10):
+    for i in range(0, 2):
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
         sim.set_preference_object(pref)
@@ -480,7 +480,7 @@ elif selection == 11:
         analyzer = AnalyzerSingleSim(sim)
 
         # street with constant curvature or half sinus or constant curvature
-        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=401)
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=601)
         # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=601, frequency=0.03)
 
         # choose which vehicle should be focused on
@@ -510,14 +510,23 @@ elif selection == 11:
             # sim.moving(vis, vis_modus='step')
             analyzer.update()
 
+        # get data first for this run
         fun_data = analyzer.get_fun_data()
         time_distance_data = analyzer.get_time_distance_data()
+        velocity_distribution_data = analyzer.get_velocity_data()
         sum_left_lane_data, sum_right_lane_data = analyzer.get_lane_changing_data()
         role_data = analyzer.get_role_data()
         behind_distance_to_partner_data, ahead_distance_to_partner_data = analyzer.get_distance_to_partner_data()
 
+        # temporary save the data for this run
         result_analyzer.add_dataframes(fun_data, temp_save='fun_data')
         result_analyzer.add_dataframes(time_distance_data, temp_save='time_distance_data')
+        result_analyzer.add_dataframes(velocity_distribution_data, temp_save='velocity_distribution_data')
+
+        # For plotting a single run
+        # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Velocity_Distribution_Motorcyclist')
+        # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
+        # Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Motorcyclist")
 
         analyzer.save_results()
         sys.stdout.write('\n')
@@ -531,14 +540,19 @@ elif selection == 11:
         sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
         sys.stdout.write('\n')
 
-    sum_fun_data = result_analyzer.get_fun_data()
-    sum_time_distance_data = result_analyzer.get_time_distance_data()
+    # # For plotting multiple runs
+    # get data from multiple runs
+    sum_fun_data = result_analyzer.get_aggregated_fun_data()
+    sum_time_distance_data = result_analyzer.get_aggregated_time_distance_data()
+    sum_velocity_data = result_analyzer.get_aggregated_velocity_data()
 
     # Fun Distribution
-    Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
+    # Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
 
-    # Plots Time-Distance Diagram for Motorcyclists and Cars as well as the velocity Distribution
-    Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram__with_errorbar_Motorcyclist")
+    # Plots Time-Distance Diagram for Motorcyclists
+    # Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
 
-    # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(),
-    #                                 plot_type='Velocity_Distribution_Motorcyclist')
+    # Plots Velocity-Distribution Diagram for Motorcyclists
+    Plotter.velocity_distribution_diagram_with_errorbar(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
+
+

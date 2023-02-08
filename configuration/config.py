@@ -278,8 +278,8 @@ class ConfigPreference:
             """
             self.model_settings = {
                 'length': 2000,
-                'total_amount_steps': 30,
-                'density': 0.6025,
+                'total_amount_steps': 4,
+                'density': 0.8025,
                 'num_lanes': 1,  # [0,1] do not change
                 'prob_slowdown': 0.00,  # should be turned off as Motorcyclist behave irregularly
                 'prob_changelane': 0.99,

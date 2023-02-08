@@ -43,6 +43,7 @@ class AnalyzerSingleSim:
                 'vehicle_type': vehicle.get_type(),   # what type of vehicle the vehicle is
                 'new_pos': vehicle.get_tile().get_index(),  # the current tile index
                 'old_pos': vehicle.get_tile().get_index(),  # old tile index
+                'velocity_list': [],  # collects the velocities
                 'travel_list': [],  # list of all traveled distances by number of tiles in each step
                 'sum_traveling_dist': 0,  # sum of travel distance
                 'new_speed': vehicle.get_speed(),  # current speed
@@ -96,6 +97,9 @@ class AnalyzerSingleSim:
             self.vehicle_summary_dict[i]['old_speed'] = self.vehicle_summary_dict[i]['new_speed']
             self.vehicle_summary_dict[i]['new_speed'] = vehicle.get_speed()
             self.vehicle_summary_dict[i]['travel_list'].append(self.vehicle_summary_dict[i]['new_speed'])
+
+            # collect velocities
+            self.vehicle_summary_dict[i]['velocity_list'].append(vehicle.get_speed())
 
             # calc new average speed
             self.vehicle_summary_dict[i]['avg_speed'] = self.vehicle_summary_dict[i]['sum_traveling_dist'] / self.step
@@ -240,6 +244,31 @@ class AnalyzerSingleSim:
         for key in self.vehicle_summary_dict:
             if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
                 motorcyclist_only[key] = self.vehicle_summary_dict[key]['travel_list']
+
+        # convert dict into dataframe. Columns are the travel distance from each motorcyclist
+        data = pd.DataFrame.from_dict(motorcyclist_only)
+
+        # rename columns to Biker_vehicle index
+        for col in data.columns:
+            name = 'Biker ' + str(col)
+            data.rename(columns={col: name}, inplace=True)
+
+        # cumulate the data for each biker
+        for col in data.columns:
+            data[col] = data[col].cumsum()
+
+        return data
+
+    def get_velocity_data(self):
+        """
+        returns a dataframe with the time and distance for each vehicle
+        :return:
+        """
+        motorcyclist_only = {}
+
+        for key in self.vehicle_summary_dict:
+            if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only[key] = self.vehicle_summary_dict[key]['velocity_list']
 
         # convert dict into dataframe. Columns are the travel distance from each motorcyclist
         data = pd.DataFrame.from_dict(motorcyclist_only)
