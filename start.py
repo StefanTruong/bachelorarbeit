@@ -428,6 +428,7 @@ elif selection == 10:
             # fun time series is defined for only one density and no inner loop
             Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
 
+            # DEPRECIATED use selection 11 instead
             # Plots Time-Distance Diagram for Motorcyclists and Cars as well as the velocity Distribution
             # Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(),
             #                               plot_type="Time_Distance_Diagram_Motorcyclist")
@@ -454,7 +455,7 @@ elif selection == 10:
     # Flow Density Diagram needs std error. Change density_list as well as inner for loop
     Plotter.flow_density_diagram_errorbar(density_list, avgFlows, stdFlows)
 
-    # fun time series is defined for only one density and no inner loop without errorbar. Depreciated use selection 11
+    # DEPRECIATED use selection 11. fun time series is defined for only one density and no inner loop without errorbar.
     # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
     print(avgFlows)
 
@@ -469,7 +470,7 @@ elif selection == 11:
     # initialize pandas dataframes for summing up results
     df_fun_data = None
 
-    for i in range(0, 5):
+    for i in range(0, 10):
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
         sim.set_preference_object(pref)
@@ -515,7 +516,8 @@ elif selection == 11:
         role_data = analyzer.get_role_data()
         behind_distance_to_partner_data, ahead_distance_to_partner_data = analyzer.get_distance_to_partner_data()
 
-        result_analyzer.add_dataframes(fun_data, save='fun_data')
+        result_analyzer.add_dataframes(fun_data, temp_save='fun_data')
+        result_analyzer.add_dataframes(time_distance_data, temp_save='time_distance_data')
 
         analyzer.save_results()
         sys.stdout.write('\n')
@@ -530,7 +532,13 @@ elif selection == 11:
         sys.stdout.write('\n')
 
     sum_fun_data = result_analyzer.get_fun_data()
-    print(sum_fun_data)
+    sum_time_distance_data = result_analyzer.get_time_distance_data()
+
     # Fun Distribution
-    Plotter.fun_distro_diagram_with_errorbar(sum_fun_data,
-                                             plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
+    Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
+
+    # Plots Time-Distance Diagram for Motorcyclists and Cars as well as the velocity Distribution
+    Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram__with_errorbar_Motorcyclist")
+
+    # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(),
+    #                                 plot_type='Velocity_Distribution_Motorcyclist')

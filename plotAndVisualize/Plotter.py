@@ -129,7 +129,7 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
     """
     mean_fun_dict, z_score_fun_dict = extractor_summary_dict(sum_fun_data, plot_type=plot_type)
 
-    # time-steps for the x-values as list
+    # time-steps for the x-values as list for x-axis plotting
     time_steps = []
     length = 0
     for biker, mean_fun in mean_fun_dict.items():
@@ -138,21 +138,57 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
             time_steps = list(range(length))
 
     for biker, mean_fun in mean_fun_dict.items():
-        plt.errorbar(time_steps, mean_fun, xerr=0, yerr=np.array(z_score_fun_dict[biker]), elinewidth=0.05, label=biker)
+        plt.errorbar(time_steps, mean_fun, xerr=0, yerr=np.array(z_score_fun_dict[biker]), elinewidth=0.15, label=biker)
 
     # calculate std for all z scores for all bikers and plot them
     all_z_scores = []
     all_mean_fun = []
     for biker, z_score_fun in z_score_fun_dict.items():
         all_z_scores.append(z_score_fun)
+
     for biker, mean_fun in mean_fun_dict.items():
         all_mean_fun.append(mean_fun)
 
     print('mean for all means', np.mean(all_mean_fun))
-    print('std for all z_scores', np.std(all_z_scores))
+    print('mean for all z_scores', np.mean(all_z_scores))
+
     plt.legend()
     plt.xlabel('Time')
     plt.ylabel('Fun')
+    plt.title(plot_type)
+    plt.show()
+
+
+def time_distance_diagram_with_errorbar(sum_time_distance_data,
+                                        plot_type='Time_Distance_Diagram__with_errorbar_Motorcyclist'):
+    mean_dist_dict, std_dist_dict = extractor_summary_dict(sum_time_distance_data, plot_type=plot_type)
+
+    # time-steps for the x-values as list for x-axis plotting
+    time_steps = []
+    length = 0
+    for biker, mean_distance in mean_dist_dict.items():
+        if len(mean_distance) > length:
+            length = len(mean_distance)
+            time_steps = list(range(length))
+
+    for biker, mean_fun in mean_dist_dict.items():
+        plt.errorbar(time_steps, mean_fun, xerr=0, yerr=np.array(std_dist_dict[biker]), elinewidth=0.15, label=biker)
+
+    # calculate std for all std for all bikers and plot them
+    all_mean_fun = []
+    all_std_scores = []
+    for biker, z_score_fun in std_dist_dict.items():
+        all_std_scores.append(z_score_fun)
+
+    for biker, mean_fun in mean_dist_dict.items():
+        all_mean_fun.append(mean_fun)
+
+    print('mean for all means', np.mean(all_mean_fun))
+    print('mean for all std_errors', np.mean(all_std_scores))
+
+    plt.legend()
+    plt.xlabel('Time')
+    plt.ylabel('Distance')
     plt.title(plot_type)
     plt.show()
 
@@ -247,20 +283,43 @@ def extractor_summary_dict(my_dict, plot_type):
         for biker, values in my_dict.items():
             mean_for_all_time_steps = []
             z_score_for_all_time_steps = []
+
             for fun_list_at_time_step in values:
-                mean_value = np.mean(fun_list_at_time_step)
-                std_value = np.std(fun_list_at_time_step)
+                mean = np.mean(fun_list_at_time_step)
+                std = np.std(fun_list_at_time_step)
                 z_score_at_time_step = []
                 for fun_value in fun_list_at_time_step:
-                    z_score = (fun_value - mean_value) / std_value
+                    z_score = (fun_value - mean) / std
                     z_score_at_time_step.append(z_score)
 
-                mean_for_all_time_steps.append(mean_value)
+                mean_for_all_time_steps.append(mean)
                 z_score_for_all_time_steps.append(z_score_at_time_step)
+
             mean_fun_motorcyclist_only[biker] = mean_for_all_time_steps
             z_score_fun_motorcyclist_only[biker] = mean_for_all_time_steps
 
         data = [mean_fun_motorcyclist_only, z_score_fun_motorcyclist_only]
+
+    elif plot_type == 'Time_Distance_Diagram__with_errorbar_Motorcyclist':
+        mean_dist_motorcyclist_only = {}
+        std_dist_motorcyclist_only = {}
+
+        # calculate average and std for each biker to each time step
+        for biker, values in my_dict.items():
+            mean_for_all_time_steps = []
+            std_for_all_time_steps = []
+
+            for dist_list_at_time_step in values:
+                mean = np.mean(dist_list_at_time_step)
+                std = np.std(dist_list_at_time_step)
+
+                mean_for_all_time_steps.append(mean)
+                std_for_all_time_steps.append(std)
+
+            mean_dist_motorcyclist_only[biker] = mean_for_all_time_steps
+            std_dist_motorcyclist_only[biker] = std_for_all_time_steps
+
+        data = [mean_dist_motorcyclist_only, std_dist_motorcyclist_only]
 
     else:
         raise ValueError('Plot type not supported')
