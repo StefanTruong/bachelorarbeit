@@ -135,7 +135,7 @@ class AnalyzerSingleSim:
                     #     np.std(self.vehicle_summary_dict[i]['behind_dist_partner_list'])
                 else:
                     # Missing values when biker is leader or sweeper it has no partner, filled with None
-                    self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(None)
+                    self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(5)
 
                 if vehicle.get_ahead_partner() is not None:
                     self.vehicle_summary_dict[i]['ahead_dist_partner'] = vehicle.get_distance_ahead_partner()
@@ -147,7 +147,7 @@ class AnalyzerSingleSim:
                     #     np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
                 else:
                     # Missing values when biker is leader or sweeper it has no partner, filled with None
-                    self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(None)
+                    self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(5)
 
                 if vehicle.get_role() == 'leader':
                     self.vehicle_summary_dict[i]['sum_is_leader'] += 1

@@ -11,6 +11,8 @@ class AnalyseResult:
         self.sum_left_lane_results = None
         self.sum_right_lane_results = None
         self.role_results = None
+        self.behind_distance_to_partner_results = None
+        self.ahead_distance_to_partner_results = None
 
     def add_dataframes(self, dataframe, temp_save):
         """
@@ -95,6 +97,38 @@ class AnalyseResult:
             else:
                 self.role_results += dataframe
 
+        elif temp_save == 'behind_distance_to_partner_data':
+            # convert dataframe to a dict collecting all velocities over time
+            dict_with_list_elements = {}
+            for key, series in dataframe.iteritems():
+                dict_with_list_elements[key] = []
+                series = series.tolist()
+                for element in series:
+                    dict_with_list_elements[key].append([element])
+
+            if self.behind_distance_to_partner_results is None:
+                self.behind_distance_to_partner_results = dict_with_list_elements
+            else:
+                for key, value in dict_with_list_elements.items():
+                    for i in range(0, len(value)):
+                        self.behind_distance_to_partner_results[key][i] += value[i]
+
+        elif temp_save == 'ahead_distance_to_partner_data':
+            # convert dataframe to a dict collecting all velocities over time
+            dict_with_list_elements = {}
+            for key, series in dataframe.iteritems():
+                dict_with_list_elements[key] = []
+                series = series.tolist()
+                for element in series:
+                    dict_with_list_elements[key].append([element])
+
+            if self.ahead_distance_to_partner_results is None:
+                self.ahead_distance_to_partner_results = dict_with_list_elements
+            else:
+                for key, value in dict_with_list_elements.items():
+                    for i in range(0, len(value)):
+                        self.ahead_distance_to_partner_results[key][i] += value[i]
+
         else:
             raise Exception('unknown temp_save modus')
 
@@ -115,6 +149,12 @@ class AnalyseResult:
 
     def get_aggregated_role_data(self):
         return self.role_results
+
+    def get_aggregated_behind_distance_to_partner_data(self):
+        return self.behind_distance_to_partner_results
+
+    def get_aggregated_ahead_distance_to_partner_data(self):
+        return self.ahead_distance_to_partner_results
 
     def load_result(self, filename=None):
         """

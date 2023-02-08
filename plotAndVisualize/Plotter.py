@@ -192,8 +192,8 @@ def time_distance_diagram_with_errorbar(sum_time_distance_data,
     plt.show()
 
 
-def velocity_distribution_diagram_with_errorbar(sum_velocity_data,
-                                                plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist'):
+def velocity_distribution_histogram_with_errorbar(sum_velocity_data,
+                                                  plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist'):
     """
     plots the velocity distribution diagram with errorbars for multiple runs
     :param sum_velocity_data: a dict of velocities of the motorcyclists for all runs
@@ -270,6 +270,86 @@ def role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram'):
     ax.set_ylabel('Share being in a Role [%]')
     plt.title(plot_type)
 
+    plt.show()
+
+
+def distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data,
+                                plot_type='Distance_to_partner_Distribution_Histogram'):
+    """
+    Plots the distance to partner distribution over time for all motorcyclists with errorbars.
+    None values are converted to 0
+    sum_behind_distance_to_partner_data = {'Biker4': [[times of runs], [], time_steps], ..., 'Biker0': [[time of runs], [], time_steps]}
+    :param sum_behind_distance_to_partner_data:
+    :param sum_ahead_distance_to_partner_data:
+    :param plot_type:
+    :return:
+    """
+    # collects all the distances of each run together in a dict with list of list as values
+    # {'Biker 4': [[0, 0, None, None], [values of runs behind and ahead], [0, 0, None, None]], 'Biker 3': [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], ...}
+    distance_summarized_all_bikers = {}
+    for biker, values in sum_behind_distance_to_partner_data.items():
+        distance_summarized_each_biker = {biker: None}
+        distance_over_time = []
+        time_step = 0
+        for element in values:
+            distance_at_time_step = sum_behind_distance_to_partner_data[biker][time_step]
+            distance_at_time_step = [*distance_at_time_step, *sum_ahead_distance_to_partner_data[biker][time_step]]
+            distance_over_time.append(distance_at_time_step)
+            distance_summarized_each_biker[biker] = distance_over_time
+            time_step += 1
+
+        distance_summarized_all_bikers[biker] = distance_summarized_each_biker[biker]
+
+    # calculate the mean and std of the distance to partner for each biker
+    distance_means_for_all_bikers = {}
+    distance_std_for_all_bikers = {}
+    for biker, values_at_time_step in distance_summarized_all_bikers.items():
+        distance_means_for_each_biker = []
+        distance_std_for_each_biker = []
+        for time_step in values_at_time_step:
+            mean = np.mean(time_step)
+            std = np.std(time_step)
+            distance_means_for_each_biker.append(mean)
+            distance_std_for_each_biker.append(std)
+        distance_means_for_all_bikers[biker] = distance_means_for_each_biker
+        distance_std_for_all_bikers[biker] = distance_std_for_each_biker
+
+    # print(distance_summarized_all_bikers)
+    # print(distance_means_for_all_bikers)
+
+    # plot the distance with errorbars to partner for each biker
+    for biker, values in distance_means_for_all_bikers.items():
+        plt.errorbar(range(len(values)), values, yerr=distance_std_for_all_bikers[biker], elinewidth=0.2, label=biker)
+
+    plt.xlabel('Time Step')
+    plt.ylabel('Distance to Partner [m]')
+    plt.title(plot_type)
+    plt.legend()
+    plt.show()
+    plt.clf()
+
+    # summarize mean values across all bikers
+    aggregated_mean_distance = []
+    aggregated_std_distance = []
+    num_time_steps = len(distance_means_for_all_bikers['Biker 0'])
+    num_bikers = len(distance_means_for_all_bikers.keys())
+    for time in range(num_time_steps):
+        aggregated_means = []
+        aggregated_std = []
+        for biker in distance_means_for_all_bikers.keys():
+            aggregated_means.append(distance_means_for_all_bikers[biker][time])
+            aggregated_std.append(distance_std_for_all_bikers[biker][time])
+        aggregated_mean_distance.append(np.sum(aggregated_means)/num_bikers)
+        aggregated_std_distance.append(np.sum(aggregated_std)/num_bikers)
+
+    # print(aggregated_mean_distance)
+    # print(aggregated_std_distance)
+
+    # plot the aggregated mean distance with errorbars
+    plt.errorbar(range(len(aggregated_mean_distance)), aggregated_mean_distance, yerr=aggregated_std_distance, elinewidth=0.2)
+    plt.xlabel('Time')
+    plt.ylabel('Average Distance to Partner [m]')
+    plt.title(plot_type)
     plt.show()
 
 

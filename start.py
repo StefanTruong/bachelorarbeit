@@ -470,7 +470,7 @@ elif selection == 11:
     # initialize pandas dataframes for summing up results
     df_fun_data = None
 
-    for i in range(0, 2):
+    for i in range(0, 5):
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
         sim.set_preference_object(pref)
@@ -525,7 +525,8 @@ elif selection == 11:
         result_analyzer.add_dataframes(left_lane_data, temp_save='left_lane_data')
         result_analyzer.add_dataframes(right_lane_data, temp_save='right_lane_data')
         result_analyzer.add_dataframes(role_data, temp_save='role_data')
-
+        result_analyzer.add_dataframes(behind_distance_to_partner_data, temp_save='behind_distance_to_partner_data')
+        result_analyzer.add_dataframes(ahead_distance_to_partner_data, temp_save='ahead_distance_to_partner_data')
 
         # For plotting a single run
         # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Velocity_Distribution_Motorcyclist')
@@ -552,7 +553,8 @@ elif selection == 11:
     sum_left_lane_data = result_analyzer.get_aggregated_left_lane_data()
     sum_right_lane_data = result_analyzer.get_aggregated_right_lane_data()
     sum_role_data = result_analyzer.get_aggregated_role_data()
-
+    sum_behind_distance_to_partner_data = result_analyzer.get_aggregated_behind_distance_to_partner_data()
+    sum_ahead_distance_to_partner_data = result_analyzer.get_aggregated_ahead_distance_to_partner_data()
 
     # Fun Distribution
     # Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
@@ -567,4 +569,7 @@ elif selection == 11:
     # Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
 
     # Plots role data
-    Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
+    # Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
+
+    # Plots distance to partner data
+    Plotter.distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data, plot_type='Distance_to_partner_Distribution_Histogram')
