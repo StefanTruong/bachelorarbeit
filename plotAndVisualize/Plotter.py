@@ -120,10 +120,47 @@ def fun_distro_diagram(summary_dict, plot_type='Fun_Distribution_Motorcyclist'):
     plt.show()
 
 
-def extractor_summary_dict(summary_dict, plot_type):
+def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist'):
+    """
+    Plots the fun distribution of the motorcyclists over time/steps with errorbar
+    :param summary_dict:
+    :param plot_type:
+    :return:
+    """
+    mean_fun_dict, z_score_fun_dict = extractor_summary_dict(sum_fun_data, plot_type=plot_type)
+
+    # time-steps for the x-values as list
+    time_steps = []
+    length = 0
+    for biker, mean_fun in mean_fun_dict.items():
+        if len(mean_fun) > length:
+            length = len(mean_fun)
+            time_steps = list(range(length))
+
+    for biker, mean_fun in mean_fun_dict.items():
+        plt.errorbar(time_steps, mean_fun, xerr=0, yerr=np.array(z_score_fun_dict[biker]), elinewidth=0.05, label=biker)
+
+    # calculate std for all z scores for all bikers and plot them
+    all_z_scores = []
+    all_mean_fun = []
+    for biker, z_score_fun in z_score_fun_dict.items():
+        all_z_scores.append(z_score_fun)
+    for biker, mean_fun in mean_fun_dict.items():
+        all_mean_fun.append(mean_fun)
+
+    print('mean for all means', np.mean(all_mean_fun))
+    print('std for all z_scores', np.std(all_z_scores))
+    plt.legend()
+    plt.xlabel('Time')
+    plt.ylabel('Fun')
+    plt.title(plot_type)
+    plt.show()
+
+
+def extractor_summary_dict(my_dict, plot_type):
     """
     Extracts the data from the summary dict and returns a dict with the adjusted data for different plots
-    :param summary_dict:
+    :param my_dict: can be the actual summary dict or some adjusted one!!!
     :param plot_type:
     :return:
     """
@@ -133,9 +170,9 @@ def extractor_summary_dict(summary_dict, plot_type):
     if plot_type == 'Time_Distance_Diagram_Motorcyclist':
         motorcyclist_only = {}
 
-        for key in summary_dict:
-            if summary_dict[key]['vehicle_type'] == 'Motorcycle':
-                motorcyclist_only[key] = summary_dict[key]['travel_list']
+        for key in my_dict:
+            if my_dict[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only[key] = my_dict[key]['travel_list']
 
         # convert dict into dataframe. Columns are the travel distance from each motorcyclist
         data = pd.DataFrame.from_dict(motorcyclist_only)
@@ -153,9 +190,9 @@ def extractor_summary_dict(summary_dict, plot_type):
     elif plot_type == 'Time_Distance_Diagram_Car':
         car_only = {}
 
-        for key in summary_dict:
-            if summary_dict[key]['vehicle_type'] == 'Car':
-                car_only[key] = summary_dict[key]['travel_list']
+        for key in my_dict:
+            if my_dict[key]['vehicle_type'] == 'Car':
+                car_only[key] = my_dict[key]['travel_list']
 
         # convert dict into dataframe. Columns are the travel distance from each car
         data = pd.DataFrame.from_dict(car_only)
@@ -173,9 +210,9 @@ def extractor_summary_dict(summary_dict, plot_type):
     elif plot_type == 'Velocity_Distribution_Motorcyclist':
         motorcyclist_only = {}
 
-        for key in summary_dict:
-            if summary_dict[key]['vehicle_type'] == 'Motorcycle':
-                motorcyclist_only[key] = summary_dict[key]['travel_list']
+        for key in my_dict:
+            if my_dict[key]['vehicle_type'] == 'Motorcycle':
+                motorcyclist_only[key] = my_dict[key]['travel_list']
 
         # convert dict into dataframe. Columns are the travel distance from each motorcyclist
         data = pd.DataFrame.from_dict(motorcyclist_only)
@@ -190,9 +227,9 @@ def extractor_summary_dict(summary_dict, plot_type):
     elif plot_type == 'Fun_Distribution_Motorcyclist':
         fun_motorcyclist_only = {}
 
-        for key in summary_dict:
-            if summary_dict[key]['vehicle_type'] == 'Motorcycle':
-                fun_motorcyclist_only[key] = summary_dict[key]['fun_list']
+        for key in my_dict:
+            if my_dict[key]['vehicle_type'] == 'Motorcycle':
+                fun_motorcyclist_only[key] = my_dict[key]['fun_list']
 
         # convert dict into dataframe. Columns are the fun for each motorcyclist
         data = pd.DataFrame.from_dict(fun_motorcyclist_only)
@@ -201,6 +238,29 @@ def extractor_summary_dict(summary_dict, plot_type):
         for col in data.columns:
             name = 'Biker ' + str(col)
             data.rename(columns={col: name}, inplace=True)
+
+    elif plot_type == 'Fun_Distribution_with_errorbar_Motorcyclist':
+        mean_fun_motorcyclist_only = {}
+        z_score_fun_motorcyclist_only = {}
+
+        # calculate average and z scores for each biker to each time step
+        for biker, values in my_dict.items():
+            mean_for_all_time_steps = []
+            z_score_for_all_time_steps = []
+            for fun_list_at_time_step in values:
+                mean_value = np.mean(fun_list_at_time_step)
+                std_value = np.std(fun_list_at_time_step)
+                z_score_at_time_step = []
+                for fun_value in fun_list_at_time_step:
+                    z_score = (fun_value - mean_value) / std_value
+                    z_score_at_time_step.append(z_score)
+
+                mean_for_all_time_steps.append(mean_value)
+                z_score_for_all_time_steps.append(z_score_at_time_step)
+            mean_fun_motorcyclist_only[biker] = mean_for_all_time_steps
+            z_score_fun_motorcyclist_only[biker] = mean_for_all_time_steps
+
+        data = [mean_fun_motorcyclist_only, z_score_fun_motorcyclist_only]
 
     else:
         raise ValueError('Plot type not supported')
