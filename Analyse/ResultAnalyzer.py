@@ -8,8 +8,10 @@ class AnalyseResult:
         self.fun_results = None
         self.time_distance_results = None
         self.velocity_results = None
+        self.sum_left_lane_results = None
+        self.sum_right_lane_results = None
 
-    def add_dataframes(self, dataframe, temp_save='fun_data'):
+    def add_dataframes(self, dataframe, temp_save):
         """
         add two dataframes, where elements are lists
         :return:
@@ -61,6 +63,27 @@ class AnalyseResult:
                 for col in dataframe.columns:
                     self.velocity_results[col] = [*self.velocity_results[col], *dataframe[col]]
 
+        elif temp_save == 'left_lane_data' or temp_save == 'right_lane_data':
+            # convert dataframe to a dict collecting all velocities over time
+
+            if temp_save == 'left_lane_data':
+                if self.sum_left_lane_results is None:
+                    self.sum_left_lane_results = {}
+                    for col in dataframe.columns:
+                        self.sum_left_lane_results[col] = dataframe[col]
+                else:
+                    for col in dataframe.columns:
+                        self.sum_left_lane_results[col] = [*self.sum_left_lane_results[col], *dataframe[col]]
+
+            else:
+                if self.sum_right_lane_results is None:
+                    self.sum_right_lane_results = {}
+                    for col in dataframe.columns:
+                        self.sum_right_lane_results[col] = dataframe[col]
+                else:
+                    for col in dataframe.columns:
+                        self.sum_right_lane_results[col] = [*self.sum_right_lane_results[col], *dataframe[col]]
+
         else:
             raise Exception('unknown temp_save modus')
 
@@ -72,6 +95,12 @@ class AnalyseResult:
 
     def get_aggregated_velocity_data(self):
         return self.velocity_results
+
+    def get_aggregated_left_lane_data(self):
+        return self.sum_left_lane_results
+
+    def get_aggregated_right_lane_data(self):
+        return self.sum_right_lane_results
 
     def load_result(self, filename=None):
         """

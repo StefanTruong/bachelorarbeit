@@ -192,7 +192,8 @@ def time_distance_diagram_with_errorbar(sum_time_distance_data,
     plt.show()
 
 
-def velocity_distribution_diagram_with_errorbar(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist'):
+def velocity_distribution_diagram_with_errorbar(sum_velocity_data,
+                                                plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist'):
     """
     plots the velocity distribution diagram with errorbars for multiple runs
     :param sum_velocity_data: a dict of velocities of the motorcyclists for all runs
@@ -213,6 +214,37 @@ def velocity_distribution_diagram_with_errorbar(sum_velocity_data, plot_type='Ve
 
     plt.show()
 
+
+def lane_diagram(left_lane_data, right_lane_data, plot_type='Percentage_being_on_the_right_lane'):
+    """
+    plots the percentage a motorcyclist was on th right lane
+    :param sum_left_lane_data: left lane is 0
+    :param sum_right_lane_data: right lane is 1
+    :return:
+    """
+    # how long a biker was on the left lane or right lane respectively
+    sum_on_left_lane = {}
+    sum_on_right_lane = {}
+
+    for biker, on_left_lane in left_lane_data.items():
+        increment = sum(on_left_lane)
+        sum_on_left_lane[biker] = increment
+
+    for biker, on_right_lane in right_lane_data.items():
+        increment = sum(on_right_lane)
+        sum_on_right_lane[biker] = increment
+
+    # calculate the percentage of time a biker was on the right lane
+    percentage_on_right_lane = {}
+    for biker, on_left_lane in sum_on_left_lane.items():
+        percentage_on_right_lane[biker] = sum_on_right_lane[biker] / (sum_on_right_lane[biker] + on_left_lane)
+
+    # plot the percentage of time a biker was on the right lane
+    plt.bar(percentage_on_right_lane.keys(), percentage_on_right_lane.values(), width=0.2)
+    plt.xlabel('Motorcyclist')
+    plt.ylabel('Percentage')
+    plt.title(plot_type)
+    plt.show()
 
 
 def extractor_summary_dict(my_dict, plot_type):

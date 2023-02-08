@@ -295,14 +295,18 @@ class AnalyzerSingleSim:
         for key in self.vehicle_summary_dict:
             if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
                 rename = 'Biker ' + str(key)
-                motorcyclist_only_left[rename] = self.vehicle_summary_dict[key]['sum_on_left_lane']
+                motorcyclist_only_left[rename] = [self.vehicle_summary_dict[key]['sum_on_left_lane']]
 
         for key in self.vehicle_summary_dict:
             if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
                 rename = 'Biker ' + str(key)
-                motorcyclist_only_right[rename] = self.vehicle_summary_dict[key]['sum_on_right_lane']
+                motorcyclist_only_right[rename] = [self.vehicle_summary_dict[key]['sum_on_right_lane']]
 
-        return motorcyclist_only_left, motorcyclist_only_right
+        # convert dict into dataframe
+        motorcyclist_only_left_df = pd.DataFrame.from_dict(motorcyclist_only_left)
+        motorcyclist_only_right_df = pd.DataFrame.from_dict(motorcyclist_only_right)
+
+        return motorcyclist_only_left_df, motorcyclist_only_right_df
 
     def get_role_data(self):
         """

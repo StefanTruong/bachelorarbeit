@@ -514,7 +514,7 @@ elif selection == 11:
         fun_data = analyzer.get_fun_data()
         time_distance_data = analyzer.get_time_distance_data()
         velocity_distribution_data = analyzer.get_velocity_data()
-        sum_left_lane_data, sum_right_lane_data = analyzer.get_lane_changing_data()
+        left_lane_data, right_lane_data = analyzer.get_lane_changing_data()
         role_data = analyzer.get_role_data()
         behind_distance_to_partner_data, ahead_distance_to_partner_data = analyzer.get_distance_to_partner_data()
 
@@ -522,6 +522,8 @@ elif selection == 11:
         result_analyzer.add_dataframes(fun_data, temp_save='fun_data')
         result_analyzer.add_dataframes(time_distance_data, temp_save='time_distance_data')
         result_analyzer.add_dataframes(velocity_distribution_data, temp_save='velocity_distribution_data')
+        result_analyzer.add_dataframes(left_lane_data, temp_save='left_lane_data')
+        result_analyzer.add_dataframes(right_lane_data, temp_save='right_lane_data')
 
         # For plotting a single run
         # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Velocity_Distribution_Motorcyclist')
@@ -545,6 +547,9 @@ elif selection == 11:
     sum_fun_data = result_analyzer.get_aggregated_fun_data()
     sum_time_distance_data = result_analyzer.get_aggregated_time_distance_data()
     sum_velocity_data = result_analyzer.get_aggregated_velocity_data()
+    sum_left_lane_data = result_analyzer.get_aggregated_left_lane_data()
+    sum_right_lane_data = result_analyzer.get_aggregated_right_lane_data()
+
 
     # Fun Distribution
     # Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
@@ -553,6 +558,9 @@ elif selection == 11:
     # Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
 
     # Plots Velocity-Distribution Diagram for Motorcyclists
-    Plotter.velocity_distribution_diagram_with_errorbar(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
+    # Plotter.velocity_distribution_diagram_with_errorbar(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
+
+    # Plots lane data
+    Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
 
 
