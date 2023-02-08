@@ -125,10 +125,10 @@ class AnalyzerSingleSim:
                     self.vehicle_summary_dict[i]['behind_dist_partner'] = vehicle.get_distance_behind_partner()
                     self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(vehicle.get_distance_behind_partner())
                     self.vehicle_summary_dict[i]['sum_behind_dist_partner'] += vehicle.get_distance_behind_partner()
-                    self.vehicle_summary_dict[i]['avg_behind_dist_partner'] = \
-                        self.vehicle_summary_dict[i]['sum_behind_dist_partner'] / self.step
-                    self.vehicle_summary_dict[i]['std_behind_dist_partner'] = \
-                        np.std(self.vehicle_summary_dict[i]['behind_dist_partner_list'])
+                    # self.vehicle_summary_dict[i]['avg_behind_dist_partner'] = \
+                    #     self.vehicle_summary_dict[i]['sum_behind_dist_partner'] / self.step
+                    # self.vehicle_summary_dict[i]['std_behind_dist_partner'] = \
+                    #     np.std(self.vehicle_summary_dict[i]['behind_dist_partner_list'])
                 else:
                     # Missing values when biker is leader or sweeper it has no partner, filled with None
                     self.vehicle_summary_dict[i]['behind_dist_partner_list'].append(None)
@@ -137,10 +137,10 @@ class AnalyzerSingleSim:
                     self.vehicle_summary_dict[i]['ahead_dist_partner'] = vehicle.get_distance_ahead_partner()
                     self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(vehicle.get_distance_ahead_partner())
                     self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] += vehicle.get_distance_ahead_partner()
-                    self.vehicle_summary_dict[i]['avg_ahead_dist_partner'] = \
-                        self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] / self.step
-                    self.vehicle_summary_dict[i]['std_ahead_dist_partner'] = \
-                        np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
+                    # self.vehicle_summary_dict[i]['avg_ahead_dist_partner'] = \
+                    #     self.vehicle_summary_dict[i]['sum_ahead_dist_partner'] / self.step
+                    # self.vehicle_summary_dict[i]['std_ahead_dist_partner'] = \
+                    #     np.std(self.vehicle_summary_dict[i]['ahead_dist_partner_list'])
                 else:
                     # Missing values when biker is leader or sweeper it has no partner, filled with None
                     self.vehicle_summary_dict[i]['ahead_dist_partner_list'].append(None)
@@ -202,7 +202,7 @@ class AnalyzerSingleSim:
         return self.vehicle_summary_dict
 
     def save_results(self, special_name=None):
-        if special_name == None:
+        if special_name is None:
             with open('./Analyse/results.json', 'w+') as fp:
                 json.dump(self.get_vehicle_summary_dict(), fp, indent=4)
         else:
@@ -265,11 +265,13 @@ class AnalyzerSingleSim:
 
         for key in self.vehicle_summary_dict:
             if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
-                motorcyclist_only_left[key] = self.vehicle_summary_dict[key]['sum_on_left_lane']
+                rename = 'Biker ' + str(key)
+                motorcyclist_only_left[rename] = self.vehicle_summary_dict[key]['sum_on_left_lane']
 
         for key in self.vehicle_summary_dict:
             if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
-                motorcyclist_only_right[key] = self.vehicle_summary_dict[key]['sum_on_right_lane']
+                rename = 'Biker ' + str(key)
+                motorcyclist_only_right[rename] = self.vehicle_summary_dict[key]['sum_on_right_lane']
 
         return motorcyclist_only_left, motorcyclist_only_right
 
@@ -282,7 +284,8 @@ class AnalyzerSingleSim:
 
         for key in self.vehicle_summary_dict:
             if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
-                motorcyclist_role[key] = [self.vehicle_summary_dict[key]['sum_is_sweeper'],
+                rename = 'Biker ' + str(key)
+                motorcyclist_role[rename] = [self.vehicle_summary_dict[key]['sum_is_sweeper'],
                                           self.vehicle_summary_dict[key]['sum_is_inbetween'],
                                           self.vehicle_summary_dict[key]['sum_is_leader']]
 
@@ -305,10 +308,18 @@ class AnalyzerSingleSim:
             if self.vehicle_summary_dict[key]['vehicle_type'] == 'Motorcycle':
                 ahead_distance_to_partner_list[key] = self.vehicle_summary_dict[key]['ahead_dist_partner_list']
 
-        behind_distance_to_partner_dict = pd.DataFrame.from_dict(behind_distance_to_partner_list)
-        ahead_distance_to_partner_dict = pd.DataFrame.from_dict(ahead_distance_to_partner_list)
+        behind_distance_to_partner_df = pd.DataFrame.from_dict(behind_distance_to_partner_list)
+        ahead_distance_to_partner_df = pd.DataFrame.from_dict(ahead_distance_to_partner_list)
 
-        return behind_distance_to_partner_dict, ahead_distance_to_partner_dict
+        for col in behind_distance_to_partner_df.columns:
+            name = 'Biker ' + str(col)
+            behind_distance_to_partner_df.rename(columns={col: name}, inplace=True)
+
+        for col in ahead_distance_to_partner_df.columns:
+            name = 'Biker ' + str(col)
+            ahead_distance_to_partner_df.rename(columns={col: name}, inplace=True)
+
+        return behind_distance_to_partner_df, ahead_distance_to_partner_df
 
 
 # ToDo Delete if not used
