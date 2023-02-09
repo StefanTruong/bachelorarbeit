@@ -467,9 +467,6 @@ elif selection == 11:
     pref = Preferences(cfg)
     result_analyzer = AnalyseResult()
 
-    # initialize pandas dataframes for summing up results
-    df_fun_data = None
-
     for i in range(0, 2):
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
@@ -558,19 +555,19 @@ elif selection == 11:
     sum_ahead_distance_to_partner_data = result_analyzer.get_aggregated_ahead_distance_to_partner_data()
 
     # Fun Distribution
-    Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
+    # Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
 
     # Plots Time-Distance Diagram for Motorcyclists
-    # Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
+    Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
 
     # Plots Velocity-Distribution Diagram for Motorcyclists
-    # Plotter.velocity_distribution_histogram(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
+    Plotter.velocity_distribution_histogram(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
 
     # Plots lane data
-    # Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
+    Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
 
     # Plots role data
-    # Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
+    Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
 
     # Plots distance to partner data
-    # Plotter.distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data, plot_type='Distance_to_partner_Distribution')
+    Plotter.distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data, plot_type='Distance_to_partner_Distribution')
