@@ -285,7 +285,7 @@ def role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram'):
 def distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data,
                                 plot_type='Distance_to_partner_Distribution'):
     """
-    Plots the distance to partner distribution over time for all motorcyclists with errorbars.
+    Plots the distance to partner distribution over time for all motorcyclists with error bars.
     None values are converted to 0
     sum_behind_distance_to_partner_data = {'Biker4': [[times of runs], [], time_steps], ..., 'Biker0': [[time of runs], [], time_steps]}
     :param sum_behind_distance_to_partner_data:
@@ -326,7 +326,7 @@ def distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_d
     # print(distance_summarized_all_bikers)
     # print(distance_means_for_all_bikers)
 
-    # plot the distance with errorbars to partner for each biker
+    # plot the distance with error bars to partner for each biker
     for biker, values in distance_means_for_all_bikers.items():
         plt.errorbar(range(len(values)), values, yerr=distance_std_for_all_bikers[biker], elinewidth=0.25, label=biker)
 
@@ -351,10 +351,14 @@ def distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_d
         aggregated_mean_distance.append(np.sum(aggregated_means)/num_bikers)
         aggregated_std_distance.append(np.sum(aggregated_std)/num_bikers)
 
-    print(aggregated_mean_distance)
-    print(aggregated_std_distance)
+    # calculate the aggregated sum mean distance
+    mean_mean_distance = np.mean(aggregated_mean_distance)
+    mean_std_distance = np.mean(aggregated_std_distance)
 
-    # plot the aggregated mean distance with errorbars
+    print('sum_mean_distance', mean_mean_distance)
+    print('sum_std_distance', mean_std_distance)
+
+    # plot the aggregated mean distance with error bars
     plt.errorbar(range(len(aggregated_mean_distance)), aggregated_mean_distance, yerr=aggregated_std_distance, elinewidth=0.25)
     plt.xlabel('Time')
     plt.ylabel('Average Distance to Partner [m]')

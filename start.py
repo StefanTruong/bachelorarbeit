@@ -558,16 +558,16 @@ elif selection == 11:
     # Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
 
     # Plots Time-Distance Diagram for Motorcyclists
-    Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
+    # Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
 
     # Plots Velocity-Distribution Diagram for Motorcyclists
-    Plotter.velocity_distribution_histogram(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
+    # Plotter.velocity_distribution_histogram(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
 
     # Plots lane data
-    Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
+    # Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
 
     # Plots role data
-    Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
+    # Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
 
     # Plots distance to partner data
     Plotter.distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data, plot_type='Distance_to_partner_Distribution')
