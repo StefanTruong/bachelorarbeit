@@ -116,11 +116,12 @@ def fun_distro_diagram(summary_dict, plot_type='Fun_Distribution_Motorcyclist'):
 def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist'):
     """
     Plots the fun distribution of the motorcyclists over time/steps with errorbar
-    :param summary_dict:
+    :param sum_fun_data:
     :param plot_type:
     :return:
     """
     mean_fun_dict, z_score_fun_dict = extractor_summary_dict(sum_fun_data, plot_type=plot_type)
+    sum_fun = extractor_summary_dict(sum_fun_data, plot_type='sum_fun')
 
     # time-steps for the x-values as list for x-axis plotting
     time_steps = []
@@ -131,7 +132,7 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
             time_steps = list(range(length))
 
     for biker, mean_fun in mean_fun_dict.items():
-        plt.errorbar(time_steps, mean_fun, xerr=0, yerr=np.array(z_score_fun_dict[biker]), elinewidth=0.15, label=biker)
+        plt.errorbar(time_steps, mean_fun, xerr=0, yerr=np.array(z_score_fun_dict[biker]), elinewidth=0.08, label=biker)
 
     # calculate std for all z scores for all bikers and plot them
     all_z_scores = []
@@ -142,6 +143,7 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
     for biker, mean_fun in mean_fun_dict.items():
         all_mean_fun.append(mean_fun)
 
+    print('sum of all fun (has to be divided by #steps again)', sum_fun)
     print('mean for all means', np.mean(all_mean_fun))
     print('mean for all z_scores', np.mean(all_z_scores))
 
@@ -192,8 +194,8 @@ def time_distance_diagram_with_errorbar(sum_time_distance_data,
     plt.show()
 
 
-def velocity_distribution_histogram_with_errorbar(sum_velocity_data,
-                                                  plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist'):
+def velocity_distribution_histogram(sum_velocity_data,
+                                    plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist'):
     """
     plots the velocity distribution diagram with errorbars for multiple runs
     :param sum_velocity_data: a dict of velocities of the motorcyclists for all runs
@@ -218,8 +220,9 @@ def velocity_distribution_histogram_with_errorbar(sum_velocity_data,
 def lane_diagram(left_lane_data, right_lane_data, plot_type='Percentage_being_on_the_right_lane'):
     """
     plots the percentage a motorcyclist was on th right lane
-    :param sum_left_lane_data: left lane is 0
-    :param sum_right_lane_data: right lane is 1
+    :param left_lane_data:
+    :param right_lane_data:
+    :param plot_type:
     :return:
     """
     # how long a biker was on the left lane or right lane respectively
@@ -274,7 +277,7 @@ def role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram'):
 
 
 def distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data,
-                                plot_type='Distance_to_partner_Distribution_Histogram'):
+                                plot_type='Distance_to_partner_Distribution'):
     """
     Plots the distance to partner distribution over time for all motorcyclists with errorbars.
     None values are converted to 0
@@ -319,7 +322,7 @@ def distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_d
 
     # plot the distance with errorbars to partner for each biker
     for biker, values in distance_means_for_all_bikers.items():
-        plt.errorbar(range(len(values)), values, yerr=distance_std_for_all_bikers[biker], elinewidth=0.2, label=biker)
+        plt.errorbar(range(len(values)), values, yerr=distance_std_for_all_bikers[biker], elinewidth=0.25, label=biker)
 
     plt.xlabel('Time Step')
     plt.ylabel('Distance to Partner [m]')
@@ -346,7 +349,7 @@ def distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_d
     # print(aggregated_std_distance)
 
     # plot the aggregated mean distance with errorbars
-    plt.errorbar(range(len(aggregated_mean_distance)), aggregated_mean_distance, yerr=aggregated_std_distance, elinewidth=0.2)
+    plt.errorbar(range(len(aggregated_mean_distance)), aggregated_mean_distance, yerr=aggregated_std_distance, elinewidth=0.25)
     plt.xlabel('Time')
     plt.ylabel('Average Distance to Partner [m]')
     plt.title(plot_type)
@@ -459,6 +462,14 @@ def extractor_summary_dict(my_dataobj, plot_type):
             z_score_fun_motorcyclist_only[biker] = mean_for_all_time_steps
 
         data = [mean_fun_motorcyclist_only, z_score_fun_motorcyclist_only]
+
+    elif plot_type == 'sum_fun':
+        sum_fun = 0
+        for biker, values in my_dataobj.items():
+            for time_data in values:
+                sum_fun += np.sum(time_data)
+
+        data = sum_fun
 
     elif plot_type == 'Time_Distance_Diagram_with_errorbar_Motorcyclist':
         mean_dist_motorcyclist_only = {}
