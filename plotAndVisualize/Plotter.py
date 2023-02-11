@@ -122,7 +122,7 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
     """
     mean_fun_dict, z_score_fun_dict = extractor_summary_dict(sum_fun_data, plot_type=plot_type)
     sum_fun = extractor_summary_dict(sum_fun_data, plot_type='sum_fun')
-
+    # print('this is my z score abc', z_score_fun_dict)
     # time-steps for the x-values as list for x-axis plotting
     time_steps = []
     length = 0
@@ -132,6 +132,8 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
             time_steps = list(range(length))
 
     for biker, mean_fun in mean_fun_dict.items():
+        print('this is my mean fun', mean_fun)
+        print('this is my z score', z_score_fun_dict[biker])
         plt.errorbar(time_steps, mean_fun, xerr=0, yerr=np.array(z_score_fun_dict[biker]), elinewidth=0.08, label=biker)
 
     # calculate std for all z scores for all bikers and plot them
@@ -270,7 +272,7 @@ def role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram'):
     sum_role_percentage = extractor_summary_dict(sum_role_data, plot_type=plot_type)
 
     # rename the index of the dataframe
-    sum_role_percentage.index = ['Sweeper', 'Inbetween', 'Leader']
+    sum_role_percentage.index = ['Sweeper', 'Inbetween', 'Leader', 'Lost']
 
     ax = sum_role_percentage.plot(kind='bar', title=plot_type)
     # rotate the x-axis labels
@@ -455,21 +457,17 @@ def extractor_summary_dict(my_dataobj, plot_type):
         # calculate average and z scores for each biker to each time step
         for biker, values in my_dataobj.items():
             mean_for_all_time_steps = []
-            z_score_for_all_time_steps = []
+            std_for_all_time_steps = []
 
             for fun_list_at_time_step in values:
                 mean = np.mean(fun_list_at_time_step)
                 std = np.std(fun_list_at_time_step)
-                z_score_at_time_step = []
-                for fun_value in fun_list_at_time_step:
-                    z_score = (fun_value - mean) / std
-                    z_score_at_time_step.append(z_score)
 
                 mean_for_all_time_steps.append(mean)
-                z_score_for_all_time_steps.append(z_score_at_time_step)
+                std_for_all_time_steps.append(std)
 
             mean_fun_motorcyclist_only[biker] = mean_for_all_time_steps
-            z_score_fun_motorcyclist_only[biker] = mean_for_all_time_steps
+            z_score_fun_motorcyclist_only[biker] = std_for_all_time_steps
 
         data = [mean_fun_motorcyclist_only, z_score_fun_motorcyclist_only]
 
