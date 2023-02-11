@@ -1,6 +1,6 @@
 import sys
 import time
-
+import numpy as np
 from Analyse.AnalyzerSingleSim import *
 from Analyse.ResultAnalyzer import *
 from movementLogic.MyTrafficSimulation import *
@@ -390,7 +390,7 @@ elif selection == 10:
     # what densities shall be calculated. Lowest density should be number of bikers, which is fixed
     lowest_density = \
         (cfg.model_settings['platoon_size'] * cfg.model_settings['number_platoons']) / cfg.model_settings['length']
-    density_list = np.linspace(lowest_density, 2, 1)
+    density_list = np.linspace(lowest_density, 2, 5)
 
     avgFlows = []
     stdFlows = []
@@ -413,7 +413,7 @@ elif selection == 10:
         vis.traffic_vis_tiles()
 
         # for each density, the simulation will be run x times to get a variance
-        for i in range(0, 1):
+        for i in range(0, 5):
             for i in range(0, sim.total_amount_steps):
                 checker.check_for_inconsistencies()
                 vis.traffic_vis_tiles_granular()
@@ -426,7 +426,7 @@ elif selection == 10:
 
             # Plots different graphics for analysis. Problem: plotter overwrites stuff.
             # fun time series is defined for only one density and no inner loop
-            Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
+            # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
 
             # DEPRECIATED use selection 11 instead
             # Plots Time-Distance Diagram for Motorcyclists and Cars as well as the velocity Distribution
@@ -467,7 +467,7 @@ elif selection == 11:
     pref = Preferences(cfg)
     result_analyzer = AnalyseResult()
 
-    for i in range(0, 2):
+    for i in range(0, 5):
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
         sim.set_preference_object(pref)
@@ -555,19 +555,19 @@ elif selection == 11:
     sum_ahead_distance_to_partner_data = result_analyzer.get_aggregated_ahead_distance_to_partner_data()
 
     # Fun Distribution
-    # Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
+    Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
 
     # Plots Time-Distance Diagram for Motorcyclists
-    # Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
+    Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
 
     # Plots Velocity-Distribution Diagram for Motorcyclists
-    # Plotter.velocity_distribution_histogram(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
+    Plotter.velocity_distribution_histogram(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
 
     # Plots lane data
-    # Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
+    Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
 
     # Plots role data
-    # Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
+    Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
 
     # Plots distance to partner data
     Plotter.distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data, plot_type='Distance_to_partner_Distribution')

@@ -58,6 +58,7 @@ class Motorcycle(Vehicle):
         self.is_leader = False
         self.is_sweeper = False
         self.is_inbetween = False
+        self.is_lost = False
 
         # optimal distance in last step achieved
         self.behind_optimal_distance = False
@@ -214,7 +215,7 @@ class Motorcycle(Vehicle):
                     # everything optimal
                     pass
 
-        # 4. if neither is in direct sight, then adjust speed to preference
+        # 4. if neither is in direct sight, then adjust speed to preference meaning the biker is lost
         if not ahead_partner_in_sight and not behind_partner_in_sight:
             if self.get_speed() < self.current_speed_preference:
                 self.set_speed(self.get_speed() + 1)
@@ -789,8 +790,8 @@ class Motorcycle(Vehicle):
                 motorcyclist.set_role("sweeper")
             elif motorcyclist.get_ahead_partner() is None:
                 motorcyclist.set_role("leader")
-            else:
-                raise Exception("Motorcyclist role could not be determined")
+            elif motorcyclist.get_ahead_partner() is None and motorcyclist.get_behind_partner() is None:
+                motorcyclist.set_role("lost")
 
     def check_roles(self):
         """
@@ -978,6 +979,10 @@ class Motorcycle(Vehicle):
             self.is_leader = False
             self.is_inbetween = False
             self.is_sweeper = True
+        elif role == 'lost':
+            self.is_leader = False
+            self.is_inbetween = False
+            self.is_sweeper = False
 
     def set_moved(self, moved=False):
         """
@@ -1013,8 +1018,8 @@ class Motorcycle(Vehicle):
             return "inbetween"
         elif self.is_sweeper:
             return "sweeper"
-        else:
-            return "none"
+        elif self.is_lost:
+            return "lost"
 
     def get_fun(self):
         return self.fun

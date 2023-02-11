@@ -122,7 +122,7 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
     """
     mean_fun_dict, z_score_fun_dict = extractor_summary_dict(sum_fun_data, plot_type=plot_type)
     sum_fun = extractor_summary_dict(sum_fun_data, plot_type='sum_fun')
-    # print('this is my z score abc', z_score_fun_dict)
+
     # time-steps for the x-values as list for x-axis plotting
     time_steps = []
     length = 0
@@ -132,8 +132,6 @@ def fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_w
             time_steps = list(range(length))
 
     for biker, mean_fun in mean_fun_dict.items():
-        print('this is my mean fun', mean_fun)
-        print('this is my z score', z_score_fun_dict[biker])
         plt.errorbar(time_steps, mean_fun, xerr=0, yerr=np.array(z_score_fun_dict[biker]), elinewidth=0.08, label=biker)
 
     # calculate std for all z scores for all bikers and plot them

@@ -278,14 +278,14 @@ class ConfigPreference:
             """
             self.model_settings = {
                 'length': 2000,
-                'total_amount_steps': 3,
-                'density': 0.0025,
+                'total_amount_steps': 200,
+                'density': 0.1175,
                 'num_lanes': 1,  # [0,1] do not change
                 'prob_slowdown': 0.00,  # should be turned off as Motorcyclist behave irregularly
                 'prob_changelane': 0.99,
-                'car_share': 1.0,
+                'car_share': 0.5,
                 'number_platoons': 1,
-                'platoon_size': 5,
+                'platoon_size': 20,
                 'car_max_velocity': 11,  # 120[km/h] = 33.33[m/s] ~ 33/3 = 11
                 'bike_max_velocity': 2,  # 20[km/h] = 5.56[m/s] ~ 5/3 = 1.67
                 'motorcycle_max_velocity': 9,  # 100[km/h] = 27.78[m/s] ~ 27/3 = 9

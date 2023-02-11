@@ -73,6 +73,7 @@ class AnalyzerSingleSim:
                 'sum_is_leader': 0,  # sum of time the vehicle was the leader
                 'sum_is_sweeper': 0,  # sum of time the vehicle was the sweeper
                 'sum_is_inbetween': 0,  # sum of time the vehicle was in between
+                'sum_is_lost': 0,  # sum of time the vehicle was lost
                 'fun_list': [],  # list of the fun values
 
                 'sum_ping_pong_lane_changes': 0,  # sum of ping pong lane changes
@@ -155,6 +156,8 @@ class AnalyzerSingleSim:
                     self.vehicle_summary_dict[i]['sum_is_sweeper'] += 1
                 elif vehicle.get_role() == 'inbetween':
                     self.vehicle_summary_dict[i]['sum_is_inbetween'] += 1
+                elif vehicle.get_role() == 'lost':
+                    self.vehicle_summary_dict[i]['sum_is_lost'] += 1
 
                 self.vehicle_summary_dict[i]['fun_list'].append(vehicle.get_fun())
 
@@ -320,7 +323,8 @@ class AnalyzerSingleSim:
                 rename = 'Biker ' + str(key)
                 motorcyclist_role[rename] = [self.vehicle_summary_dict[key]['sum_is_sweeper'],
                                           self.vehicle_summary_dict[key]['sum_is_inbetween'],
-                                          self.vehicle_summary_dict[key]['sum_is_leader']]
+                                          self.vehicle_summary_dict[key]['sum_is_leader'],
+                                             self.vehicle_summary_dict[key]['sum_is_lost']]
 
         # convert dict into dataframe
         motorcyclist_role_df = pd.DataFrame.from_dict(motorcyclist_role)
