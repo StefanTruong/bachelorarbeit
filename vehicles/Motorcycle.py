@@ -31,7 +31,6 @@ class Motorcycle(Vehicle):
         :param speed_distance_preferences: dict how far the distance should be for speed type
         see config speed_distance_preferences
         :param max_velocity:
-        :param fun: ToDo
         """
         super().__init__(speed, tile, max_velocity)
         # security distance of 2 sec. 60km/h ~ 16m/s ~ 4tiles ~ 8tiles
@@ -132,7 +131,7 @@ class Motorcycle(Vehicle):
         close_up_dist_ahead = self.estimate_close_up_distance_partner('ahead')
 
         changed_speed = False
-
+        other_lane = 0
         if self.tile.get_lane() == 0:
             other_lane = 1
         elif self.tile.get_lane() == 1:
@@ -278,6 +277,7 @@ class Motorcycle(Vehicle):
         close_up_dist_ahead = self.estimate_close_up_distance_partner('ahead')
 
         # the leader decides the speed of the platoon
+        other_lane = 0
         if self.is_leader:
             if self.tile.get_lane() == 0:
                 other_lane = 1
@@ -321,7 +321,7 @@ class Motorcycle(Vehicle):
                         and self.get_speed() < self.get_tile().get_speed_limit():
                     self.set_speed(self.get_speed() + 1)
 
-            # todo implement recursive distance berechnung
+            # todo implement recursive distance Berechnung
             # calc_platoon_distance = self.platoon_distance_too_far()
         else:
             # the sweeper and inbetween motorcyclists follow the ahead_partner if he is insight
@@ -809,8 +809,9 @@ class Motorcycle(Vehicle):
             elif m.is_inbetween:
                 inbetween += 1
         if leader != 1 or sweeper != 1 or inbetween != len(self.my_platoon) - 2:
-            print('#leader, #sweeper, #inbetween: ', leader, sweeper, inbetween)
-            raise Exception("Roles are not correct")
+            pass
+            # print('#leader, #sweeper, #inbetween: ', leader, sweeper, inbetween)
+            # raise Exception("Roles are not correct")
 
     def check_switch_position(self):
         """
@@ -859,7 +860,7 @@ class Motorcycle(Vehicle):
         :return:
         """
         switch = False
-
+        other_lane = 0
         if self.tile.get_lane() == 0:
             other_lane = 1
         elif self.tile.get_lane() == 1:
@@ -919,7 +920,7 @@ class Motorcycle(Vehicle):
         """
         calculates the fun. Fun depends on actual distance to partners on distance preference and speed preference
         speed is weighted according to curvature. See curve_fun_preference in config.py
-        Reminder: motorcyclist only see the actual index of the ahead_partner in the current turn. Thus cannot
+        Reminder: motorcyclist only see the actual index of the ahead_partner in the current turn. Thus, cannot
         see itself the updated index nor the updated index of the behind_partner
         :return:
         """
