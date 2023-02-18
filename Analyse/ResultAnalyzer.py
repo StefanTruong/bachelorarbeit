@@ -61,10 +61,11 @@ class AnalyseResult:
             if self.velocity_results is None:
                 self.velocity_results = {}
                 for col in dataframe.columns:
-                    self.velocity_results[col] = dataframe[col]
+                    self.velocity_results[col] = [dataframe[col].tolist()]
             else:
                 for col in dataframe.columns:
-                    self.velocity_results[col] = [*self.velocity_results[col], *dataframe[col]]
+                    self.velocity_results[col].append(dataframe[col].tolist())
+                    # self.velocity_results[col] = [*self.velocity_results[col], *dataframe[col]]
 
         elif temp_save == 'left_lane_data' or temp_save == 'right_lane_data':
             # convert dataframe to a dict collecting all velocities over time

@@ -282,8 +282,10 @@ class AnalyzerSingleSim:
             data.rename(columns={col: name}, inplace=True)
 
         # cumulate the data for each biker
+        '''
         for col in data.columns:
             data[col] = data[col].cumsum()
+        '''
 
         return data
 

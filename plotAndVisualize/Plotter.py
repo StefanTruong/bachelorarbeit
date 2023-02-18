@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+plt.rcParams['font.size'] = 20
 import numpy as np
 import pandas as pd
 
@@ -537,8 +538,21 @@ def extractor_summary_dict(my_dataobj, plot_type):
         data = sum_dist
 
     elif plot_type == 'Velocity_Distribution_Diagram_with_errorbar_Motorcyclist':
+        # number of time steps
+        time_steps = len(my_dataobj['Biker 0'][0])
+
+        avg_dict = {}
+        for biker, num_runs in my_dataobj.items():
+            avg_dict[biker] = []
+            velo_at_time_i = []
+            for i in range(time_steps):
+                for run in num_runs:
+                    velo_at_time_i.append(run[i])
+                avg_dict[biker].append(np.mean(velo_at_time_i))
+                velo_at_time_i = []
+
         # converts dict to dataframe
-        converted_dict_to_df = pd.DataFrame.from_dict(my_dataobj)
+        converted_dict_to_df = pd.DataFrame.from_dict(avg_dict)
         data = converted_dict_to_df
 
     elif plot_type == 'Role_Distribution_Histogram':
