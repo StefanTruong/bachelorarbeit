@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-plt.rcParams['font.size'] = 20
+plt.rcParams['font.size'] = 36
 import numpy as np
 import pandas as pd
 

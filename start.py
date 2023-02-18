@@ -406,7 +406,7 @@ elif selection == 10:
         vis = VisualizeStreet(sim)
         analyzer = AnalyzerSingleSim(sim)
 
-        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=401)
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=False, constant_curvature=401)
         # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
 
         # shows how initial distribution of vehicles are for each density
@@ -477,7 +477,7 @@ elif selection == 11:
         analyzer = AnalyzerSingleSim(sim)
 
         # street with constant curvature or half sinus or constant curvature
-        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=601)
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=False, constant_curvature=601)
         # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=601, frequency=0.03)
 
         # choose which vehicle should be focused on
@@ -526,10 +526,10 @@ elif selection == 11:
         result_analyzer.add_dataframes(ahead_distance_to_partner_data, temp_save='ahead_distance_to_partner_data')
 
         # For plotting a single run
-        # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Velocity_Distribution_Motorcyclist')
-        # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
-        # Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Motorcyclist")
-        # for lane in range(0, sim.get_lanes() + 1): Plotter.time_space_granular(vis.get_time_space_data(lane))
+        Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Velocity_Distribution_Motorcyclist')
+        Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
+        Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Motorcyclist")
+        for lane in range(0, sim.get_lanes() + 1): Plotter.time_space_granular(vis.get_time_space_data(lane))
 
         analyzer.save_results()
         sys.stdout.write('\n')

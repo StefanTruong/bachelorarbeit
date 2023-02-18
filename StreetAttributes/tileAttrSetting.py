@@ -216,24 +216,24 @@ class TileAttributeSetter:
             for lane in range(0, self.simulation.get_lanes() + 1):
                 # first value is the curvature
                 # if no curvature is set in the json file, the curvature will be the minimum value
-                if type(value[0]) is int:
-                    self.tiles[int(key)][lane].set_curvature(value[0])
+                if type(value[0]) is float:
+                    self.tiles[int(key)][lane].set_curvature(int(value[0]))
                 else:
                     self.tiles[int(key)][lane].set_curvature(0)
                 # second value is the speed limit
                 # if no speed limit is set in the json file, the speed limit will be calculated from the curvature
                 # if no curvature is set in the json file, the speed limit will be the maximum value
-                if type(value[1]) is int:
+                if type(value[1]) is float:
                     if value[1] == 0:
                         raise ValueError('Speed limit must be greater than 0')
                     else:
-                        self.tiles[int(key)][lane].set_speed_limit(value[1])
+                        self.tiles[int(key)][lane].set_speed_limit(int(value[1]))
                 else:
                     speed_limit = self.curve_speed_limit(self.tiles[int(key)][lane].get_curvature())
                     self.tiles[int(key)][lane].set_speed_limit(speed_limit)
                 # third value is the beauty
                 # if no beauty is set in the json file, the beauty will be the minimum value
-                if type(value[2]) is int:
+                if type(value[2]) is float:
                     self.tiles[int(key)][lane].set_beauty(value[2])
                 else:
                     self.tiles[int(key)][lane].set_beauty(0)
