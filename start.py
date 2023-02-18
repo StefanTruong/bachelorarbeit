@@ -47,7 +47,7 @@ from preferences.PreferenceNV import Preferences
 if len(sys.argv) == 2:
     selection = int(sys.argv[1])
 else:
-    selection = 11  # ToDo change to selection which should be run on IDE
+    selection = 12  # ToDo change to selection which should be run on IDE
 
 # ---------------------------------- selection 1 ------------------------------------
 if selection == 1:
@@ -336,7 +336,7 @@ elif selection == 9:
     analyzer = AnalyzerSingleSim(sim)
 
     # street with constant curvature or half sinus or constant curvature
-    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=401)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=False, constant_curvature=401)
     # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=601, frequency=0.03)
 
     # choose which vehicle should be focused on
@@ -406,7 +406,7 @@ elif selection == 10:
         vis = VisualizeStreet(sim)
         analyzer = AnalyzerSingleSim(sim)
 
-        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=False, constant_curvature=401)
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=401)
         # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='sinus_half', generate=True, amplitude=5000, frequency=0.1)
 
         # shows how initial distribution of vehicles are for each density
@@ -467,7 +467,7 @@ elif selection == 11:
     pref = Preferences(cfg)
     result_analyzer = AnalyseResult()
 
-    for i in range(0, 5):
+    for i in range(0, 3):
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
         sim.set_preference_object(pref)
@@ -530,6 +530,122 @@ elif selection == 11:
         Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
         Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Motorcyclist")
         for lane in range(0, sim.get_lanes() + 1): Plotter.time_space_granular(vis.get_time_space_data(lane))
+
+        analyzer.save_results()
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'number of collisions:        {checker.number_of_collisions}')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'number of missing index:     {checker.number_of_missing_pos}')
+        sys.stdout.write('\n')
+        sys.stdout.write(f'all vehicles present:        {checker.all_vehicle_present}')
+        sys.stdout.write('\n')
+
+    # # For plotting multiple runs
+    # get data from multiple runs
+    sum_fun_data = result_analyzer.get_aggregated_fun_data()
+    sum_time_distance_data = result_analyzer.get_aggregated_time_distance_data()
+    sum_velocity_data = result_analyzer.get_aggregated_velocity_data()
+    sum_left_lane_data = result_analyzer.get_aggregated_left_lane_data()
+    sum_right_lane_data = result_analyzer.get_aggregated_right_lane_data()
+    sum_role_data = result_analyzer.get_aggregated_role_data()
+    sum_behind_distance_to_partner_data = result_analyzer.get_aggregated_behind_distance_to_partner_data()
+    sum_ahead_distance_to_partner_data = result_analyzer.get_aggregated_ahead_distance_to_partner_data()
+
+    # Fun Distribution
+    Plotter.fun_distro_diagram_with_errorbar(sum_fun_data, plot_type='Fun_Distribution_with_errorbar_Motorcyclist')
+
+    # Fun Summary as Histogram
+    Plotter.fun_distro_histogram(sum_fun_data, cfg.model_settings['total_amount_steps'], plot_type='Fun_Histogram_Motorcyclist')
+
+    # Plots Time-Distance Diagram for Motorcyclists
+    Plotter.time_distance_diagram_with_errorbar(sum_time_distance_data, plot_type="Time_Distance_Diagram_with_errorbar_Motorcyclist")
+
+    # Plots Velocity-Distribution Diagram for Motorcyclists
+    Plotter.velocity_distribution_histogram(sum_velocity_data, plot_type='Velocity_Distribution_Diagram_with_errorbar_Motorcyclist')
+
+    # Plots lane data
+    Plotter.lane_diagram(sum_left_lane_data, sum_right_lane_data, plot_type='Percentage_being_on_the_right_lane')
+
+    # Plots role data
+    Plotter.role_diagram(sum_role_data, plot_type='Role_Distribution_Histogram')
+
+    # Plots distance to partner data
+    Plotter.distance_to_partner_diagram(sum_behind_distance_to_partner_data, sum_ahead_distance_to_partner_data, plot_type='Distance_to_partner_Distribution')
+
+
+# ---------------------------------- selection 12 ------------------------------------
+elif selection == 12:
+    print('Selection Mode: ', selection)
+    cfg = ConfigPreference('default')
+    pref = Preferences(cfg)
+    result_analyzer = AnalyseResult()
+
+    for i in range(0, 50):
+        sim = TrafficSimulation(**cfg.model_settings)
+        sim.set_config_object(cfg)
+        sim.set_preference_object(pref)
+        sim.initialize()
+        checker = CollisionChecker(sim)
+        vis = VisualizeStreet(sim)
+        analyzer = AnalyzerSingleSim(sim)
+
+        # street with constant curvature or half sinus or constant curvature
+        tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=False, constant_curvature=601)
+        # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=601, frequency=0.03)
+
+        # choose which vehicle should be focused on
+        vis.traffic_vis_tiles()
+
+        # print('select vehicle to focus on (choose: (idx, lane) ')
+        vehicle_dict = {}
+        for idx, vehicle in enumerate(sim.vehicle_list):
+            vehicle_dict[idx] = vehicle
+
+        for key, value in vehicle_dict.items():
+            index = vehicle_dict[key].get_tile().get_index()
+            lane = vehicle_dict[key].get_tile().get_lane()
+            # print(f'{key}: {index, lane}')
+
+        # chosen_vehicle_number = input()
+        chosen_vehicle_number = 0  # Supress input as not needed for selection 11
+        focus_vehicle = vehicle_dict[int(chosen_vehicle_number)]
+        focus_vehicle.set_symbol('X')
+
+        for j in range(0, sim.total_amount_steps):
+            checker.check_for_inconsistencies()
+            vis.traffic_vis_tiles_granular()
+            # time.sleep(1.0)
+            # vis.traffic_vis_tiles_fix_lines_focused(focus_vehicle, display_curve=True)
+            sim.moving(vis)
+            # sim.moving(vis, vis_modus='step')
+            analyzer.update()
+
+        # get data first for this run
+        fun_data = analyzer.get_fun_data()
+        time_distance_data = analyzer.get_time_distance_data()
+        velocity_distribution_data = analyzer.get_velocity_data()
+        left_lane_data, right_lane_data = analyzer.get_lane_changing_data()
+        role_data = analyzer.get_role_data()
+        behind_distance_to_partner_data, ahead_distance_to_partner_data = analyzer.get_distance_to_partner_data()
+
+        # temporary save the data for this run
+        result_analyzer.add_dataframes(fun_data, temp_save='fun_data')
+        result_analyzer.add_dataframes(time_distance_data, temp_save='time_distance_data')
+        result_analyzer.add_dataframes(velocity_distribution_data, temp_save='velocity_distribution_data')
+        result_analyzer.add_dataframes(left_lane_data, temp_save='left_lane_data')
+        result_analyzer.add_dataframes(right_lane_data, temp_save='right_lane_data')
+        result_analyzer.add_dataframes(role_data, temp_save='role_data')
+        result_analyzer.add_dataframes(behind_distance_to_partner_data, temp_save='behind_distance_to_partner_data')
+        result_analyzer.add_dataframes(ahead_distance_to_partner_data, temp_save='ahead_distance_to_partner_data')
+
+        # For plotting a single run
+        # Plotter.velocity_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Velocity_Distribution_Motorcyclist')
+        # Plotter.fun_distro_diagram(analyzer.get_vehicle_summary_dict(), plot_type='Fun_Distribution_Motorcyclist')
+        # Plotter.time_distance_diagram(analyzer.get_vehicle_summary_dict(), plot_type="Time_Distance_Diagram_Motorcyclist")
+        # for lane in range(0, sim.get_lanes() + 1): Plotter.time_space_granular(vis.get_time_space_data(lane))
 
         analyzer.save_results()
         sys.stdout.write('\n')

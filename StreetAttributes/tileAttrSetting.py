@@ -212,6 +212,11 @@ class TileAttributeSetter:
                   'attr_list.json', 'r') as f:
             self.attr_dict = json.load(f)
 
+        # tiles is not from simulation anymore. Check tile length are the same
+        new_length = len(self.attr_dict)
+        if new_length != len(self.tiles):
+            raise ValueError('The length of the loaded attr_dict is not the same as the length of the tiles', new_length, len(self.tiles))
+
         for key, value in self.attr_dict.items():
             for lane in range(0, self.simulation.get_lanes() + 1):
                 # first value is the curvature
@@ -237,6 +242,9 @@ class TileAttributeSetter:
                     self.tiles[int(key)][lane].set_beauty(value[2])
                 else:
                     self.tiles[int(key)][lane].set_beauty(0)
+
+        # self.simulation.set_tiles(self.tiles)
+        print()
 
     def curve_speed_limit(self, curve):
         """

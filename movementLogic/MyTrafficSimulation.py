@@ -96,14 +96,16 @@ class TrafficSimulation:
 
         self.platoon_composition = platoon_composition
 
-    def generate_empty_street(self):
+    def generate_empty_street(self, length=None):
         """
         generates an empty street
         array of tiles = [(left_Tile, right_Tile), ...] with tuple representing a street sector
         :return: returns empty street
         """
+        if length is None:
+            length = self.length
         tiles = []
-        for index in range(0, self.length):
+        for index in range(0, length):
             street_sector = []
 
             for lane in range(0, self.num_lanes + 1):
@@ -417,3 +419,6 @@ class TrafficSimulation:
 
     def set_config_object(self, cfg):
         self.config_object = cfg
+
+    def set_tiles(self, tiles):
+        self.tiles = tiles
