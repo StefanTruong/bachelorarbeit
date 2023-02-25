@@ -1,0 +1,58 @@
+\cleardoublepage
+\addchap{List of Symbols and Variables}
+
+\begin{center}
+\begin{longtable}{@{}l l p{10cm}@{}}
+\toprule
+Symbol & Unit & Description \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\textit{List of Symbols -- continued}}\\
+\toprule
+Symbol & Unit & Description \\
+\midrule
+\endhead
+\bottomrule \multicolumn{3}{c}{\textit{Continued}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+
+% start here with your symbols:
+\(v, speed\) &tiles/time-step& velocity\\
+\(M4\) & vehicle & Motorcycle with velocity 4\\
+\(C5\) & vehicle & Car with velocity 5\\
+\(B2\) & vehicle & Bike with velocity 2\\
+\(~\) & curvature & Degree of road curvature\\
+\(.\) & & Empty tile\\
+\(|\) & & Tile marker for every 10th road tile\\
+\(maxV\) & tiles/time-step & maximum velocity of a vehicle\\
+\\$distance\_front$\ & tiles & clear distance in front in the same lane\\
+\\$distance\_behind$\ & tiles & clear distance behind in the same lane\\
+\\$distance\_front\_other\_lane$\ & tiles & clear distance in front of the other lane\\
+\\$distance\_behind\_other\_lane$\ & tiles & clear distance behind of the other lane\\
+\\$moved$\ & vehicle & Boolean indicating if vehicle movement\\
+&&was updated in this time-step\\
+\\$distance\_behind\_partner$\ & tiles & clear distance between the motorcycle\\
+&&in focus and their partner behind\\
+\\$distance\_ahead\_partner$\ & tiles & clear distance between the motorcycle\\
+&&in focus and their partner ahead\\
+\\$close\_up\_dist\_behind$\ & tiles & estimated clear distance between\\
+&&the motorcycle in focus\\
+&&and their partner behind\\
+\\$close\_up\_dist\_ahead$\ & tiles & estimated clear distance between\\
+&&the motorcycle in focus\\
+&&and their partner ahead\\
+\\$preferred\_distance$\ & tiles & the preferred distance between bikers\\
+\\$is\_leader, is\_sweeper, is\_inbetween$\ &  & Roles of the biker in the platoon\\
+\\$fun$\ & float & measure for success for keeping\\
+&&the preferred distance and speed\\
+\(length\) & tile & the length of the street\\
+\\$total\_amount\_steps$\ & sec & the length of the street\\
+\(density\) & [0,2] & the length of the street\\
+\\$car\_share$\ & [0,1] & Share of cars among vehicles (excluding motorcycles)\\
+\\$number\_platoons$\ & int & number of platoons\\
+\\$platoon\_size$\ & int & size of a platoon\\
+\\$s$\ & float & spearman rank correlation coefficient\\
+
+\end{longtable}
+\end{center}

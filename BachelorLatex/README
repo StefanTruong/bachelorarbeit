@@ -1,0 +1,30 @@
+An Acronym Environment for LaTeX
+
+INSTALLATION:
+ - call 'latex acronym.ins' and copy the acronym.sty - file into
+   a path searched by LaTeX.
+ - to re-generate the documentation, call latex acronym.dtx
+
+While writing a paper on cellular mobile radio I had to used a lot of
+acronyms.  Acronyms can be quite disturbing for the novice reader ...
+
+The Acronym package provides tooling to make sure that all acronyms used in
+the text are spelled out in full at least once and it provides an
+environment to keep a list of used acronyms.
+
+Note that acronym requires the 'suffix' package. You can find it on 
+CTAN:macros/latex/contrib/bigfoot/
+
+Files of the `acronym' package:
+  README         This file
+  acronym.dtx    Sourcecode, example file & documentation
+  acronym.ins    Installation script generating the source and an example
+  acronym.pdf    PDF Version of the Docs
+  CHANGES        list of changes
+
+If you run into trouble or would like to contribute, please use
+
+https://github.com/oetiker/acronym/
+
+cheers
+tobi

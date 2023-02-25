@@ -583,7 +583,7 @@ elif selection == 12:
     pref = Preferences(cfg)
     result_analyzer = AnalyseResult()
 
-    for i in range(0, 50):
+    for i in range(0, 10):
         sim = TrafficSimulation(**cfg.model_settings)
         sim.set_config_object(cfg)
         sim.set_preference_object(pref)

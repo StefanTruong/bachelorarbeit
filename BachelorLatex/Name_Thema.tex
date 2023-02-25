@@ -1,0 +1,80 @@
+\documentclass[ a4paper,
+                oneside,
+                toc=bibliography,
+                toc=listof
+                ]{scrbook}
+
+\input{settings}
+
+% Path to .bib file for BibLatex
+\addbibresource{bibliography.bib}
+% \addbibresource{someOtherBibFile}
+
+\author{Stefan Truong}
+\placeOfBirth{Stuttgart}
+\address{Breitwiesenstraße 10, 70771 Echterdingen}
+\major{Data Science}
+\title{Modeling the Behavior of Platoons of Motorcyclists Driving in the Black Forest}
+\titleTranslated{Modellierung des Fahrverhaltens von Motorradfahrerkolonnen im Schwarzwald}
+\matrnr{3338287}
+\date{28 February 2023}
+\supervisor{Prof. Dr. Marco Aiello}
+\professor{Prof. Dr. Marco Aiello}
+
+\begin{document} 
+    \frontmatter
+    %\makeISWtitle
+
+	\cleardoublepage
+	\setcounter{page}{1} % start at page (i) after title page
+    \declarationOfOriginality
+
+    % Kurzfassung/Abstract
+    \input{chapters/Abstract}
+    
+    \cleardoublepage
+    \currentpdfbookmark{\contentsname}{Inhalt}
+    \tableofcontents
+       
+
+    \mainmatter
+    % ********************************************************************
+    % Write your own contents here:
+    % ********************************************************************
+    
+    % TODO: remove this \nocite{*} command. This is only to demonstrate the bibliography
+    % \nocite{*}
+
+
+    \input{chapters/Introduction}
+    \input{chapters/Literature}
+    \input{chapters/A Cellular Automata Model for Platoons}
+    \input{chapters/Influence of model parameters on metrics}
+    \input{chapters/Analysis of platoon behaviour in the Black Forest Region.tex}
+    \input{chapters/Conclusion.tex}
+
+    % ********************************************************************
+    % End of contents
+    % ********************************************************************
+    
+    \cleardoublepage
+    \printbibliography
+    
+     \cleardoublepage
+    %\input{chapters/Acronyms}
+    
+    \cleardoublepage
+    \listoffigures
+    
+    \cleardoublepage
+    \listoftables
+    
+    \input{chapters/Symbols}
+    
+    % Appendix, if needed:
+    \appendix
+    \input{chapters/Appendix: Additional Simulation Results.tex}
+    \input{chapters/Appendix: Survey on speed limit}
+
+
+\end{document}
