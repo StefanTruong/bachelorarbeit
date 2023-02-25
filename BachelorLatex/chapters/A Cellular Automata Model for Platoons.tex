@@ -173,7 +173,7 @@ The curvature calculation algorithm considers the possibility of conflicts at in
 
 The storage of road curvature geodata in Keyhole Markup Language (KML) format presents a challenge for utilization due to the need for a preliminary understanding of its schema. To overcome this, the necessary data was extracted manually from the tooltips provided in the in-browser map, rather than through automated crawling, see figure \ref{fig:tooltip}.
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[width=0.8\linewidth]{images/tooltip.png}
     \caption{Tooltip for Allerheiligenstraße, source: roadcurvature.com, 20.02.23}
@@ -182,7 +182,7 @@ The storage of road curvature geodata in Keyhole Markup Language (KML) format pr
 
 The seven roads randomly selected for the thesis are considered to have a high level of curviness, as indicated by their depiction as purple roads on the map. Those roads are listed in table \ref{tab:roadsample}
 
-    \begin{table}[htb]
+    \begin{table}
     \centering
     \begin{tabular}{@{}llr@{}} \toprule
         Name                                      & Sum Length [km] & Sum Curvature \\ \midrule
@@ -217,17 +217,17 @@ There were some difficulties in mapping the curvature to the right part of the r
 The data obtained from the tooltip was then saved in a CSV format and stored in the directory Traffic\_Simulation/StreetAttributes/Streets. As the model splits the street into tiles representing 3m of length, it was assumed that each tile has the same curvature value as the section. 
 To gather the missing information on maximum speed and the preferred speed for motorcyclists on curved roads, a small survey\footnote{see: Curvature\_maxV.pdf} was conducted. However, since only two  participants\footnote{Thanks to Jonathan Scholz and Pantelis Antoniadis} were asked, the results of the survey is not supposed to be representative. A sample of 20 road section images were presented to the participants along with the corresponding curvature value and were asked to indicate the optimal speed they would like to ride a motorcycle on these curves without considering altitude or other factors affecting speed. The survey results are presented in appendix \ref{chapter:Appendix: Survey on speed limit}. With that survey, a linear regression analysis was conducted, as depicted in figure \ref{fig:regressionPrefspeed}, to determine the relationship between preferred speed and curvature. 
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[width=1.0\linewidth]{images/regression.png}
     \caption{A regression for preferred speed and road curvature, see estimated\_maxV.ods.}
     \label{fig:regressionPrefspeed}
 \end{figure}
 
-    \begin{table}[htb]
+    \begin{table}
     \centering
     \begin{tabular}{@{}llr@{}} \toprule
-    \multicolumn{2}{r}{Preferred Speed}             \\ \cmidrule(l){2-3}
+    \multicolumn{3}{r}{Preferred Speed}             \\ \cmidrule(l){2-3}
         Curvature range & [km/h] & [tiles/time-step]        \\ \midrule
         (0,200)         & 85        & 8 \\
         (200,500)       & 75        & 7 \\
@@ -245,12 +245,10 @@ The outcome of the regression analysis was utilized to establish a correlation b
 \section{Fun Metric}
 \label{sec:Fun Metric}
 The fun of the motorcyclist is modeled using a standard normal distribution, taking into account their preferred speed given the curvature and desired distance from their platoon members. For each time-step, the distance to other motorcyclists and current speed are evaluated based on three standard distributions: one for the distance to the motorcyclist ahead, one for the distance to the motorcyclist behind, and one for speed. In the case of the sweeper or leader missing a partner in front or behind, one side will be duplicated. The riders who got lost will not have anything added to their fun measure for that time-step. \\
-
 Further since a motorcyclist visits the Black Forest region for its curves (ignoring the scenic view), the enjoyment of riding through curves is weighted differently. Curves in the range of (0,400) are weighted by 0.25, while curves in the range of (400, 1000) are weighted by 1.\\
-
 As the normal distribution is symmetric and has its highest peak at the center, this means that for an optimal scenario, where the motorcyclist is in the middle of the platoon and all distances and speeds are at their preferred levels, the value obtained by the motorcyclist would be three times the value of the highest peak of the normal distribution. However, any deviations from the desired distance or speed would result in reduced values, as the sum of normal distributions still follows a normal distribution pattern, with its peak centered around its mean\footnote{see https://en.wikipedia.org/wiki/Sum\_of\_normally\_distributed\_random\_variables, 20.02.23}. Figure \ref{fig:fun_distribution_clear_road} displays the mean fun-distribution diagram for a platoon of five motorcyclists on an empty road with a curvature of 600 for 50 time-steps. Biker 0 is designated as the initial leader, and Biker 4 is the initial sweeper. The plot shows that it takes approximately 15 time-steps for the platoon to reach its optimal distance to each other, as evidenced by the plateau of about 1.2 in the fun-distribution curve. Note that this value is about three times higher than the peak of a standard normal distribution, which is around around 0.4.\\
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[width=1.0\linewidth]{images/fun_distribution_free_road.png}
     \caption{Fun-distribution of five motorcyclists on a clear road with curvature 600 for 50 time-steps, with Biker 0 as initial leader and Biker 4 as initial sweeper.}
@@ -265,7 +263,7 @@ As the fun metric is based on a standard normal distribution, this indicates tha
 \label{sec:Additional Metrics and Parameters}
 Table \ref{tab:moreparameters} lists additional parameters of the model important for the analysis of metrics listet in table \ref{tab:moremetrics}
 
-    \begin{table}[htb]
+    \begin{table}
     \centering
     \begin{tabular}{@{}llr@{}} \toprule
         Parameter                   & Unit          & Explanation        \\ \midrule
@@ -281,7 +279,7 @@ Table \ref{tab:moreparameters} lists additional parameters of the model importan
     \end{table}
 
 
-    \begin{table}[htb]
+    \begin{table}
     \centering
     \begin{tabular}{@{}llr@{}} \toprule
         Parameter                   & Unit                      & Explanation        \\ \midrule

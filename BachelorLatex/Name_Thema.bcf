@@ -2361,4 +2361,41 @@
     <bcf:citekey order="11">Polichronidis_2018</bcf:citekey>
     <bcf:citekey order="12">Polichronidis_2018</bcf:citekey>
     <bcf:citekey order="13">Polichronidis_2018</bcf:citekey>
-    <bcf:citekey order="14">Polichronidis_2018
+    <bcf:citekey order="14">Polichronidis_2018</bcf:citekey>
+    <bcf:citekey order="15">Polichronidis_2018</bcf:citekey>
+    <bcf:citekey order="0" nocite="1">*</bcf:citekey>
+    <bcf:citekey order="16">RICKERT1996534</bcf:citekey>
+    <bcf:citekey order="17">MENG2007470</bcf:citekey>
+    <bcf:citekey order="18">RICKERT1996534</bcf:citekey>
+    <bcf:citekey order="19">roadcurvature.com</bcf:citekey>
+    <bcf:citekey order="20">roadcurvature.com</bcf:citekey>
+    <bcf:citekey order="21">roadcurvature.com</bcf:citekey>
+    <bcf:citekey order="22">roadcurvature.com</bcf:citekey>
+    <bcf:citekey order="23">roadcurvature.com</bcf:citekey>
+    <bcf:citekey order="24">roadcurvature.com</bcf:citekey>
+    <bcf:citekey order="25">MENG2007470</bcf:citekey>
+    <bcf:citekey order="31">Neumann</bcf:citekey>
+    <bcf:citekey order="32">10.2307/24927642</bcf:citekey>
+    <bcf:citekey order="33">NASCH1992</bcf:citekey>
+    <bcf:citekey order="34">RICKERT1996534</bcf:citekey>
+    <bcf:citekey order="35">Polichronidis_2018</bcf:citekey>
+    <bcf:citekey order="36">MENG2007470</bcf:citekey>
+    <bcf:citekey order="37">roadcurvature.com</bcf:citekey>
+  </bcf:section>
+  <!-- SORTING TEMPLATES -->
+  <bcf:sortingtemplate name="none">
+    <bcf:sort order="1">
+      <bcf:sortitem order="1">citeorder</bcf:sortitem>
+    </bcf:sort>
+  </bcf:sortingtemplate>
+  <!-- DATALISTS -->
+  <bcf:datalist section="0"
+                name="none/global//global/global"
+                type="entry"
+                sortingtemplatename="none"
+                sortingnamekeytemplatename="global"
+                labelprefix=""
+                uniquenametemplatename="global"
+                labelalphanametemplatename="global">
+  </bcf:datalist>
+</bcf:controlfile>
