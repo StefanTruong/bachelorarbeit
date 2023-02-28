@@ -336,8 +336,9 @@ elif selection == 9:
     analyzer = AnalyzerSingleSim(sim)
 
     # street with constant curvature or half sinus or constant curvature
-    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=False, constant_curvature=401)
+    # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=False, constant_curvature=401)
     # tileAttrSetting = TileAttributeSetter(sim, cfg, modus='step_function', generate=True, amplitude=601, frequency=0.03)
+    tileAttrSetting = TileAttributeSetter(sim, cfg, modus='constant', generate=True, constant_curvature=901)
 
     # choose which vehicle should be focused on
     vis.traffic_vis_tiles()
